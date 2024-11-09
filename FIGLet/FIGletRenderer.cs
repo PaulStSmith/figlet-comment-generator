@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -35,6 +36,7 @@ namespace FIGlet
 
             foreach (var c in text)
             {
+                Debug.WriteLine($"Character being rendered: '{c}'");
                 if (!Font.Characters.ContainsKey(c))
                     continue;
 
@@ -42,6 +44,7 @@ namespace FIGlet
                 if (ol[0].Length == 0)
                 {
                     // First character, just append
+                    Debug.WriteLine("First character, just append");
                     for (var i = 0; i < Font.Height; i++)
                         ol[i].Append(charLines[i]);
                     continue;
@@ -65,6 +68,8 @@ namespace FIGlet
             return string.Join(lineSeparator, ol.Select(x => x.Replace(Font.HardBlank[0], ' ').ToString()));
         }
 
+        private int lc;
+
         /// <summary>
         /// Calculates the number of characters that can be overlapped between two lines based on the specified layout mode.
         /// </summary>
@@ -77,12 +82,31 @@ namespace FIGlet
             if (mode == LayoutMode.FullSize)
                 return 0;
 
-            var m1 = (LastNonWhitespaceRegex()).Match(line);
+            var eol = line.Length < character.Length ? line : line[^character.Length..];
+            var m1 = (LastNonWhitespaceRegex()).Match(eol);
             var m2 = (FirstNonWhitespaceRegex()).Match(character);
-            if (!m1.Success || !m2.Success)
-                return character.Length;
 
-            return CanSmush(m1.Value[0], m2.Value[0], mode) ? Math.Max(line.Length - m1.Index, m2.Index) +1: 0;
+            Debug.WriteLine($"{++lc:000}. Debug - Line end: '{eol}', Char start: '{character}'");
+            Debug.WriteLine($"{++lc:000}. Debug - m1 success: {m1.Success}, index: {(m1.Success ? m1.Index : -1)}, value: '{(m1.Success ? m1.Value : "")}'");
+            Debug.WriteLine($"{++lc:000}. Debug - m2 success: {m2.Success}, index: {(m2.Success ? m2.Index : -1)}, value: '{(m2.Success ? m2.Value : "")}'");
+
+            if (!m1.Success || !m2.Success)
+            {
+                Debug.WriteLine($"{++lc:000}. Debug - overlap: {character.Length}");
+                return character.Length;
+            }
+
+            var canSmush = CanSmush(m1.Value[0], m2.Value[0], mode);
+            Debug.WriteLine($"{++lc:000}. Debug - Can smush: {canSmush}");
+            var overlapLength = canSmush ? Math.Max(eol.Length - m1.Index, m2.Index) + 1 : 0;
+            overlapLength = Math.Min(overlapLength, character.Length);
+            // Special case when we have oposing slashes
+            if ((canSmush && m1.Value[0] == '/' && m2.Value[0] == '\\') || 
+                (canSmush && m1.Value[0] == '\\' && m2.Value[0] == '/'))
+                overlapLength = Math.Max(overlapLength - 1, 0);
+            Debug.WriteLine($"{++lc:000}. Debug - overlap: {overlapLength}");
+
+            return overlapLength;
         }
 
         /// <summary>
@@ -94,36 +118,59 @@ namespace FIGlet
         /// <returns>True if the characters can be smushed together; otherwise, false.</returns>
         private bool CanSmush(char c1, char c2, LayoutMode mode)
         {
+            Debug.WriteLine($"CanSmush called with c1='{c1}', c2='{c2}', mode={mode}");
+
             // Early return for kerning mode
             if (mode == LayoutMode.Kerning)
-                return c1 == c2 && c1 == ' ';
+            {
+                var result = c1 == c2 && c1 == ' ';
+                Debug.WriteLine($"Kerning check: {result}");
+                return result;
+            }
 
             // Early return for full size
             if (mode == LayoutMode.FullSize)
+            {
+                Debug.WriteLine("FullSize mode - returning false");
                 return false;
-
-            // Handle spaces properly
-            if (c1 == ' ' && c2 == ' ') return true;
-            if (c1 == ' ' || c2 == ' ') return true;
+            }
 
             // Handle hardblanks first
             if (c1 == Font.HardBlank[0] || c2 == Font.HardBlank[0])
             {
-                if (Font.HasSmushingRule(SmushingRules.HardBlank))
-                    return true;
-                return false;
+                var result = Font.HasSmushingRule(SmushingRules.HardBlank);
+                Debug.WriteLine($"Hardblank check: {result}");
+                return result;
+            }
+
+            // Handle spaces
+            if (c1 == ' ' && c2 == ' ')
+            {
+                Debug.WriteLine("Both spaces - returning true");
+                return true;
+            }
+            if (c1 == ' ' || c2 == ' ')
+            {
+                Debug.WriteLine("One space - returning true");
+                return true;
             }
 
             // Rule 1: Equal Character Smushing
             if (Font.HasSmushingRule(SmushingRules.EqualCharacter) && c1 == c2)
+            {
+                Debug.WriteLine("Equal character rule matched");
                 return true;
+            }
 
             // Rule 2: Underscore Smushing
             if (Font.HasSmushingRule(SmushingRules.Underscore))
             {
                 if ((c1 == '_' && HierarchyCharacters.Contains(c2)) ||
                     (c2 == '_' && HierarchyCharacters.Contains(c1)))
+                {
+                    Debug.WriteLine("Underscore rule matched");
                     return true;
+                }
             }
 
             // Rule 3: Hierarchy Smushing
@@ -133,27 +180,35 @@ namespace FIGlet
                 var rank1 = hierarchy.IndexOf(c1);
                 var rank2 = hierarchy.IndexOf(c2);
 
+                Debug.WriteLine($"Hierarchy check - rank1: {rank1}, rank2: {rank2}");
                 if (rank1 >= 0 && rank2 >= 0)
+                {
+                    Debug.WriteLine("Hierarchy rule matched");
                     return true;
+                }
             }
 
             // Rule 4: Opposite Pair Smushing
             if (Font.HasSmushingRule(SmushingRules.OppositePair))
             {
-                if (oppositePairs.TryGetValue(c1, out char opposite) && opposite == c2)
+                if (oppositePairs.TryGetValue(c1, out var opposite) && opposite == c2)
+                {
+                    Debug.WriteLine("Opposite pair rule matched");
                     return true;
+                }
             }
 
             // Rule 5: Big X Smushing
             if (Font.HasSmushingRule(SmushingRules.BigX))
             {
-                if ((c1 == '/' && c2 == '\\') ||
-                    (c1 == '\\' && c2 == '/') ||
-                    (c1 == '>' && c2 == '<'))
+                if (c1 == '>' && c2 == '<')
+                {
+                    Debug.WriteLine("Big X rule matched");
                     return true;
+                }
             }
 
-            // If no smushing rules apply, return false
+            Debug.WriteLine("No rules matched - returning false");
             return false;
         }
 

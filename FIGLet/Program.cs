@@ -2,7 +2,7 @@
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var fnt = FIGFont.LoadFromFile("fonts\\small.flf");
             var renderer = new FIGletRenderer(fnt);

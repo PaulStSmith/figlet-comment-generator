@@ -133,13 +133,60 @@
 
         private static void ParseLayoutParameters(FIGFont font)
         {
-            // If FullLayout is present (>0), use it. Otherwise use OldLayout
-            var layoutMask = font.FullLayout > 0 ? font.FullLayout : font.OldLayout;
+            // First, determine if we should use full_layout or old_layout
+            int layoutMask;
 
-            if (layoutMask == -1)
-                return;
+            if (font.FullLayout > 0)
+            {
+                // Full layout is present
+                layoutMask = font.FullLayout;
 
-            font.SmushingRules = (SmushingRules)(layoutMask & 0x3F);
+                // In full layout mode:
+                // Bit 0: Horizontal smushing (smush vs. kern)
+                // Bit 1-6: Specific smushing rules
+                // Bit 7-15: Reserved for future use
+
+                // Check if horizontal smushing is enabled
+                var horizontalSmushingEnabled = (layoutMask & 1) == 1;
+                if (!horizontalSmushingEnabled)
+                {
+                    // If horizontal smushing is not enabled, no rules apply
+                    font.SmushingRules = SmushingRules.None;
+                    return;
+                }
+
+                // Extract just the rules part (bits 1-6)
+                layoutMask = (layoutMask >> 1) & 0x3F;
+            }
+            else
+            {
+                // Use old layout
+                layoutMask = font.OldLayout;
+
+                // In old layout, -1 means no smushing
+                if (layoutMask == -1)
+                {
+                    font.SmushingRules = SmushingRules.None;
+                    return;
+                }
+
+                // In old layout, 0 means kerning
+                if (layoutMask == 0)
+                {
+                    font.SmushingRules = SmushingRules.None;
+                    return;
+                }
+
+                // For positive values, extract the rules
+                if (layoutMask > 0)
+                {
+                    // Convert old layout to new layout rules format
+                    layoutMask &= 0x3F;
+                }
+            }
+
+            // Apply the final smushing rules
+            font.SmushingRules = (SmushingRules)layoutMask;
         }
 
         public bool HasSmushingRule(SmushingRules rule)
