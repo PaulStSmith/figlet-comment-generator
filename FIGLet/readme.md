@@ -1,15 +1,15 @@
-# FIGlet Core Library
+# FIGLet Core Library
 
-A C# implementation of FIGlet (Frank, Ian & Glenn's letters) - a program for making large letters out of ordinary text.
+A C# implementation of FIGLet (Frank, Ian & Glenn's letters) - a program for making large letters out of ordinary text.
 
 ## Overview
 
-This library provides a robust and efficient implementation of the FIGlet specification, allowing you to create ASCII art from text using FIGlet fonts. It supports all standard FIGlet features including various smushing rules and layout modes.
+This library provides a robust and efficient implementation of the FIGLet specification, allowing you to create ASCII art from text using FIGLet fonts. It supports all standard FIGLet features including various smushing rules and layout modes.
 
 ## Features
 
-- Full FIGlet font (.flf) file parsing and loading
-- Support for all standard FIGlet smushing rules:
+- Full FIGLet font (.flf) file parsing and loading
+- Support for all standard FIGLet smushing rules:
   - Equal Character
   - Underscore
   - Hierarchy
@@ -27,11 +27,11 @@ This library provides a robust and efficient implementation of the FIGlet specif
 ## Usage
 
 ```csharp
-// Load a FIGlet font
+// Load a FIGLet font
 var font = FIGFont.LoadFromFile("standard.flf");
 
 // Create a renderer
-var renderer = new FIGletRenderer(font);
+var renderer = new FIGLetRenderer(font);
 
 // Render text
 string asciiArt = renderer.Render("Hello World!", LayoutMode.Smushing);
@@ -55,7 +55,7 @@ string smushing = renderer.Render("Text", LayoutMode.Smushing);
 
 ### Smushing Rules
 
-The library implements all standard FIGlet smushing rules as defined in the FIGlet specification:
+The library implements all standard FIGLet smushing rules as defined in the FIGLet specification:
 
 ```csharp
 // Check if a specific smushing rule is enabled
@@ -72,8 +72,8 @@ The library consists of four main components:
    - Stores character data and font metadata
    - Manages smushing rules configuration
 
-2. `FIGletRenderer`: Core rendering engine
-   - Converts input text to FIGlet output
+2. `FIGLetRenderer`: Core rendering engine
+   - Converts input text to FIGLet output
    - Implements character smushing logic
    - Handles different layout modes
 
@@ -109,11 +109,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Credits
 
-- Original FIGlet concept by Frank, Ian & Glenn
-- FIGlet specifications: http://www.figlet.org/
+- Original FIGLet concept by Frank, Ian & Glenn
+- FIGLet specifications: http://www.org/
 - Implementation by Paulo Santos
 
 ## Additional Resources
 
-- [FIGlet Documentation](http://www.figlet.org/figlet_documentation.html)
-- [FIGlet Font Format Specification](http://www.jave.de/figlet/figfont.html)
+- [FIGLet Documentation](http://www.org/FIGLet_documentation.html)
+- [FIGLet Font Format Specification](http://www.jave.de/FIGLet/figfont.html)

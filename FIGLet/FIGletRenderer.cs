@@ -1,11 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace FIGlet
+namespace FIGLet
 {
-    public partial class FIGletRenderer(FIGFont font)
+    /// <summary>
+    /// Class for rendering text using FIGLet fonts.
+    /// </summary>
+    public partial class FIGLetRenderer
     {
         private const string HierarchyCharacters = "|/\\[]{}()<>";
         private static readonly Dictionary<char, char> oppositePairs = new()
@@ -16,7 +18,7 @@ namespace FIGlet
                 {'<', '>'}, {'>', '<'}
             };
 
-        public FIGFont Font { get; } = font;
+        public FIGFont Font { get; }
 
         /// <summary>
         /// Renders the specified text using the FIGFont and layout mode.
@@ -36,7 +38,7 @@ namespace FIGlet
 
             foreach (var c in text)
             {
-                Debug.WriteLine($"Character being rendered: '{c}'");
+                // Debug.WriteLine($"Character being rendered: '{c}'");
                 if (!Font.Characters.ContainsKey(c))
                     continue;
 
@@ -44,7 +46,7 @@ namespace FIGlet
                 if (ol[0].Length == 0)
                 {
                     // First character, just append
-                    Debug.WriteLine("First character, just append");
+                    // Debug.WriteLine("First character, just append");
                     for (var i = 0; i < Font.Height; i++)
                         ol[i].Append(charLines[i]);
                     continue;
@@ -68,7 +70,16 @@ namespace FIGlet
             return string.Join(lineSeparator, ol.Select(x => x.Replace(Font.HardBlank[0], ' ').ToString()));
         }
 
-        private int lc;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGfont.
+        /// </summary>
+        /// <param name="font">The FIGfont to use for rendering text.</param>
+        public FIGLetRenderer(FIGFont font) => Font = font;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class using the default FIGfont.
+        /// </summary>
+        public FIGLetRenderer() : this(FIGFont.Default) { }
 
         /// <summary>
         /// Calculates the number of characters that can be overlapped between two lines based on the specified layout mode.
@@ -82,29 +93,29 @@ namespace FIGlet
             if (mode == LayoutMode.FullSize)
                 return 0;
 
-            var eol = line.Length < character.Length ? line : line[^character.Length..];
+            var eol = line.Length < character.Length ? line : line.Substring(line.Length - character.Length);
             var m1 = (LastNonWhitespaceRegex()).Match(eol);
             var m2 = (FirstNonWhitespaceRegex()).Match(character);
 
-            Debug.WriteLine($"{++lc:000}. Debug - Line end: '{eol}', Char start: '{character}'");
-            Debug.WriteLine($"{++lc:000}. Debug - m1 success: {m1.Success}, index: {(m1.Success ? m1.Index : -1)}, value: '{(m1.Success ? m1.Value : "")}'");
-            Debug.WriteLine($"{++lc:000}. Debug - m2 success: {m2.Success}, index: {(m2.Success ? m2.Index : -1)}, value: '{(m2.Success ? m2.Value : "")}'");
+            // Debug.WriteLine($"Debug - Line end: '{eol}', Char start: '{character}'");
+            // Debug.WriteLine($"Debug - m1 success: {m1.Success}, index: {(m1.Success ? m1.Index : -1)}, value: '{(m1.Success ? m1.Value : "")}'");
+            // Debug.WriteLine($"Debug - m2 success: {m2.Success}, index: {(m2.Success ? m2.Index : -1)}, value: '{(m2.Success ? m2.Value : "")}'");
 
             if (!m1.Success || !m2.Success)
             {
-                Debug.WriteLine($"{++lc:000}. Debug - overlap: {character.Length}");
+                // Debug.WriteLine($"Debug - overlap: {character.Length}");
                 return character.Length;
             }
 
             var canSmush = CanSmush(m1.Value[0], m2.Value[0], mode);
-            Debug.WriteLine($"{++lc:000}. Debug - Can smush: {canSmush}");
+            // Debug.WriteLine($"Debug - Can smush: {canSmush}");
             var overlapLength = canSmush ? Math.Max(eol.Length - m1.Index, m2.Index) + 1 : 0;
             overlapLength = Math.Min(overlapLength, character.Length);
             // Special case when we have oposing slashes
             if ((canSmush && m1.Value[0] == '/' && m2.Value[0] == '\\') || 
                 (canSmush && m1.Value[0] == '\\' && m2.Value[0] == '/'))
                 overlapLength = Math.Max(overlapLength - 1, 0);
-            Debug.WriteLine($"{++lc:000}. Debug - overlap: {overlapLength}");
+            // Debug.WriteLine($"Debug - overlap: {overlapLength}");
 
             return overlapLength;
         }
@@ -118,20 +129,20 @@ namespace FIGlet
         /// <returns>True if the characters can be smushed together; otherwise, false.</returns>
         private bool CanSmush(char c1, char c2, LayoutMode mode)
         {
-            Debug.WriteLine($"CanSmush called with c1='{c1}', c2='{c2}', mode={mode}");
+            // Debug.WriteLine($"CanSmush called with c1='{c1}', c2='{c2}', mode={mode}");
 
             // Early return for kerning mode
             if (mode == LayoutMode.Kerning)
             {
                 var result = c1 == c2 && c1 == ' ';
-                Debug.WriteLine($"Kerning check: {result}");
+                // Debug.WriteLine($"Kerning check: {result}");
                 return result;
             }
 
             // Early return for full size
             if (mode == LayoutMode.FullSize)
             {
-                Debug.WriteLine("FullSize mode - returning false");
+                // Debug.WriteLine("FullSize mode - returning false");
                 return false;
             }
 
@@ -139,26 +150,26 @@ namespace FIGlet
             if (c1 == Font.HardBlank[0] || c2 == Font.HardBlank[0])
             {
                 var result = Font.HasSmushingRule(SmushingRules.HardBlank);
-                Debug.WriteLine($"Hardblank check: {result}");
+                // Debug.WriteLine($"Hardblank check: {result}");
                 return result;
             }
 
             // Handle spaces
             if (c1 == ' ' && c2 == ' ')
             {
-                Debug.WriteLine("Both spaces - returning true");
+                // Debug.WriteLine("Both spaces - returning true");
                 return true;
             }
             if (c1 == ' ' || c2 == ' ')
             {
-                Debug.WriteLine("One space - returning true");
+                // Debug.WriteLine("One space - returning true");
                 return true;
             }
 
             // Rule 1: Equal Character Smushing
             if (Font.HasSmushingRule(SmushingRules.EqualCharacter) && c1 == c2)
             {
-                Debug.WriteLine("Equal character rule matched");
+                // Debug.WriteLine("Equal character rule matched");
                 return true;
             }
 
@@ -168,7 +179,7 @@ namespace FIGlet
                 if ((c1 == '_' && HierarchyCharacters.Contains(c2)) ||
                     (c2 == '_' && HierarchyCharacters.Contains(c1)))
                 {
-                    Debug.WriteLine("Underscore rule matched");
+                    // Debug.WriteLine("Underscore rule matched");
                     return true;
                 }
             }
@@ -180,10 +191,10 @@ namespace FIGlet
                 var rank1 = hierarchy.IndexOf(c1);
                 var rank2 = hierarchy.IndexOf(c2);
 
-                Debug.WriteLine($"Hierarchy check - rank1: {rank1}, rank2: {rank2}");
+                // Debug.WriteLine($"Hierarchy check - rank1: {rank1}, rank2: {rank2}");
                 if (rank1 >= 0 && rank2 >= 0)
                 {
-                    Debug.WriteLine("Hierarchy rule matched");
+                    // Debug.WriteLine("Hierarchy rule matched");
                     return true;
                 }
             }
@@ -193,7 +204,7 @@ namespace FIGlet
             {
                 if (oppositePairs.TryGetValue(c1, out var opposite) && opposite == c2)
                 {
-                    Debug.WriteLine("Opposite pair rule matched");
+                    // Debug.WriteLine("Opposite pair rule matched");
                     return true;
                 }
             }
@@ -203,12 +214,12 @@ namespace FIGlet
             {
                 if (c1 == '>' && c2 == '<')
                 {
-                    Debug.WriteLine("Big X rule matched");
+                    // Debug.WriteLine("Big X rule matched");
                     return true;
                 }
             }
 
-            Debug.WriteLine("No rules matched - returning false");
+            // Debug.WriteLine("No rules matched - returning false");
             return false;
         }
 
@@ -221,7 +232,7 @@ namespace FIGlet
         /// <param name="mode">The layout mode to use for smushing.</param>
         private void Smush(StringBuilder line, string character, int overlap, LayoutMode mode)
         {
-            var lineEnd = line.ToString()[^overlap..];
+            var lineEnd = line.ToString().Substring(line.Length - overlap);
             line.Length -= overlap;
             if (mode == LayoutMode.Kerning)
             {
@@ -231,7 +242,7 @@ namespace FIGlet
             for (var i = 0; i < overlap; i++)
                 line.Append(SmushCharacters(lineEnd[i], character[i], mode));
 
-            line.Append(character[overlap..]);
+            line.Append(character.Substring(overlap));
         }
 
         /// <summary>
@@ -313,14 +324,12 @@ namespace FIGlet
         /// A regex to match the last non-whitespace character in a string.
         /// </summary>
         /// <returns>A regex pattern to match the last non-whitespace character.</returns>
-        [GeneratedRegex(@"\S(?=\s*$)")]
-        private static partial Regex LastNonWhitespaceRegex();
+        private static Regex LastNonWhitespaceRegex() => new Regex(@"\S(?=\s*$)");
 
         /// <summary>
         /// A regex to match the first non-whitespace character in a string.
         /// </summary>
         /// <returns>A regex pattern to match the first non-whitespace character.</returns>
-        [GeneratedRegex(@"(?<=^|\s*)\S")]
-        private static partial Regex FirstNonWhitespaceRegex();
+        private static Regex FirstNonWhitespaceRegex() => new Regex(@"(?<=^|\s*)\S");
     }
 }

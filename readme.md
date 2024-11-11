@@ -1,11 +1,11 @@
-# FIGlet Comment Generator
+# FIGLet Comment Generator
 
-A Visual Studio and VS Code extension that allows developers to generate ASCII art comments using FIGlet fonts. Add beautiful, eye-catching header comments to your code with just a few keystrokes!
+A Visual Studio and VS Code extension that allows developers to generate ASCII art comments using FIGLet fonts. Add beautiful, eye-catching header comments to your code with just a few keystrokes!
 
 ## Planned Features
 
 - 🎨 Generates ASCII art comments in any programming language
-- 🔤 Supports for multiple FIGlet fonts
+- 🔤 Supports for multiple FIGLet fonts
 - ⚙️ Automatically uses the correct comment syntax for different file types
 - 📐 Multiple layout modes (Full Size, Kerning, Smushing)
 - 🎯 Intelligent character compression with customizable smushing rules
@@ -18,14 +18,14 @@ A Visual Studio and VS Code extension that allows developers to generate ASCII a
 
 1. Open Visual Studio
 2. Go to Extensions > Manage Extensions
-3. Search for "FIGlet Comment Generator"
+3. Search for "FIGLet Comment Generator"
 4. Click Download and restart Visual Studio
 
 ### VS Code
 
 1. Open VS Code
 2. Press `Ctrl+P` (Windows/Linux) or `Cmd+P` (macOS)
-3. Type `ext install figlet-comment-generator`
+3. Type `ext install FIGLet-comment-generator`
 4. Press Enter and reload VS Code
 
 ## Usage
@@ -78,7 +78,7 @@ Output (using "small" font):
 
 ### Visual Studio
 
-Go to Tools > Options > FIGlet Comment Generator to configure:
+Go to Tools > Options > FIGLet Comment Generator to configure:
 - Default font
 - Layout mode
 - Comment style
@@ -87,7 +87,7 @@ Go to Tools > Options > FIGlet Comment Generator to configure:
 ### VS Code
 
 1. Open Settings (`Ctrl+,` or `Cmd+,`)
-2. Search for "FIGlet"
+2. Search for "FIGLet"
 3. Adjust settings as needed
 
 ## Supported Languages
@@ -103,9 +103,9 @@ The extension automatically detects the file type and uses the appropriate comme
 
 ## Technical Details
 
-The extension is built on a robust FIGlet implementation that includes:
+The extension is built on a robust FIGLet implementation that includes:
 
-- Full support for the FIGlet font format (.flf)
+- Full support for the FIGLet font format (.flf)
 - Multiple layout modes (FullSize, Kerning, Smushing)
 - Comprehensive smushing rules:
   - Equal character smushing
@@ -133,15 +133,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- FIGlet (http://www.figlet.org/) for the original FIGlet specification
-- The FIGlet font designers for their creative contributions
+- FIGLet (http://www.org/) for the original FIGLet specification
+- The FIGLet font designers for their creative contributions
 - The Visual Studio and VS Code extension ecosystem
 
 ## Support
 
 If you encounter any issues or have feature requests, please:
 1. Check the [FAQ](docs/FAQ.md)
-2. Search existing [issues](https://github.com/PaulStSmith/figlet-comment-generator/issues)
+2. Search existing [issues](https://github.com/PaulStSmith/FIGLet-comment-generator/issues)
 3. Create a new issue if needed
 
 ---

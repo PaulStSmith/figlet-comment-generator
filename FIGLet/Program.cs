@@ -1,12 +1,12 @@
-﻿namespace FIGlet
+﻿namespace FIGLet
 {
     internal class Program
     {
         static void Main()
         {
-            var fnt = FIGFont.LoadFromFile("fonts\\small.flf");
-            var renderer = new FIGletRenderer(fnt);
-            Console.WriteLine(renderer.Render("Hello, World!"));
+            var fnt = FIGFont.LoadFromFile("fonts\\standard.flf");
+            var renderer = new FIGLetRenderer(fnt);
+            Console.WriteLine(renderer.Render("C#"));
         }
     }
 }

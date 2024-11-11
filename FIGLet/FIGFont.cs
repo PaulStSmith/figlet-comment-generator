@@ -1,10 +1,21 @@
-﻿namespace FIGlet
+﻿using System.Reflection;
+
+namespace FIGLet
 {
     /// <summary>
-    /// Represents a FIGfont used for rendering text in FIGlet style.
+    /// Represents a FIGfont used for rendering text in FIGLet style.
     /// </summary>
     public class FIGFont
     {
+        public static FIGFont Default { get
+            {
+                if (_default == null)
+                    _default = LoadDefaultFont();
+                return _default ?? throw new InvalidOperationException("Default FIGfont not found");
+            } 
+        }
+        private static FIGFont? _default;
+
         /// <summary>
         /// Gets the signature of the FIGfont.
         /// </summary>
@@ -60,16 +71,39 @@
         /// </summary>
         public SmushingRules SmushingRules { get; private set; } = SmushingRules.None;
 
-        /// <summary>
-        /// Loads a FIGfont from a file.
-        /// </summary>
-        /// <param name="path">The path to the FIGfont file.</param>
-        /// <returns>A <see cref="FIGFont"/> object.</returns>
-        /// <exception cref="FormatException">Thrown when the file format is invalid.</exception>
-        public static FIGFont LoadFromFile(string path)
+        public static FIGFont? FromFile(String? path)
         {
+            if (String.IsNullOrEmpty(path))
+                return null;
+
+            using var stream = File.OpenRead(path);
+            return FromStream(stream);
+        }
+
+        public static FIGFont? FromStream(Stream? stream)
+        {
+            if (stream == null)
+                return null;
+
+            using var reader = new StreamReader(stream);
+            return FromReader(reader);
+        }
+
+        public static FIGFont? FromReader(TextReader? reader)
+        {
+            if (reader == null)
+                return null;
+
+            var lines = reader.ReadToEnd().Split('\n');
+            return FromLines(lines);
+        }
+
+        public static FIGFont? FromLines(string[]? lines)
+        {
+            if (lines == null || lines.Length == 0)
+                return null;
+
             var font = new FIGFont();
-            var lines = File.ReadAllLines(path);
 
             // Parse header
             var header = lines[0];
@@ -129,6 +163,16 @@
             ParseLayoutParameters(font);
 
             return font;
+        }
+
+        /// <summary>
+        /// Loads the default FIGfont from the embedded resource.
+        /// </summary>
+        /// <returns>The default FIGfont if found; otherwise, null.</returns>
+        private static FIGFont? LoadDefaultFont()
+        {
+            using var stream = typeof(FIGFont).Assembly.GetManifestResourceStream("FIGLet.fonts.small.flf");
+            return FromStream(stream);
         }
 
         private static void ParseLayoutParameters(FIGFont font)

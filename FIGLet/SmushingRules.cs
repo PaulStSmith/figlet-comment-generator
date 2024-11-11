@@ -1,7 +1,7 @@
-﻿namespace FIGlet
+﻿namespace FIGLet
 {
     /// <summary>
-    /// Specifies the rules for smushing characters together in FIGlet text.
+    /// Specifies the rules for smushing characters together in FIGLet text.
     /// </summary>
     [Flags]
     public enum SmushingRules

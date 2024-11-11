@@ -1,7 +1,7 @@
-﻿namespace FIGlet
+﻿namespace FIGLet
 {
     /// <summary>
-    /// Specifies the layout mode for rendering FIGlet text.
+    /// Specifies the layout mode for rendering FIGLet text.
     /// </summary>
     public enum LayoutMode
     {
