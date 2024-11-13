@@ -9,7 +9,14 @@ namespace FIGLet
     /// </summary>
     public partial class FIGLetRenderer
     {
+        /// <summary>
+        /// Characters used for hierarchy smushing.
+        /// </summary>
         private const string HierarchyCharacters = "|/\\[]{}()<>";
+
+        /// <summary>
+        /// Dictionary of opposite character pairs for smushing.
+        /// </summary>
         private static readonly Dictionary<char, char> oppositePairs = new()
             {
                 {'[', ']'}, {']', '['},
@@ -18,7 +25,24 @@ namespace FIGLet
                 {'<', '>'}, {'>', '<'}
             };
 
+        /// <summary>
+        /// Gets the FIGFont used for rendering text.
+        /// </summary>
         public FIGFont Font { get; }
+
+        /// <summary>
+        /// Renders the specified text using the given FIGFont and layout mode.
+        /// </summary>
+        /// <param name="text">The text to render.</param>
+        /// <param name="font">The FIGFont to use for rendering the text.</param>
+        /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
+        /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
+        /// <returns>The rendered text as a string.</returns>
+        public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Smushing, string lineSeparator = "\r\n")
+        {
+            var renderer = new FIGLetRenderer(font);
+            return renderer.Render(text, mode, lineSeparator);
+        }
 
         /// <summary>
         /// Renders the specified text using the FIGFont and layout mode.
@@ -324,12 +348,12 @@ namespace FIGLet
         /// A regex to match the last non-whitespace character in a string.
         /// </summary>
         /// <returns>A regex pattern to match the last non-whitespace character.</returns>
-        private static Regex LastNonWhitespaceRegex() => new Regex(@"\S(?=\s*$)");
+        private static Regex LastNonWhitespaceRegex() => new(@"\S(?=\s*$)");
 
         /// <summary>
         /// A regex to match the first non-whitespace character in a string.
         /// </summary>
         /// <returns>A regex pattern to match the first non-whitespace character.</returns>
-        private static Regex FirstNonWhitespaceRegex() => new Regex(@"(?<=^|\s*)\S");
+        private static Regex FirstNonWhitespaceRegex() => new(@"(?<=^|\s*)\S");
     }
 }

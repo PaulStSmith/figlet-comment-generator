@@ -1,7 +1,6 @@
-﻿using System;
+﻿using FIGLet.VisualStudioExtension.UI;
 using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Media.Animation;
 
 namespace FIGLet.VisualStudioExtension
 {

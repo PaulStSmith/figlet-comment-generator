@@ -4,7 +4,7 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 
-namespace FIGLet.VisualStudioExtension
+namespace FIGLet.VisualStudioExtension.UI
 {
     /// <summary>
     /// Interaction logic for FIGLetInputDialogView.xaml

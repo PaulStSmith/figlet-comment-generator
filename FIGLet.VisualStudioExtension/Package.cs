@@ -1,11 +1,8 @@
 ﻿using EnvDTE;
-using FIGLet;
+using FIGLet.VisualStudioExtension.UI;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using System;
-using System.ComponentModel;
 using System.ComponentModel.Design;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Task = System.Threading.Tasks.Task;
@@ -18,14 +15,14 @@ namespace FIGLet.VisualStudioExtension
     [ProvideOptionPage(typeof(FIGLetOptions), "FIGLet Comment Generator", "General", 0, 0, true)]
     public sealed class FIGLetCommentPackage : AsyncPackage
     {
+        // Thread-safe singleton implementation
         private FIGLetCommentCommand command;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            var commandService = await GetServiceAsync(typeof(IMenuCommandService)) as IMenuCommandService;
-            if (commandService != null)
+            if (await GetServiceAsync(typeof(IMenuCommandService)) is IMenuCommandService commandService)
             {
                 var renderer = new FIGLetRenderer();
                 command = new FIGLetCommentCommand(this, commandService, renderer);
@@ -85,24 +82,6 @@ namespace FIGLet.VisualStudioExtension
             var selection = (EnvDTE.TextSelection)activeDocument.Selection;
             selection.Insert(commentedText + "\n");
         }
-    }
-
-    public class FIGLetOptions : DialogPage
-    {
-        [Category("Appearance")]
-        [DisplayName("Default Font")]
-        [Description("The default FIGLet font to use")]
-        public string DefaultFont { get; set; } = "standard.flf";
-
-        [Category("Layout")]
-        [DisplayName("Layout Mode")]
-        [Description("How to arrange the FIGLet text")]
-        public LayoutMode LayoutMode { get; set; } = LayoutMode.Smushing;
-
-        [Category("Comments")]
-        [DisplayName("Comment Style")]
-        [Description("Style of comments to use")]
-        public string CommentStyle { get; set; } = "Auto";
     }
 
     // PackageIds.cs

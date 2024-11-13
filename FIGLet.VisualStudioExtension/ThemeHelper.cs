@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -76,15 +77,15 @@ namespace FIGLet.VisualStudioExtension
         }
 
         /// <summary>
-        /// Gets the brush for comment text based on the current Visual Studio theme.
+        /// Gets the brush for the comment color based on the current Visual Studio theme.
         /// </summary>
-        /// <param name="package">The async package.</param>
-        /// <returns>The brush used for comment text in the current theme.</returns>
-        public static Brush GetCommentColorBrush(AsyncPackage package)
+        /// <param name="serviceProvider">The service provider to use for retrieving Visual Studio services.</param>
+        /// <returns>The brush for the comment color.</returns>
+        public static Brush GetCommentColorBrush(IServiceProvider serviceProvider)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var componentModel = package.GetService<SComponentModel, IComponentModel>();
+            var componentModel = serviceProvider.GetService<SComponentModel, IComponentModel>();
             if (componentModel == null) return Brushes.Green;
 
             var classificationFormatMapService = componentModel.GetService<IClassificationFormatMapService>();
@@ -96,6 +97,11 @@ namespace FIGLet.VisualStudioExtension
             var textProperties = formatMap.GetTextProperties(commentType);
 
             return (textProperties.ForegroundBrush as SolidColorBrush) ?? Brushes.Green;
+        }
+
+        public static Brush GetBackgroundColorBrush()
+        {
+            return GetThemeBrush(EnvironmentColors.ToolboxBackgroundBrushKey);
         }
 
         /// <summary>

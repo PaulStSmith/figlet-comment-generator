@@ -7,12 +7,20 @@ namespace FIGLet
     /// </summary>
     public class FIGFont
     {
-        public static FIGFont Default { get
+        /// <summary>
+        /// Gets the default FIGfont.
+        /// </summary>
+        /// <remarks>
+        /// If the default font is not already loaded, it loads the default font from the embedded resource.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">Thrown when the default FIGfont is not found.</exception>
+        public static FIGFont Default
+        {
+            get
             {
-                if (_default == null)
-                    _default = LoadDefaultFont();
+                _default ??= LoadDefaultFont();
                 return _default ?? throw new InvalidOperationException("Default FIGfont not found");
-            } 
+            }
         }
         private static FIGFont? _default;
 
@@ -47,11 +55,6 @@ namespace FIGLet
         public int OldLayout { get; private set; }
 
         /// <summary>
-        /// Gets the number of comment lines in the FIGfont.
-        /// </summary>
-        public int CommentLines { get; private set; }
-
-        /// <summary>
         /// Gets the print direction of the FIGfont.
         /// </summary>
         public int PrintDirection { get; private set; }
@@ -71,6 +74,13 @@ namespace FIGLet
         /// </summary>
         public SmushingRules SmushingRules { get; private set; } = SmushingRules.None;
 
+        public string Comments { get; private set; } = "";
+
+        /// <summary>
+        /// Creates a FIGFont from a file.
+        /// </summary>
+        /// <param name="path">The path to the FIGfont file.</param>
+        /// <returns>The FIGFont if the file is found and valid; otherwise, null.</returns>
         public static FIGFont? FromFile(String? path)
         {
             if (String.IsNullOrEmpty(path))
@@ -80,6 +90,11 @@ namespace FIGLet
             return FromStream(stream);
         }
 
+        /// <summary>
+        /// Creates a FIGFont from a stream.
+        /// </summary>
+        /// <param name="stream">The stream containing the FIGfont data.</param>
+        /// <returns>The FIGFont if the stream is valid; otherwise, null.</returns>
         public static FIGFont? FromStream(Stream? stream)
         {
             if (stream == null)
@@ -89,6 +104,11 @@ namespace FIGLet
             return FromReader(reader);
         }
 
+        /// <summary>
+        /// Creates a FIGFont from a text reader.
+        /// </summary>
+        /// <param name="reader">The text reader containing the FIGfont data.</param>
+        /// <returns>The FIGFont if the reader is valid; otherwise, null.</returns>
         public static FIGFont? FromReader(TextReader? reader)
         {
             if (reader == null)
@@ -98,6 +118,11 @@ namespace FIGLet
             return FromLines(lines);
         }
 
+        /// <summary>
+        /// Creates a FIGFont from an array of lines.
+        /// </summary>
+        /// <param name="lines">The lines containing the FIGfont data.</param>
+        /// <returns>The FIGFont if the lines are valid; otherwise, null.</returns>
         public static FIGFont? FromLines(string[]? lines)
         {
             if (lines == null || lines.Length == 0)
@@ -117,12 +142,14 @@ namespace FIGLet
             font.Baseline = int.Parse(headerParts[2]);
             font.MaxLength = int.Parse(headerParts[3]);
             font.OldLayout = int.Parse(headerParts[4]);
-            font.CommentLines = int.Parse(headerParts[5]);
+            var commentLines = int.Parse(headerParts[5]);
             font.PrintDirection = headerParts.Length > 6 ? int.Parse(headerParts[6]) : 0;
             font.FullLayout = headerParts.Length > 7 ? int.Parse(headerParts[7]) : 0;
 
+            font.Comments = string.Join("\n", lines.Skip(1).Take(commentLines));
+
             // Skip header and comments
-            var currentLine = 1 + font.CommentLines;
+            var currentLine = 1 + commentLines;
 
             // Load required characters (ASCII 32-126)
             for (var charCode = 32; charCode <= 126; charCode++)
@@ -158,7 +185,7 @@ namespace FIGLet
                 font.Characters.Add((char)codePoint, charLines);
                 currentLine += font.Height;
             }
-            
+
             // Parse the layout parameters to determine smushing rules
             ParseLayoutParameters(font);
 
@@ -175,6 +202,10 @@ namespace FIGLet
             return FromStream(stream);
         }
 
+        /// <summary>
+        /// Parses the layout parameters to determine smushing rules for the FIGfont.
+        /// </summary>
+        /// <param name="font">The FIGfont object to parse layout parameters for.</param>
         private static void ParseLayoutParameters(FIGFont font)
         {
             // First, determine if we should use full_layout or old_layout
@@ -233,9 +264,11 @@ namespace FIGLet
             font.SmushingRules = (SmushingRules)layoutMask;
         }
 
-        public bool HasSmushingRule(SmushingRules rule)
-        {
-            return (SmushingRules & rule) == rule;
-        }
+        /// <summary>
+        /// Determines if the FIGfont has a specific smushing rule.
+        /// </summary>
+        /// <param name="rule">The smushing rule to check for.</param>
+        /// <returns>True if the smushing rule is present; otherwise, false.</returns>
+        public bool HasSmushingRule(SmushingRules rule) => (SmushingRules & rule) == rule;
     }
 }

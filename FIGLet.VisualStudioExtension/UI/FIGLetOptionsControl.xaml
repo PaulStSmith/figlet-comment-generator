@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserControl 
+    x:Class="FIGLet.VisualStudioExtension.UI.FIGLetOptionsControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:local="clr-namespace:FIGLet;assembly=FIGLet"
+    mc:Ignorable="d" 
+    d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ObjectDataProvider x:Key="LayoutModes" 
+                        MethodName="GetValues"
+                        ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:LayoutMode"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="12">
+            <Grid
+                Margin="0,0,0,8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Font Directory Selection -->
+                <Label 
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Content="Font Directory:"
+                    Padding="0,0,8,0"
+                    VerticalAlignment="Center"/>
+                <DockPanel 
+                    Grid.Row="0" 
+                    Grid.Column="1" 
+                    Margin="8">
+                    <Button 
+                        Content="..." 
+                        Click="BrowseButton_Click"
+                        DockPanel.Dock="Right"
+                        Width="32"
+                        Margin="8,0,0,0"/>
+                    <TextBox 
+                        x:Name="FontDirectoryTextBox"
+                        TextChanged="FontDirectoryTextBox_TextChanged"/>
+                </DockPanel>
+                <!-- Layout Mode -->
+                <Label 
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Content="Layout Mode:"
+                    Padding="0,0,8,0"
+                    VerticalAlignment="Center"/>
+                <ComboBox 
+                    x:Name="LayoutModeComboBox" 
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="8"
+                    ItemsSource="{Binding Source={StaticResource LayoutModes}}"
+                    SelectedItem="{Binding LayoutMode}"
+                    SelectionChanged="LayoutModeComboBox_SelectionChanged"
+                    Width="150"
+                    HorizontalAlignment="Left"/>
+            </Grid>
+
+            <!-- Font List -->
+            <Border 
+                CornerRadius="5"
+                BorderBrush="{x:Static SystemColors.ControlDarkBrush}" 
+                BorderThickness="1" 
+                Margin="0,0,0,8"
+                MinHeight="200"
+                MaxHeight="200" >
+                <DockPanel>
+                    <DockPanel 
+                        DockPanel.Dock="Top"
+                        Background="{x:Static SystemColors.ControlBrush}">
+                        <TextBlock 
+                            x:Name="FontCountText"
+                            Text="Available Fonts (0)"
+                            Padding="4,2"
+                            DockPanel.Dock="Left"/>
+                    </DockPanel>
+                    <ListView x:Name="FontListView" 
+                        SelectionChanged="FontListView_SelectionChanged"
+                        AlternationCount="2">
+                        <ListView.Resources>
+                            <!-- Style for left-aligned cells -->
+                            <Style x:Key="LeftAlignedCell" TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Left"/>
+                                <Setter Property="Margin" Value="5,0"/>
+                            </Style>
+
+                            <!-- Style for right-aligned cells -->
+                            <Style x:Key="RightAlignedCell" TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Margin" Value="5,0"/>
+                            </Style>
+
+                            <!-- Style for headers -->
+                            <Style x:Key="LeftAlignedHeader" TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            </Style>
+                        </ListView.Resources>
+
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Style.Triggers>
+                                    <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                        <Setter Property="Background" Value="White"/>
+                                    </Trigger>
+                                    <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                        <Setter Property="Background" Value="#F5F5F5"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#CCE8FF"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#E5F3FF"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Font Name" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" 
+                                 Style="{StaticResource LeftAlignedCell}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                    <GridViewColumn.HeaderContainerStyle>
+                                        <StaticResource ResourceKey="LeftAlignedHeader"/>
+                                    </GridViewColumn.HeaderContainerStyle>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="Height" Width="60">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Height}" 
+                                 Style="{StaticResource RightAlignedCell}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                    <GridViewColumn.HeaderContainerStyle>
+                                        <StaticResource ResourceKey="LeftAlignedHeader"/>
+                                    </GridViewColumn.HeaderContainerStyle>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="Baseline" Width="60">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Baseline}" 
+                                 Style="{StaticResource RightAlignedCell}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                    <GridViewColumn.HeaderContainerStyle>
+                                        <StaticResource ResourceKey="LeftAlignedHeader"/>
+                                    </GridViewColumn.HeaderContainerStyle>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="Max Width" Width="80">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding MaxLength}" 
+                                 Style="{StaticResource RightAlignedCell}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                    <GridViewColumn.HeaderContainerStyle>
+                                        <StaticResource ResourceKey="LeftAlignedHeader"/>
+                                    </GridViewColumn.HeaderContainerStyle>
+                                </GridViewColumn>
+
+                                <GridViewColumn Header="Layout Rules" Width="300">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding SmushingRules}" 
+                                 Style="{StaticResource LeftAlignedCell}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                    <GridViewColumn.HeaderContainerStyle>
+                                        <StaticResource ResourceKey="LeftAlignedHeader"/>
+                                    </GridViewColumn.HeaderContainerStyle>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+            </Border>
+
+            <!-- Preview Controls -->
+            <!-- Preview Area -->
+            <Border 
+                CornerRadius="5"
+                BorderBrush="{x:Static SystemColors.ControlDarkBrush}" 
+                BorderThickness="1"
+                MinHeight="175">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel
+                        Grid.Row="0"
+                        Background="{x:Static SystemColors.ControlBrush}"
+                        Margin="0,0,0,4">
+                        <TextBlock 
+                            Text="Preview Text:" 
+                            Padding="4,2"
+                            VerticalAlignment="Center"/>
+                        <TextBox 
+                            x:Name="SampleTextBox" 
+                            Text="Hello World"
+                            TextChanged="SampleTextBox_TextChanged"
+                            Margin="8,2"
+                            VerticalAlignment="Center"/>
+                    </DockPanel>
+
+                    <TextBox 
+                        Grid.Row="1"
+                        x:Name="PreviewTextBox"
+                        IsReadOnly="True"
+                        FontFamily="Consolas"
+                        Background="{x:Static SystemColors.ControlLightBrush}"
+                        Margin="2"
+                        AcceptsReturn="True"
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Auto"/>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

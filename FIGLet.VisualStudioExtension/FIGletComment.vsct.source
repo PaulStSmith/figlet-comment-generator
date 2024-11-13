@@ -28,14 +28,14 @@
   </Commands>
 
   <Symbols>
-    <GuidSymbol name="guidFIGLetCommentPackage" value="{PACKAGE_GUID_STRING}" />
+    <GuidSymbol name="guidFIGLetCommentPackage" value="{PACKAGE_GUID}" />
 
-    <GuidSymbol name="guidFIGLetCommentPackageCmdSet" value="{COMMAND_SET_GUID_STRING}">
+    <GuidSymbol name="guidFIGLetCommentPackageCmdSet" value="{COMMAND_SET_GUID}">
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="FIGLetCommentCommandId" value="0x0100" />
     </GuidSymbol>
 
-    <GuidSymbol name="guidImages" value="{IMAGES_GUID_STRING}">
+    <GuidSymbol name="guidImages" value="{IMAGES_GUID}">
       <IDSymbol name="bmpPic1" value="1" />
     </GuidSymbol>
   </Symbols>

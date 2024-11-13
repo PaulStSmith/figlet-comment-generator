@@ -26,6 +26,7 @@
     <StartAction>Program</StartAction>
     <StartProgram Condition="'$(DevEnvDir)' != ''">$(DevEnvDir)devenv.exe</StartProgram>
     <StartArguments>/rootsuffix Exp</StartArguments>
+    <LangVersion>12.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,14 +46,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CodeContextDetector.cs" />
     <Compile Include="DialogHelper.cs" />
+    <Compile Include="FIGLetFontManager.cs" />
+    <Compile Include="InsertLocation.cs" />
     <Compile Include="LanguageCommentStyles.cs" />
+    <Compile Include="FIGLetOptions.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Package.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="FIGLetInputDialogView .xaml.cs">
+    <Compile Include="UI\FIGLetInputDialogView .xaml.cs">
       <DependentUpon>FIGLetInputDialogView .xaml</DependentUpon>
     </Compile>
     <Compile Include="ThemeHelper.cs" />
+    <Compile Include="UI\FIGLetOptionsControl.xaml.cs">
+      <DependentUpon>FIGLetOptionsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FontInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Template source files - these are not included in compilation -->
@@ -133,6 +144,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
+      <Version>4.11.0</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.11.40262" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -164,7 +178,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="FIGLetInputDialogView .xaml">
+    <Page Include="UI\FIGLetInputDialogView .xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\FIGLetOptionsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
