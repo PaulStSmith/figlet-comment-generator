@@ -5,6 +5,7 @@
         <DisplayName>FIGLet Comment Generator</DisplayName>
         <Description xml:space="preserve">&lt;Description xml:space="preserve"&gt;Create beautiful ASCII art comments that make your code documentation stand out! FIGLet Comment Generator provides a powerful and intuitive way to create eye-catching ASCII art banners within Visual Studio. Features include: seamless VS integration with context menu support, smart detection of classes and methods, multiple fonts with live preview, language-aware comment formatting, and full Visual Studio theme integration. Transform your code documentation with professional ASCII art banners.&lt;/Description&gt;</Description>
         <License>LICENSE.txt</License>
+        <GettingStartedGuide>GettingStarted.html</GettingStartedGuide>
         <ReleaseNotes>ReleaseNotes.html</ReleaseNotes>
         <Icon>Resources\icon-90.png</Icon>
         <PreviewImage>Resources\preview.png</PreviewImage>
