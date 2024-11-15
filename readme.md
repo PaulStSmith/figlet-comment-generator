@@ -21,7 +21,7 @@ A Visual Studio and VS Code extension that allows developers to generate ASCII a
 3. Search for "FIGLet Comment Generator"
 4. Click Download and restart Visual Studio
 
-### VS Code
+### VS Code - Upcoming
 
 1. Open VS Code
 2. Press `Ctrl+P` (Windows/Linux) or `Cmd+P` (macOS)
@@ -79,12 +79,10 @@ Output (using "small" font):
 ### Visual Studio
 
 Go to Tools > Options > FIGLet Comment Generator to configure:
-- Default font
-- Layout mode
-- Comment style
-- Keyboard shortcuts
+- Font folder, for additional fonts.
+- See examples of the available fonts.
 
-### VS Code
+### VS Code - Upcoming
 
 1. Open Settings (`Ctrl+,` or `Cmd+,`)
 2. Search for "FIGLet"

@@ -28,7 +28,7 @@ This library provides a robust and efficient implementation of the FIGLet specif
 
 ```csharp
 // Load a FIGLet font
-var font = FIGFont.LoadFromFile("standard.flf");
+var font = FIGFont.FromFile("standard.flf");
 
 // Create a renderer
 var renderer = new FIGLetRenderer(font);
@@ -112,8 +112,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Original FIGLet concept by Frank, Ian & Glenn
 - FIGLet specifications: http://www.org/
 - Implementation by Paulo Santos
-
-## Additional Resources
-
-- [FIGLet Documentation](http://www.org/FIGLet_documentation.html)
-- [FIGLet Font Format Specification](http://www.jave.de/FIGLet/figfont.html)

@@ -44,6 +44,10 @@ internal sealed class FIGLetCommentCommand
         commandService.AddCommand(oleMenuItem);
     }
 
+    /// <summary>
+    /// Initializes context menu commands asynchronously.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InitializeContextMenuCommandsAsync()
     {
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -59,6 +63,12 @@ internal sealed class FIGLetCommentCommand
         AddContextMenuCommand(PackageIds.InsertFIGLetMethodBannerCommandId, "Insert FIGLet Method Banner", ExecuteMethodBanner);
     }
 
+    /// <summary>
+    /// Adds a context menu command.
+    /// </summary>
+    /// <param name="commandId">The command ID.</param>
+    /// <param name="text">The text for the command.</param>
+    /// <param name="handler">The event handler for the command.</param>
     private void AddContextMenuCommand(int commandId, string text, EventHandler handler)
     {
         var commandID = new CommandID(PackageGuids.guidFIGLetContextMenuCmdSet, commandId);
@@ -67,6 +77,11 @@ internal sealed class FIGLetCommentCommand
         commandService.AddCommand(menuCommand);
     }
 
+    /// <summary>
+    /// Updates the status of the command.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void UpdateCommandStatus(object sender, EventArgs e)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -80,6 +95,10 @@ internal sealed class FIGLetCommentCommand
         command.Visible = isEnabled;
     }
 
+    /// <summary>
+    /// Checks if the active document is a text editor.
+    /// </summary>
+    /// <returns>True if the active document is a text editor, otherwise false.</returns>
     private bool IsTextEditorActive()
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -90,12 +109,22 @@ internal sealed class FIGLetCommentCommand
         return dte.ActiveDocument.Object("TextDocument") is TextDocument;
     }
 
+    /// <summary>
+    /// Executes the command to insert a generic FIGLet banner.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void Execute(object sender, EventArgs e)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
         ExecuteGenericBanner(sender, e);
     }
 
+    /// <summary>
+    /// Executes the command to insert a generic FIGLet banner.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void ExecuteGenericBanner(object sender, EventArgs e)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -111,6 +140,11 @@ internal sealed class FIGLetCommentCommand
         InsertBanner(dialogContent.PreviewBlock.Text);
     }
 
+    /// <summary>
+    /// Executes the command to insert a FIGLet banner for a class.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void ExecuteClassBanner(object sender, EventArgs e)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -122,26 +156,21 @@ internal sealed class FIGLetCommentCommand
 
             var _ = package.JoinableTaskFactory.RunAsync(async () =>
             {
-                var (className, methodName) = await detector.GetCodeElementAtCursorAsync();
+                var ce = await detector.GetCodeElementAtCursorAsync();
 
                 // Switch back to UI thread for VS operations
                 await package.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                if (!string.IsNullOrEmpty(className))
+                if (string.IsNullOrEmpty(ce.ClassName))
+                    return;
+
+                // Show input dialog with class name pre-filled
+                var dialogContent = new FIGLetInputDialogView(package, doc.Language)
                 {
-                    // Show input dialog with class name pre-filled
-                    var dialogContent = new FIGLetInputDialogView(package, doc.Language)
-                    {
-                        InputText = className
-                    };
+                    InputText = ce.ClassName
+                };
 
-                    if (DialogHelper.ShowDialog(dialogContent) != true)
-                        return;
-
-                    var selection = (TextSelection)doc.Selection;
-                    var insertPoint = FindInsertionPoint(selection.ActivePoint);
-                    InsertBanner(dialogContent.PreviewBlock.Text, insertPoint);
-                }
+                InsertCodeBanner(doc, ce, dialogContent);
             });
         }
         catch (Exception ex)
@@ -150,6 +179,37 @@ internal sealed class FIGLetCommentCommand
         }
     }
 
+    /// <summary>
+    /// Inserts a FIGLet banner into the code at the specified location.
+    /// </summary>
+    /// <param name="doc">The active document.</param>
+    /// <param name="ce">The code element information.</param>
+    /// <param name="dialogContent">The dialog content containing the banner text.</param>
+    private void InsertCodeBanner(Document doc, CodeElementInfo ce, FIGLetInputDialogView dialogContent)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+        if (DialogHelper.ShowDialog(dialogContent) != true)
+            return;
+
+        EditPoint insertPoint;
+        if (ce.CodeElement != null)
+        {
+            insertPoint = FindInsertionPoint(ce.CodeElement.StartPoint);
+        }
+        else
+        {
+            // Fallback to current selection (if any)
+            var selection = (TextSelection)doc.Selection;
+            insertPoint = FindInsertionPoint(selection.ActivePoint);
+        }
+        InsertBanner(dialogContent.PreviewBlock.Text, insertPoint);
+    }
+
+    /// <summary>
+    /// Executes the command to insert a FIGLet banner for a method.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
     private void ExecuteMethodBanner(object sender, EventArgs e)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -161,26 +221,21 @@ internal sealed class FIGLetCommentCommand
 
             var _ = package.JoinableTaskFactory.RunAsync(async () =>
             {
-                var (className, methodName) = await detector.GetCodeElementAtCursorAsync();
+                var ce = await detector.GetCodeElementAtCursorAsync();
 
                 // Switch back to UI thread for VS operations
                 await package.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                if (!string.IsNullOrEmpty(methodName))
+                if (string.IsNullOrEmpty(ce.MethodName))
+                    return;
+
+                // Show input dialog with method name pre-filled
+                var dialogContent = new FIGLetInputDialogView(package, doc.Language)
                 {
-                    // Show input dialog with method name pre-filled
-                    var dialogContent = new FIGLetInputDialogView(package, doc.Language)
-                    {
-                        InputText = methodName
-                    };
+                    InputText = ce.MethodName
+                };
 
-                    if (DialogHelper.ShowDialog(dialogContent) != true)
-                        return;
-
-                    var selection = (TextSelection)doc.Selection;
-                    var insertPoint = FindInsertionPoint(selection.ActivePoint);
-                    InsertBanner(dialogContent.PreviewBlock.Text, insertPoint);
-                }
+                InsertCodeBanner(doc, ce, dialogContent);
             });
         }
         catch (Exception ex)
@@ -189,6 +244,11 @@ internal sealed class FIGLetCommentCommand
         }
     }
 
+    /// <summary>
+    /// Finds the insertion point for the banner starting from the given text point.
+    /// </summary>
+    /// <param name="startPoint">The starting text point.</param>
+    /// <returns>The edit point where the banner should be inserted.</returns>
     private EditPoint FindInsertionPoint(TextPoint startPoint)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -206,6 +266,12 @@ internal sealed class FIGLetCommentCommand
         return insertPoint;
     }
 
+    /// <summary>
+    /// Determines if the given edit point is at a documentation line based on the language.
+    /// </summary>
+    /// <param name="point">The edit point to check.</param>
+    /// <param name="language">The programming language of the document.</param>
+    /// <returns>True if the line is a documentation line, otherwise false.</returns>
     private bool IsDocumentationLine(EditPoint point, string language)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -226,6 +292,11 @@ internal sealed class FIGLetCommentCommand
         }
     }
 
+    /// <summary>
+    /// Inserts a FIGLet banner at the specified insertion point or at the current selection if no insertion point is provided.
+    /// </summary>
+    /// <param name="bannerText">The text of the FIGLet banner to insert.</param>
+    /// <param name="insertPoint">The edit point where the banner should be inserted. If null, the current selection is used.</param>
     private void InsertBanner(string bannerText, EditPoint insertPoint = null)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -243,45 +314,11 @@ internal sealed class FIGLetCommentCommand
         insertPoint.Insert(indentation + string.Join(Environment.NewLine + indentation, lines) + Environment.NewLine);
     }
 
-    ///// <summary>
-    ///// Executes the command.
-    ///// </summary>
-    ///// <param name="sender">The event sender.</param>
-    ///// <param name="e">The event arguments.</param>
-    //private void Execute(object sender, EventArgs e)
-    //{
-    //    ThreadHelper.ThrowIfNotOnUIThread();
-
-    //    // Get the active document
-    //    var dte = package.GetService<DTE, DTE>();
-    //    if (dte?.ActiveDocument == null)
-    //        return;
-
-    //    var doc = dte.ActiveDocument;
-    //    var lang = doc.Language;
-
-    //    // Show our custom input dialog
-    //    var dialogContent = new FIGLetInputDialogView(package, lang);
-
-    //    if (DialogHelper.ShowDialog(dialogContent) != true)
-    //        return;
-
-    //    // Get current options
-    //    var options = (FIGLetOptions)package.GetDialogPage(typeof(FIGLetOptions));
-
-    //    // Get the current indentation
-    //    var selection = (EnvDTE.TextSelection)doc.Selection;
-
-    //    // Get the previewed text
-    //    var lines = dialogContent.PreviewBlock.Text.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
-
-    //    // Insert at cursor position
-    //    var ep = selection.ActivePoint.CreateEditPoint();
-    //    var indentation = GenerateIndentation(doc);
-    //    ep.StartOfLine();
-    //    ep.Insert(indentation + string.Join(Environment.NewLine + indentation, lines) + Environment.NewLine);
-    //}
-
+    /// <summary>
+    /// Generates the indentation string for the current line in the document.
+    /// </summary>
+    /// <param name="doc">The active document.</param>
+    /// <returns>The indentation string.</returns>
     private string GenerateIndentation(Document doc)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -318,7 +355,6 @@ internal sealed class FIGLetCommentCommand
 
         // Retrieve specific tab settings
         var tabSize = TryGetValue(languageProperties, "TabSize", 4);
-        var indentSize = TryGetValue(languageProperties, "IndentSize", 4);
         var useSpaces = TryGetValue(languageProperties, "InsertSpaces", true);
 
         if (useSpaces)
@@ -337,6 +373,14 @@ internal sealed class FIGLetCommentCommand
         }
     }
     
+    /// <summary>
+    /// Tries to get the value of a property from the given properties collection.
+    /// </summary>
+    /// <typeparam name="T">The type of the property value.</typeparam>
+    /// <param name="properties">The properties collection.</param>
+    /// <param name="name">The name of the property.</param>
+    /// <param name="defaultValue">The default value to return if the property is not found.</param>
+    /// <returns>The value of the property if found, otherwise the default value.</returns>
     T TryGetValue<T>(Properties properties, string name, T defaultValue)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
