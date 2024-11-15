@@ -29,11 +29,14 @@ public static class ThemeHelper
     /// Gets the themed brush for the specified theme resource key.
     /// </summary>
     /// <param name="key">The theme resource key.</param>
+    /// <param name="alpha">The alpha value for the brush.</param>
     /// <returns>The brush associated with the specified theme resource key.</returns>
-    public static Brush GetThemeBrush(ThemeResourceKey key)
+    public static Brush GetThemeBrush(ThemeResourceKey key, double alpha = 1.0)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
-        return new SolidColorBrush(GetThemeColor(key));
+        var color = GetThemeColor(key);
+        color.A = (byte)(alpha * 255);
+        return new SolidColorBrush(color);
     }
 
     /// <summary>
@@ -68,9 +71,7 @@ public static class ThemeHelper
 
         // Disabled trigger
         var disabledTrigger = new Trigger { Property = Button.IsEnabledProperty, Value = false };
-        disabledTrigger.Setters.Add(new Setter(Button.BackgroundProperty, GetThemeBrush(CommonControlsColors.ButtonDisabledColorKey)));
-        disabledTrigger.Setters.Add(new Setter(Button.ForegroundProperty, GetThemeBrush(CommonControlsColors.ButtonDisabledTextColorKey)));
-        disabledTrigger.Setters.Add(new Setter(Button.BorderBrushProperty, GetThemeBrush(CommonControlsColors.ButtonBorderDefaultColorKey)));
+        disabledTrigger.Setters.Add(new Setter(Button.OpacityProperty, 0.5));
         style.Triggers.Add(disabledTrigger);
 
         button.Style = style;
@@ -105,6 +106,7 @@ public static class ThemeHelper
     /// <returns>The brush for the background color.</returns>
     public static Brush GetBackgroundColorBrush()
     {
+        ThreadHelper.ThrowIfNotOnUIThread();
         return GetThemeBrush(EnvironmentColors.ToolboxBackgroundBrushKey);
     }
 
@@ -116,5 +118,14 @@ public static class ThemeHelper
     private static Color ToMediaColor(this System.Drawing.Color color)
     {
         return Color.FromArgb(color.A, color.R, color.G, color.B);
+    }
+
+    public static Color ColorFromValue(uint color)
+    {
+        var A = (byte)((color >> 24) & 0xff);
+        var R = (byte)((color >> 16) & 0xff);
+        var G = (byte)((color >> 8) & 0xff);
+        var B = (byte)(color & 0xff);
+        return Color.FromArgb(A, R, G, B);
     }
 }

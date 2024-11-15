@@ -18,6 +18,11 @@
         /// <summary>
         /// Smushing layout mode.
         /// </summary>
-        Smushing = 1
+        Smushing = 1,
+
+        /// <summary>
+        /// The default layout mode, which is smushing.
+        /// </summary>
+        Default = -2
     }
 }

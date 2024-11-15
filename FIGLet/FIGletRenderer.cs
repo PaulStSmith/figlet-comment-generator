@@ -37,7 +37,7 @@ public partial class FIGLetRenderer
     /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
     /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
     /// <returns>The rendered text as a string.</returns>
-    public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Smushing, string lineSeparator = "\r\n")
+    public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n")
     {
         var renderer = new FIGLetRenderer(font);
         return renderer.Render(text, mode, lineSeparator);
@@ -50,7 +50,7 @@ public partial class FIGLetRenderer
     /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
     /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
     /// <returns>The rendered text as a string.</returns>
-    public string Render(string text, LayoutMode mode = LayoutMode.Smushing, string lineSeparator = "\r\n")
+    public string Render(string text, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n")
     {
         if (string.IsNullOrEmpty(text))
             return string.Empty;
@@ -58,6 +58,8 @@ public partial class FIGLetRenderer
         var ol = new StringBuilder[Font.Height];
         for (var i = 0; i < Font.Height; i++)
             ol[i] = new StringBuilder();
+
+        mode = mode == LayoutMode.Default ? LayoutMode.Smushing : mode;
 
         foreach (var c in text)
         {

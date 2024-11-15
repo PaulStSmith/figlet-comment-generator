@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FIGlet Comment Generator - Release Notes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5px;
+        }
+
+        h2 {
+            color: #2c5898;
+            margin-top: 20px;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 15px;
+        }
+
+        .version {
+            font-size: 1.5em;
+            color: #0066cc;
+            margin: 20px 0;
+        }
+
+        .feature-section {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+
+        .highlight {
+            background-color: #e6f3ff;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .code {
+            font-family: Consolas, monospace;
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>FIGlet Comment Generator - Release Notes</h1>
+
+    <div class="version">
+        Version 1.0.0 - Initial Release (November 2024)
+    </div>
+
+    <div class="feature-section">
+        <h2>🎉 Core Features</h2>
+        <h3>Context Menu Integration</h3>
+        <ul>
+            <li>Insert ASCII art banners through the context menu</li>
+            <li>Automatic class and method name detection</li>
+            <li>Smart indentation preservation</li>
+        </ul>
+    </div>
+
+    <div class="feature-section">
+        <h2>🔤 Language Support</h2>
+        <p>Comprehensive language support with automatic comment formatting:</p>
+        <ul>
+            <li>
+                C-style Languages (C#, Java, C++, JavaScript)
+                <ul>
+                    <li>Block comments (<span class="code">/* */</span>)</li>
+                    <li>Line comments (<span class="code">//</span>)</li>
+                </ul>
+            </li>
+            <li>
+                Web Technologies
+                <ul>
+                    <li>HTML/XML (<span class="code">&lt;!-- --&gt;</span>)</li>
+                    <li>CSS (<span class="code">/* */</span>)</li>
+                </ul>
+            </li>
+            <li>
+                Scripting Languages
+                <ul>
+                    <li>Python (<span class="code">#</span> and docstrings)</li>
+                    <li>PowerShell (<span class="code">#</span> and <span class="code">&lt;# #&gt;</span>)</li>
+                    <li>Bash (<span class="code">#</span>)</li>
+                </ul>
+            </li>
+            <li>
+                Database
+                <ul>
+                    <li>SQL (<span class="code">--</span> and <span class="code">/* */</span>)</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="feature-section">
+        <h2>🎨 Visual Studio Integration</h2>
+        <ul>
+            <li>
+                Full Visual Studio theme support
+                <ul>
+                    <li>Adapts to light and dark themes</li>
+                    <li>Matches VS color scheme</li>
+                </ul>
+            </li>
+            <li>
+                Editor Integration
+                <ul>
+                    <li>Preserves code formatting</li>
+                    <li>Respects editor settings</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="feature-section">
+        <h2>⚙️ Configuration & Settings</h2>
+        <ul>
+            <li>
+                Font Management
+                <ul>
+                    <li>Custom font directory support</li>
+                    <li>Live preview functionality</li>
+                    <li>Multiple layout modes</li>
+                </ul>
+            </li>
+            <li>
+                Customization Options
+                <ul>
+                    <li>Default layout preferences</li>
+                    <li>Font selection memory</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="note">
+        <h3>System Requirements</h3>
+        <ul>
+            <li>Visual Studio 2022 (17.0 or higher)</li>
+            <li>Windows (x64 platform)</li>
+            <li>.NET Framework 4.7.2 or higher</li>
+        </ul>
+    </div>
+
+    <div class="feature-section">
+        <h2>🔄 Known Limitations</h2>
+        <ul>
+            <li>Currently supports Visual Studio 2022 only</li>
+            <li>Windows x64 platforms only</li>
+        </ul>
+    </div>
+
+    <div class="feature-section">
+        <h2>🚀 Future Plans</h2>
+        <ul>
+            <li>Additional font repositories</li>
+            <li>Custom font creation tools</li>
+            <li>Multi-line text support</li>
+            <li>Banner style templates</li>
+            <li>Command palette integration</li>
+        </ul>
+    </div>
+
+    <div class="note">
+        <p>For support, feature requests, or bug reports, please visit our <a href="https://github.com/yourusername/FIGlet-Comment-Generator">GitHub repository</a>.</p>
+    </div>
+</body>
+</html>

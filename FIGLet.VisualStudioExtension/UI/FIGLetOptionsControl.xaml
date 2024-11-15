@@ -10,9 +10,10 @@
     mc:Ignorable="d" 
     d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
-        <ObjectDataProvider x:Key="LayoutModes" 
-                        MethodName="GetValues"
-                        ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider 
+            x:Key="LayoutModes" 
+            MethodName="GetValues"
+            ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="local:LayoutMode"/>
             </ObjectDataProvider.MethodParameters>

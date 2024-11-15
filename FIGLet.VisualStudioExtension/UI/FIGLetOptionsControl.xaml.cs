@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.Shell;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -13,28 +14,33 @@ namespace FIGLet.VisualStudioExtension.UI;
 /// </summary>
 public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
 {
-    private readonly FIGLetOptions _optionsPage;
+    private readonly FIGLetOptions _options;
     private readonly ObservableCollection<FontInfo> _fonts = new();
     private FIGFont _currentFont;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FIGLetOptionsControl"/> class.
     /// </summary>
-    /// <param name="optionsPage">The options page.</param>
-    public FIGLetOptionsControl(FIGLetOptions optionsPage)
+    /// <param name="options">The options page.</param>
+    public FIGLetOptionsControl(FIGLetOptions options)
     {
-        _optionsPage = optionsPage;
+        _options = options;
         InitializeComponent();
 
         MinWidth = 400;
         FontListView.ItemsSource = _fonts;
 
         // Initialize controls
-        UpdateControls();
+        LayoutModeComboBox.Loaded += (s, e) =>
+        {
+            UpdateControls();
+            UpdatePreview();
+        };
 
         // Set default sample text
         SampleTextBox.Text = "Hello World";
-        PreviewTextBox.Foreground = ThemeHelper.GetCommentColorBrush(optionsPage);
+        ThreadHelper.ThrowIfNotOnUIThread();
+        PreviewTextBox.Foreground = ThemeHelper.GetCommentColorBrush(options);
         PreviewTextBox.Background = ThemeHelper.GetBackgroundColorBrush();
     }
 
@@ -43,8 +49,8 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     /// </summary>
     public void UpdateControls()
     {
-        FontDirectoryTextBox.Text = _optionsPage.FontPath;
-        LayoutModeComboBox.SelectedItem = _optionsPage.LayoutMode;
+        FontDirectoryTextBox.Text = _options.FontPath;
+        LayoutModeComboBox.SelectedItem = _options.LayoutMode;
 
         LoadFonts();
     }
@@ -54,11 +60,11 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     /// </summary>
     public void UpdateSettings()
     {
-        _optionsPage.FontPath = FontDirectoryTextBox.Text;
-        _optionsPage.LayoutMode = (LayoutMode)LayoutModeComboBox.SelectedItem;
+        _options.FontPath = FontDirectoryTextBox.Text;
+        _options.LayoutMode = (LayoutMode)LayoutModeComboBox.SelectedItem;
 
         if (FontListView.SelectedItem is FontInfo selectedFont)
-            _optionsPage.LastSelectedFont = selectedFont.Name;
+            _options.LastSelectedFont = selectedFont.Name;
     }
 
     /// <summary>
@@ -98,7 +104,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
             }
 
             // Select the default font if it exists
-            var defaultFont = _fonts.FirstOrDefault(f => f.Name == _optionsPage.LastSelectedFont);
+            var defaultFont = _fonts.FirstOrDefault(f => f.Name == _options.LastSelectedFont);
             if (defaultFont != null)
             {
                 FontListView.SelectedItem = defaultFont;
@@ -135,7 +141,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
             PreviewTextBox.Text = FIGLetRenderer.Render(
                 SampleTextBox.Text,
                 _currentFont,
-                LayoutModeComboBox.SelectedItem == null ? LayoutMode.Smushing : (LayoutMode)LayoutModeComboBox.SelectedItem);
+                LayoutModeComboBox.SelectedItem == null ? LayoutMode.Default : (LayoutMode)LayoutModeComboBox.SelectedItem);
         }
         catch (Exception ex)
         {

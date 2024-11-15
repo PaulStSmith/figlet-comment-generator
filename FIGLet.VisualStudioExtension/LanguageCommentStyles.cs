@@ -58,7 +58,11 @@ namespace FIGLet.VisualStudioExtension
         /// <summary>
         /// Pascal-style comments ({}).
         /// </summary>
-        Pascal
+        Pascal,
+
+        PowerShell,
+
+        Bash
     }
 
     public class CommentStyleInfo
@@ -100,11 +104,17 @@ namespace FIGLet.VisualStudioExtension
             switch (PrimaryStyle = primary)
             {
                 case CommentStyle.Custom:
-                    if (singleLinePrefix == null || (blockStart == null && blockEnd == null))
+                    if (singleLinePrefix != null)
+                        SingleLinePrefix = singleLinePrefix;
+
+                    if (blockStart != null && blockEnd != null)
+                    {
+                        BlockCommentStart = blockStart;
+                        BlockCommentEnd = blockEnd;
+                    }
+
+                    if (SingleLinePrefix == null && (BlockCommentStart == null || BlockCommentEnd == null))
                         throw new ArgumentException("Custom comment style requires a single-line prefix, both block comment markers, or all three.");
-                    BlockCommentStart = blockStart;
-                    BlockCommentEnd = blockEnd;
-                    SingleLinePrefix = singleLinePrefix;
                     break;
                 case CommentStyle.CStyleBlock:
                     BlockCommentStart = blockStart ?? "/*";
@@ -143,6 +153,16 @@ namespace FIGLet.VisualStudioExtension
                     BlockCommentEnd = blockEnd ?? "}";
                     SingleLinePrefix = singleLinePrefix ?? "//";
                     break;
+                case CommentStyle.PowerShell:
+                    SingleLinePrefix = singleLinePrefix ?? "#";
+                    BlockCommentStart = blockStart ?? "<#";
+                    BlockCommentEnd = blockEnd ?? "#>";
+                    break;
+                case CommentStyle.Bash:
+                    SingleLinePrefix = singleLinePrefix ?? "#";
+                    BlockCommentStart = blockStart ?? ": '#";
+                    BlockCommentEnd = blockEnd ?? "#'";     
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(primary), primary, null);
             }
@@ -163,7 +183,7 @@ namespace FIGLet.VisualStudioExtension
             if (BlockCommentStart[a] == BlockCommentEnd[0])
             {
                 var c = new string(' ', a) + BlockCommentEnd[0];
-                return $"{BlockCommentStart}\n{ string.Join("\n" + c, text.Split('\n')) }\n{c}{BlockCommentEnd.Substring(1)}";
+                return $"{BlockCommentStart}\n{c}{ string.Join("\n" + c, text.Split(['\r','\n'], StringSplitOptions.RemoveEmptyEntries)) }\n{c}{BlockCommentEnd.Substring(1)}";
             }
 
             return $"{BlockCommentStart}\n{text}\n{BlockCommentEnd}";
@@ -193,47 +213,62 @@ namespace FIGLet.VisualStudioExtension
         /// <summary>
         /// C-style block comment style (/* ... */).
         /// </summary>
-        public static readonly CommentStyleInfo CStyleBlock = new CommentStyleInfo(CommentStyle.CStyleBlock);
+        public static readonly CommentStyleInfo CStyleBlock = new(CommentStyle.CStyleBlock);
 
         /// <summary>
         /// Double slashes comment style (//).
         /// </summary>
-        public static readonly CommentStyleInfo DoubleSlashes = new CommentStyleInfo(CommentStyle.DoubleSlashes);
+        public static readonly CommentStyleInfo DoubleSlashes = new(CommentStyle.DoubleSlashes);
 
         /// <summary>
         /// Hash-style single line comment style (#).
         /// </summary>
-        public static readonly CommentStyleInfo Hash = new CommentStyleInfo(CommentStyle.Hash);
+        public static readonly CommentStyleInfo Hash = new(CommentStyle.Hash);
 
         /// <summary>
         /// Semicolon-style single line comment style (;).
         /// </summary>
-        public static readonly CommentStyleInfo Semicolon = new CommentStyleInfo(CommentStyle.Semicolon);
+        public static readonly CommentStyleInfo Semicolon = new(CommentStyle.Semicolon);
 
         /// <summary>
         /// Quote-style single line comment style (').
         /// </summary>
-        public static readonly CommentStyleInfo Quote = new CommentStyleInfo(CommentStyle.Quote);
+        public static readonly CommentStyleInfo Quote = new(CommentStyle.Quote);
 
         /// <summary>
         /// ML-style block comment style ((* ... *)).
         /// </summary>
-        public static readonly CommentStyleInfo MLComment = new CommentStyleInfo(CommentStyle.MLComment);
+        public static readonly CommentStyleInfo MLComment = new(CommentStyle.MLComment);
 
         /// <summary>
         /// HTML-style block comment style (<!-- ... -->).
         /// </summary>
-        public static readonly CommentStyleInfo HTML = new CommentStyleInfo(CommentStyle.HTML);
+        public static readonly CommentStyleInfo HTML = new(CommentStyle.HTML);
 
         /// <summary>
         /// SQL-style single line comment style (--).
         /// </summary>
-        public static readonly CommentStyleInfo SQLLine = new CommentStyleInfo(CommentStyle.SQLLine);
+        public static readonly CommentStyleInfo SQLLine = new(CommentStyle.SQLLine);
+
+        /// <summary>
+        /// Pascal-style comments ({}).
+        /// </summary>
+        public static readonly CommentStyleInfo Pascal = new(CommentStyle.Pascal);
+
+        /// <summary>
+        /// PowerShell-style comments (# and <# ... #>).
+        /// </summary>
+        public static readonly CommentStyleInfo PowerShell = new(CommentStyle.PowerShell);
+
+        /// <summary>
+        /// Bash-style comments (# and : ' ... ').
+        /// </summary>
+        public static readonly CommentStyleInfo Bash = new(CommentStyle.Bash);
 
         /// <summary>
         /// Dictionary mapping language names to their respective comment styles.
         /// </summary>
-        private static readonly Dictionary<string, CommentStyleInfo> LanguageMap = new Dictionary<string, CommentStyleInfo>(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, CommentStyleInfo> LanguageMap = new(StringComparer.OrdinalIgnoreCase)
         {
             // C-style block comments primary
             { "csharp",CStyleBlock},
@@ -256,7 +291,6 @@ namespace FIGLet.VisualStudioExtension
             { "python", Hash },
             { "ruby", Hash },
             { "perl", Hash },
-            { "powershell", Hash },
             { "r", Hash },
             { "yaml", Hash },
             { "shell", Hash },
@@ -279,7 +313,28 @@ namespace FIGLet.VisualStudioExtension
             { "tsql", SQLLine },
             { "mysql", SQLLine },
             { "pgsql", SQLLine },
-            { "plsql", SQLLine }
+            { "plsql", SQLLine },
+            { "sqlite", SQLLine },
+
+            // Pascal-style comments
+            { "pascal", Pascal },
+
+            // PowerShell
+            { "ps1", PowerShell },
+            { "powershell", PowerShell },
+
+            // Bash
+            { "sh", Bash },
+            { "zsh", Bash },
+            { "bash", Bash },
+            { "fish", Bash },
+            { "shellscript", Bash },
+
+            // Add batch file support
+            { "bat", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
+            { "cmd", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
+            { "dos", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
+            { "batch", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
         };
 
         /// <summary>

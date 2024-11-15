@@ -135,6 +135,7 @@ internal class CodeElementDetector
 
     private (string className, string methodName) GetElementAtCursorFromWindow()
     {
+        ThreadHelper.ThrowIfNotOnUIThread();
         if (ActiveCodeWindow is not IVsDropdownBarManager manager)
             return (null, null);
 
@@ -146,17 +147,24 @@ internal class CodeElementDetector
         var part2 = GetSelectionText(bar, 1);
         var part3 = GetSelectionText(bar, 2);
 
-        var fqName = $"{part1}.{part2}{(part3 == null ? "" : "." + part3)}";
+        var fqName = $"{part1}.{part2}.{part3}";
         return ExtractClassAndMethodName(fqName);
     }
 
     private static (string className, string methodName) ExtractClassAndMethodName(string fqName)
     {
-        var parts = fqName.Split('.');
-        var className = parts[parts.Length - 2];
-        var methodName = parts[parts.Length - 1];
+        fqName = fqName ?? string.Empty;
+        if (fqName.Contains("("))
+            fqName = fqName.Substring(0, fqName.IndexOf("("));
 
-        return (className, methodName);
+        var parts = fqName.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
+        switch (parts.Length)
+        {
+            case 0: return (null, null);
+            case 1: return (parts[0], null);
+            case 2: return (parts[0], parts[1]);
+            default: return (parts[parts.Length - 2], parts[parts.Length - 1]);
+        }
     }
 
     /// <summary>

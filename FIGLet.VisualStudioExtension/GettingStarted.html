@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Getting Started with FIGlet Comment Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5px;
+        }
+
+        h2 {
+            color: #2c5898;
+            margin-top: 25px;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .shortcut {
+            background-color: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+
+        .tip {
+            background-color: #e7f5ff;
+            border-left: 4px solid #339af0;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+
+        .important {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 10px 0;
+        }
+
+        .method {
+            background-color: #f1f8ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .screenshot {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Getting Started with FIGlet Comment Generator</h1>
+
+    <div class="important">
+        <h3>🚀 Quick Start</h3>
+        <p>The fastest way to create an ASCII art banner:</p>
+        <ol>
+            <li>Right-click in your code editor</li>
+            <li>Select "Insert FIGLet Banner"</li>
+            <li>Type your text</li>
+            <li>Click OK</li>
+        </ol>
+    </div>
+
+    <h2>Creating Your First Banner</h2>
+
+    <div class="step">
+        <h3>Method 1: Using the Context Menu</h3>
+        <p>Right-click in your code editor to access three banner options:</p>
+        <ul>
+            <li><strong>Insert FIGLet Banner</strong> - Creates a generic banner with your text</li>
+            <li><strong>Insert FIGLet Class Banner</strong> - Automatically detects and uses the current class name</li>
+            <li><strong>Insert FIGLet Method Banner</strong> - Automatically detects and uses the current method name</li>
+        </ul>
+        <div class="tip">
+            <strong>Pro Tip:</strong> When using Class or Method banners, the extension automatically suggests the detected name but allows you to modify it.
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>Method 2: Using the Edit Menu</h3>
+        <p>You can also create banners through the Edit menu:</p>
+        <ol>
+            <li>Go to <code>Edit > Insert FIGLet Banner</code></li>
+            <li>Enter your text in the dialog</li>
+            <li>Customize the appearance using available options</li>
+            <li>Click OK to insert</li>
+        </ol>
+    </div>
+
+    <h2>Customizing Your Banner</h2>
+
+    <div class="method">
+        <h3>Font Selection</h3>
+        <p>Choose from various FIGlet fonts to style your banner:</p>
+        <ul>
+            <li>Use the dropdown in the banner dialog to preview different fonts</li>
+            <li>The preview updates in real-time as you type</li>
+            <li>Your last used font is remembered for next time</li>
+        </ul>
+    </div>
+
+    <div class="method">
+        <h3>Layout Options</h3>
+        <p>Adjust the banner layout using these modes:</p>
+        <ul>
+            <li><strong>Full Width</strong> - Characters use maximum width</li>
+            <li><strong>Fitted</strong> - Removes unnecessary spacing</li>
+            <li><strong>Smushed</strong> - Combines characters where possible</li>
+        </ul>
+    </div>
+
+    <h2>Examples</h2>
+
+    <div class="step">
+        <h3>Class Documentation</h3>
+        <pre><code>
+    /*
+     *   ___         _           _ _
+     *  / __|___ _ _| |_ _ _ ___| | |___ _ _
+     * | (__/ _ \ ' \  _| '_/ _ \ | / -_) '_|
+     *  \___\___/_||_\__|_| \___/_|_\___|_|
+     *
+     */
+    public class Controller {
+    // Class implementation
+    }
+</code></pre>
+    </div>
+
+    <div class="step">
+        <h3>Method Documentation</h3>
+        <pre><code>
+    /*
+     *  ___                   _
+     * | __|__ _ _ _ __  __ _| |_
+     * | _/ _ \ '_| '  \/ _` |  _|
+     * |_|\___/_| |_|_|_\__,_|\__|
+     *
+     */
+    public void Format() {
+    // Method implementation
+    }
+</code></pre>
+    </div>
+
+    <h2>Configuration</h2>
+
+    <div class="method">
+        <h3>Adding Custom Fonts</h3>
+        <ol>
+            <li>Go to <code>Tools > Options > FIGlet Comment Generator</code></li>
+            <li>Set your custom font directory</li>
+            <li>Add .flf files to this directory</li>
+            <li>Fonts will appear in the selection dropdown</li>
+        </ol>
+    </div>
+
+    <div class="tip">
+        <h3>Best Practices</h3>
+        <ul>
+            <li>Use banners for major code sections to improve navigation</li>
+            <li>Choose fonts that balance readability and style</li>
+            <li>Maintain consistent banner styles across your project</li>
+            <li>Consider your team's coding standards when using ASCII art comments</li>
+        </ul>
+    </div>
+
+    <div class="important">
+        <h3>Need Help?</h3>
+        <p>For additional support or to report issues:</p>
+        <ul>
+            <li>Visit our <a href="https://github.com/PaulStSmith/FIGlet-Comment-Generator">GitHub repository</a></li>
+            <li>Check the <a href="https://github.com/PaulStSmith/FIGlet-Comment-Generator/issues">Issues page</a></li>
+            <li>Review our documentation for more examples and tips</li>
+        </ul>
+    </div>
+</body>
+</html>

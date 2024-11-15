@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -12,14 +13,14 @@ namespace FIGLet.VisualStudioExtension.UI;
 /// </summary>
 public partial class FIGLetInputDialogView : UserControl
 {
+    private const string DEFAULT_FONT_NAME = "<Default>";
     private readonly string _language;
     private readonly AsyncPackage _package;
-    private FIGFont _currentFont;
 
     /// <summary>
     /// Gets the selected font.
     /// </summary>
-    public FIGFont SelectedFont => _currentFont;
+    public FIGFont SelectedFont { get; private set; }
 
     /// <summary>
     /// Gets or sets the input text from the text box.
@@ -53,42 +54,53 @@ public partial class FIGLetInputDialogView : UserControl
         // Load fonts from settings
         options = (FIGLetOptions)package.GetDialogPage(typeof(FIGLetOptions));
         if (!string.IsNullOrEmpty(options.FontPath) && Directory.Exists(options.FontPath))
-        {
             LoadFonts(options.FontPath);
-        }
 
-        // Try to select the last used font
-        if (!string.IsNullOrEmpty(options.LastSelectedFont))
+        // Load default font if no fonts are loaded
+        if (FontComboBox.Items.Count == 0)
+            FontComboBox.Items.Add(new FontInfo(FIGFont.Default, DEFAULT_FONT_NAME));
+        else
         {
-            var lastFont = FontComboBox.Items.Cast<FontInfo>()
-                .FirstOrDefault(f => f.Name == options.LastSelectedFont);
-            if (lastFont != null)
+            // Try to select the last used font
+            if (!string.IsNullOrEmpty(options.LastSelectedFont))
             {
-                FontComboBox.SelectedItem = lastFont;
-                _currentFont = lastFont.Font;
+                var lastFont = FontComboBox.Items.Cast<FontInfo>().FirstOrDefault(f => f.Name == options.LastSelectedFont);
+                if (lastFont != null)
+                {
+                    FontComboBox.SelectedItem = lastFont;
+                    SelectedFont = lastFont.Font;
+                }
             }
         }
 
-        if (_currentFont == null && FontComboBox.Items.Count > 0)
+        // Select the first font if no font is selected
+        if (SelectedFont == null && FontComboBox.Items.Count > 0)
         {
             FontComboBox.SelectedIndex = 0;
-            _currentFont = ((FontInfo)FontComboBox.SelectedItem).Font;
+            SelectedFont = ((FontInfo)FontComboBox.SelectedItem).Font;
         }
 
-        PreviewBlock.Text = RederPreview();
         PreviewBlock.Foreground = ThemeHelper.GetCommentColorBrush(_package);
 
+        ThreadHelper.ThrowIfNotOnUIThread();
         ThemeHelper.ApplyVsThemeToButton(OkButton);
         ThemeHelper.ApplyVsThemeToButton(CancelButton);
+
+        LayoutModeComboBox.Loaded += (s, e) =>
+        {
+            LayoutModeComboBox.SelectedItem = options.LayoutMode;
+            UpdatePreview();
+        };
     }
 
     /// <summary>
     /// Renders the preview text.
     /// </summary>
     /// <returns>The rendered preview text.</returns>
-    private string RederPreview()
+    private string RenderDefaultPreview()
     {
-        return LanguageCommentStyles.WrapInComments(FIGLetRenderer.Render("Preview will appear here", _currentFont), _language);
+        var text = FIGLetRenderer.Render("Hello, World!", SelectedFont, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
+        return LanguageCommentStyles.WrapInComments(text, _language);
     }
 
     /// <summary>
@@ -99,11 +111,11 @@ public partial class FIGLetInputDialogView : UserControl
         OkButton.IsEnabled = InputTextBox.Text.Length > 0;
         if (string.IsNullOrWhiteSpace(InputTextBox.Text))
         {
-            PreviewBlock.Text = RederPreview();
+            PreviewBlock.Text = RenderDefaultPreview();
             return;
         }
 
-        var txt = FIGLetRenderer.Render(InputTextBox.Text, _currentFont);
+        var txt = FIGLetRenderer.Render(InputTextBox.Text, SelectedFont, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
         PreviewBlock.Text = LanguageCommentStyles.WrapInComments(txt, _language);
     }
 
@@ -178,22 +190,23 @@ public partial class FIGLetInputDialogView : UserControl
     {
         if (FontComboBox.SelectedItem is FontInfo selectedFont)
         {
-            try
-            {
-                _currentFont = selectedFont.Font;
-                UpdatePreview();
+            SelectedFont = selectedFont.Font;
+            UpdatePreview();
 
-                // Update the options to remember this font
+            // Update the options to remember this font
+            if (selectedFont.Name != DEFAULT_FONT_NAME)
                 options.LastSelectedFont = selectedFont.Name;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Error loading font: {ex.Message}",
-                    "FIGLet Font Manager",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
         }
+    }
+
+    /// <summary>
+    /// Handles the selection changed event for the layout mode combo box.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
+    private void LayoutModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        UpdatePreview();
+        options.LayoutMode = (LayoutMode)LayoutModeComboBox.SelectedIndex;
     }
 }

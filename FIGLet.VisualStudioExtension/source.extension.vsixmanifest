@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-  <Metadata>
-    <Identity Id="FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e" Version="1.0" Language="en-US" Publisher="Paulo Santos" />
-    <DisplayName>FIGLet Comment Generator</DisplayName>
-    <Description xml:space="preserve">Create eye-catching ASCII art comments in your code using FIGLet fonts.</Description>
-    <License>LICENSE.txt</License>
-    <Icon>Resources\icon-90.png</Icon>
-    <PreviewImage>Resources\preview.png</PreviewImage>
-    <Preview>true</Preview>
-  </Metadata>
-  <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
-      <ProductArchitecture>amd64</ProductArchitecture>
-    </InstallationTarget>
-  </Installation>
-  <Dependencies>
-    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
-  </Dependencies>
-  <Prerequisites>
-    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
-  </Prerequisites>
-  <Assets>
-    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-    <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" AssemblyName="|%CurrentProject%;AssemblyName|" />
-    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
-  </Assets>
+    <Metadata>
+        <Identity Id="FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e" Version="1.0" Language="en-US" Publisher="Paulo Santos" />
+        <DisplayName>FIGLet Comment Generator</DisplayName>
+        <Description xml:space="preserve">&lt;Description xml:space="preserve"&gt;Create beautiful ASCII art comments that make your code documentation stand out! FIGLet Comment Generator provides a powerful and intuitive way to create eye-catching ASCII art banners within Visual Studio. Features include: seamless VS integration with context menu support, smart detection of classes and methods, multiple fonts with live preview, language-aware comment formatting, and full Visual Studio theme integration. Transform your code documentation with professional ASCII art banners.&lt;/Description&gt;</Description>
+        <License>LICENSE.txt</License>
+        <ReleaseNotes>ReleaseNotes.html</ReleaseNotes>
+        <Icon>Resources\icon-90.png</Icon>
+        <PreviewImage>Resources\preview.png</PreviewImage>
+        <Tags>&lt;Tags&gt;comments, ascii art, figlet, documentation, banner, code organization, formatting, productivity&lt;/Tags&gt;</Tags>
+        <Preview>true</Preview>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+            <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.Assembly" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" AssemblyName="|%CurrentProject%;AssemblyName|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+    </Assets>
 </PackageManifest>

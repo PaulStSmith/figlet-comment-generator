@@ -308,7 +308,7 @@ internal sealed class FIGLetCommentCommand
         insertPoint ??= selection.ActivePoint.CreateEditPoint();
 
         var indentation = GenerateIndentation(doc);
-        var lines = bannerText.Split(new[] { '\r', '\n' }, StringSplitOptions.None);
+        var lines = bannerText.Split([ '\r', '\n' ], StringSplitOptions.RemoveEmptyEntries);
 
         insertPoint.StartOfLine();
         insertPoint.Insert(indentation + string.Join(Environment.NewLine + indentation, lines) + Environment.NewLine);

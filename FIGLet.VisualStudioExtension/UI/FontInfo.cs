@@ -6,17 +6,37 @@ namespace FIGLet.VisualStudioExtension.UI;
 /// <summary>
 /// Represents information about a FIGlet font.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="FontInfo"/> class with the specified file path.
-/// </remarks>
-/// <param name="filePath">The file path of the FIGlet font.</param>
-public class FontInfo(string filePath)
+public class FontInfo
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FontInfo"/> class with the specified file path.
+    /// </summary>
+    /// <param name="filePath">The file path of the font.</param>
+    public FontInfo(string filePath) => FilePath = filePath;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FontInfo"/> class with the specified FIGFont object.
+    /// </summary>
+    /// <param name="font">The FIGFont object.</param>
+    public FontInfo(FIGFont font)
+    {
+        _filePath = null;
+        _name = string.Empty;
+        Font = font ?? throw new ArgumentNullException(nameof(font));
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FontInfo"/> class with the specified FIGFont object and name.
+    /// </summary>
+    /// <param name="font">The FIGFont object.</param>
+    /// <param name="name">The name of the font.</param>
+    public FontInfo(FIGFont font, string name) : this(font) => _name = name;
 
     /// <summary>
     /// Gets the name of the font.
     /// </summary>
-    public string Name { get; private set; } = Path.GetFileNameWithoutExtension(filePath);
+    public string Name => _name ??= Path.GetFileNameWithoutExtension(_filePath);
+    private string _name;
 
     /// <summary>
     /// Gets the height of the font.
@@ -39,28 +59,28 @@ public class FontInfo(string filePath)
     public SmushingRules SmushingRules => Font.SmushingRules;
 
     /// <summary>
-    /// Gets or sets the file path of the font.
+    /// Gets the file path of the font.
     /// </summary>
-    /// <exception cref="ArgumentException">Thrown when the value is null or whitespace.</exception>
     public string FilePath
     {
-        get => filePath;
-        set
+        get => _filePath;
+        private set
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(value));
 
-            if (filePath != value)
+            if (_filePath != value)
             {
-                filePath = value;
+                _filePath = value;
+                _name = Path.GetFileNameWithoutExtension(value);
                 Font = FIGFont.FromFile(value);
-                Name = Path.GetFileNameWithoutExtension(value);
             }
         }
     }
+    private string _filePath;
 
     /// <summary>
     /// Gets the FIGFont object.
     /// </summary>
-    public FIGFont Font { get; private set; } = FIGFont.FromFile(filePath);
+    public FIGFont Font { get; private set; }
 }
