@@ -1,97 +1,199 @@
-﻿using System.Windows;
+﻿using Microsoft.VisualStudio.Shell;
+using System;
+using System.IO;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell;
 
-namespace FIGLet.VisualStudioExtension.UI
+namespace FIGLet.VisualStudioExtension.UI;
+
+/// <summary>
+/// Interaction logic for FIGLetInputDialogView.xaml
+/// </summary>
+public partial class FIGLetInputDialogView : UserControl
 {
+    private readonly string _language;
+    private readonly AsyncPackage _package;
+    private FIGFont _currentFont;
+
     /// <summary>
-    /// Interaction logic for FIGLetInputDialogView.xaml
+    /// Gets the selected font.
     /// </summary>
-    public partial class FIGLetInputDialogView : UserControl
+    public FIGFont SelectedFont => _currentFont;
+
+    /// <summary>
+    /// Gets or sets the input text from the text box.
+    /// </summary>
+    public string InputText
     {
-        private readonly FIGLetRenderer _renderer;
-        private readonly string _language;
+        get => InputTextBox.Text;
+        set => InputTextBox.Text = value;
+    }
 
-        private readonly string _defaultPreviewText;
+    /// <summary>
+    /// Gets the dialog result indicating whether the user clicked OK or Cancel.
+    /// </summary>
+    public bool? DialogResult { get; private set; }
 
-        /// <summary>
-        /// Gets the input text from the text box.
-        /// </summary>
-        public string InputText => InputTextBox.Text;
+    private readonly FIGLetOptions options;
 
-        /// <summary>
-        /// Gets the dialog result indicating whether the user clicked OK or Cancel.
-        /// </summary>
-        public bool? DialogResult { get; private set; }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FIGLetInputDialogView"/> class.
+    /// </summary>
+    /// <param name="package">The async package.</param>
+    /// <param name="language">The programming language.</param>
+    public FIGLetInputDialogView(AsyncPackage package, string language)
+    {
+        InitializeComponent();
+        _package = package;
+        _language = language;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FIGLetInputDialogView"/> class.
-        /// </summary>
-        /// <param name="package">The async package.</param>
-        /// <param name="renderer">The FIGLet renderer.</param>
-        /// <param name="language">The programming language.</param>
-        public FIGLetInputDialogView(AsyncPackage package, FIGLetRenderer renderer, string language)
+        InputTextBox.TextChanged += (s, e) => UpdatePreview();
+
+        // Load fonts from settings
+        options = (FIGLetOptions)package.GetDialogPage(typeof(FIGLetOptions));
+        if (!string.IsNullOrEmpty(options.FontPath) && Directory.Exists(options.FontPath))
         {
-            InitializeComponent();
-            _renderer = renderer;
-            _language = language;
-
-            _defaultPreviewText = LanguageCommentStyles.WrapInComments(_renderer.Render("Preview will appear here"), _language);
-
-            InputTextBox.TextChanged += (s, e) => UpdatePreview();
-
-            PreviewBlock.Text = _defaultPreviewText;
-            PreviewBlock.Foreground = ThemeHelper.GetCommentColorBrush(package);
-
-            ThemeHelper.ApplyVsThemeToButton(OkButton);
-            ThemeHelper.ApplyVsThemeToButton(CancelButton);
+            LoadFonts(options.FontPath);
         }
 
-        /// <summary>
-        /// Updates the preview text based on the input text.
-        /// </summary>
-        private void UpdatePreview()
+        // Try to select the last used font
+        if (!string.IsNullOrEmpty(options.LastSelectedFont))
         {
-            OkButton.IsEnabled = InputTextBox.Text.Length > 0;
-            if (string.IsNullOrWhiteSpace(InputTextBox.Text))
+            var lastFont = FontComboBox.Items.Cast<FontInfo>()
+                .FirstOrDefault(f => f.Name == options.LastSelectedFont);
+            if (lastFont != null)
             {
-                PreviewBlock.Text = _defaultPreviewText;
-                return;
+                FontComboBox.SelectedItem = lastFont;
+                _currentFont = lastFont.Font;
             }
-
-            var txt = _renderer.Render(InputTextBox.Text);
-            PreviewBlock.Text = LanguageCommentStyles.WrapInComments(txt, _language);
         }
 
-        /// <summary>
-        /// Handles the click event of the OK button.
-        /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OkButton_Click(object sender, RoutedEventArgs e)
+        if (_currentFont == null && FontComboBox.Items.Count > 0)
         {
-            if (string.IsNullOrWhiteSpace(InputTextBox.Text))
+            FontComboBox.SelectedIndex = 0;
+            _currentFont = ((FontInfo)FontComboBox.SelectedItem).Font;
+        }
+
+        PreviewBlock.Text = RederPreview();
+        PreviewBlock.Foreground = ThemeHelper.GetCommentColorBrush(_package);
+
+        ThemeHelper.ApplyVsThemeToButton(OkButton);
+        ThemeHelper.ApplyVsThemeToButton(CancelButton);
+    }
+
+    /// <summary>
+    /// Renders the preview text.
+    /// </summary>
+    /// <returns>The rendered preview text.</returns>
+    private string RederPreview()
+    {
+        return LanguageCommentStyles.WrapInComments(FIGLetRenderer.Render("Preview will appear here", _currentFont), _language);
+    }
+
+    /// <summary>
+    /// Updates the preview text based on the input text.
+    /// </summary>
+    private void UpdatePreview()
+    {
+        OkButton.IsEnabled = InputTextBox.Text.Length > 0;
+        if (string.IsNullOrWhiteSpace(InputTextBox.Text))
+        {
+            PreviewBlock.Text = RederPreview();
+            return;
+        }
+
+        var txt = FIGLetRenderer.Render(InputTextBox.Text, _currentFont);
+        PreviewBlock.Text = LanguageCommentStyles.WrapInComments(txt, _language);
+    }
+
+    /// <summary>
+    /// Handles the click event of the OK button.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
+    private void OkButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(InputTextBox.Text))
+        {
+            MessageBox.Show("Please enter some text to convert.", "Input Required",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        DialogResult = true;
+        options.SaveSettingsToStorage();
+        Window.GetWindow(this)?.Close();
+    }
+
+    /// <summary>
+    /// Handles the click event of the Cancel button.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
+    private void CancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        DialogResult = false;
+        Window.GetWindow(this)?.Close();
+    }
+
+    /// <summary>
+    /// Loads the fonts from the specified directory.
+    /// </summary>
+    /// <param name="fontDirectory">The font directory.</param>
+    private void LoadFonts(string fontDirectory)
+    {
+        FontComboBox.Items.Clear();
+
+        try
+        {
+            foreach (var file in Directory.GetFiles(fontDirectory, "*.flf"))
             {
-                MessageBox.Show("Please enter some text to convert.", "Input Required",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                try
+                {
+                    FontComboBox.Items.Add(new FontInfo(file));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error loading font {file}: {ex.Message}");
+                }
             }
-
-            DialogResult = true;
-            Window.GetWindow(this)?.Close();
         }
-
-        /// <summary>
-        /// Handles the click event of the Cancel button.
-        /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        catch (Exception ex)
         {
-            DialogResult = false;
-            Window.GetWindow(this)?.Close();
+            MessageBox.Show(
+                $"Error loading fonts: {ex.Message}",
+                "FIGLet Font Manager",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    /// <summary>
+    /// Handles the selection changed event for the font combo box.
+    /// </summary>
+    /// <param name="sender">The event sender.</param>
+    /// <param name="e">The event arguments.</param>
+    private void FontComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (FontComboBox.SelectedItem is FontInfo selectedFont)
+        {
+            try
+            {
+                _currentFont = selectedFont.Font;
+                UpdatePreview();
+
+                // Update the options to remember this font
+                options.LastSelectedFont = selectedFont.Name;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error loading font: {ex.Message}",
+                    "FIGLet Font Manager",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 }

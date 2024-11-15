@@ -16,25 +16,42 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" 
-                   Text="Enter text to convert:" 
-                   Margin="0,0,0,5"/>
+        <!-- Font Selection -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+            <TextBlock 
+                Text="Font:" 
+                VerticalAlignment="Center"
+                Margin="0,0,10,0"/>
+            <ComboBox 
+                x:Name="FontComboBox"
+                Width="350"
+                HorizontalAlignment="Left"
+                SelectionChanged="FontComboBox_SelectionChanged"
+                DisplayMemberPath="Name"/>
+        </DockPanel>
 
-        <TextBox Grid.Row="1" 
-                 Foreground="{DynamicResource {x:Static vs_shell:CommonControlsColors.TextBoxTextBrushKey}}"
-                 Background="{DynamicResource {x:Static vs_shell:CommonControlsColors.TextBoxBackgroundBrushKey}}"
-                 x:Name="InputTextBox"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap"
-                 Margin="0,0,0,10"
-                 VerticalScrollBarVisibility="Auto"/>
+        <TextBlock 
+            Grid.Row="1" 
+            Text="Enter text to convert:" 
+            Margin="0,0,0,5"/>
+
+        <TextBox 
+            Grid.Row="2" 
+            Foreground="{DynamicResource {x:Static vs_shell:CommonControlsColors.TextBoxTextBrushKey}}"
+            Background="{DynamicResource {x:Static vs_shell:CommonControlsColors.TextBoxBackgroundBrushKey}}"
+            x:Name="InputTextBox"
+            AcceptsReturn="True"
+            TextWrapping="Wrap"
+            Margin="0,0,0,10"
+            VerticalScrollBarVisibility="Auto"/>
 
         <Border 
-            Grid.Row="2" 
+            Grid.Row="3" 
             BorderThickness="2"
             CornerRadius="5"
             Padding="16"
@@ -51,7 +68,7 @@
             </ScrollViewer>
         </Border>
 
-        <StackPanel Grid.Row="3" 
+        <StackPanel Grid.Row="4" 
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right">
             <Button x:Name="OkButton"

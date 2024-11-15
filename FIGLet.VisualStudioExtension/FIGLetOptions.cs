@@ -32,11 +32,6 @@ namespace FIGLet.VisualStudioExtension
         public string FontPath { get; set; } = "";
 
         /// <summary>
-        /// Gets or sets the default insert location for FIGLet comments.
-        /// </summary>
-        public InsertLocation InsertLocation { get; set; } = InsertLocation.Above;
-
-        /// <summary>
         /// Gets the UI element to be hosted in the options page.
         /// </summary>
         protected override UIElement Child => _page ??= new FIGLetOptionsControl(this);
@@ -59,6 +54,17 @@ namespace FIGLet.VisualStudioExtension
             base.SaveSettingsToStorage();
         }
 
+
+        /// <summary>
+        /// Gets the service object of the specified type.
+        /// </summary>
+        /// <param name="serviceType">An object that specifies the type of service object to get.</param>
+        /// <returns>A service object of type <paramref name="serviceType"/>.</returns>
+        /// <remarks>
+        /// Even though <see cref="UIElementDialogPage"/> has a <see cref="GetService"/> method, the class
+        /// hierarchy, at no point, implements the <see cref="IServiceProvider"/> interface. 
+        /// At some point, I needed this class to implement the interface, so here it is.
+        /// </remarks>
         object IServiceProvider.GetService(Type serviceType)
         {
             return this.GetService(serviceType);

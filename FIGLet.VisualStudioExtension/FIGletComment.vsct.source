@@ -12,16 +12,41 @@
 
   <Commands package="guidFIGLetCommentPackage">
     <Groups>
-      <Group guid="guidFIGLetCommentPackageCmdSet" id="MyMenuGroup" priority="0x0600">
+      <Group guid="guidFIGLetCommentPackageCmdSet" id="FIGLetEditMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_EDIT"/>
+      </Group>
+
+      <Group guid="guidFIGLetContextMenuCmdSet" id="FIGLetContextMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
       </Group>
     </Groups>
 
     <Buttons>
       <Button guid="guidFIGLetCommentPackageCmdSet" id="FIGLetCommentCommandId" priority="0x0100" type="Button">
-        <Parent guid="guidFIGLetCommentPackageCmdSet" id="MyMenuGroup" />
+        <Parent guid="guidFIGLetCommentPackageCmdSet" id="FIGLetEditMenuGroup" />
         <Strings>
-          <ButtonText>Insert FIGLet Comment</ButtonText>
+          <ButtonText>Insert FIGLet Banner</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidFIGLetContextMenuCmdSet" id="InsertFIGLetBannerCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidFIGLetContextMenuCmdSet" id="FIGLetContextMenuGroup" />
+        <Strings>
+          <ButtonText>Insert FIGLet Banner</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidFIGLetContextMenuCmdSet" id="InsertFIGLetClassBannerCommandId" priority="0x0101" type="Button">
+        <Parent guid="guidFIGLetContextMenuCmdSet" id="FIGLetContextMenuGroup" />
+        <Strings>
+          <ButtonText>Insert FIGLet Class Banner</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidFIGLetContextMenuCmdSet" id="InsertFIGLetMethodBannerCommandId" priority="0x0102" type="Button">
+        <Parent guid="guidFIGLetContextMenuCmdSet" id="FIGLetContextMenuGroup" />
+        <Strings>
+          <ButtonText>Insert FIGLet Method/Function Banner</ButtonText>
         </Strings>
       </Button>
     </Buttons>
@@ -31,12 +56,15 @@
     <GuidSymbol name="guidFIGLetCommentPackage" value="{PACKAGE_GUID}" />
 
     <GuidSymbol name="guidFIGLetCommentPackageCmdSet" value="{COMMAND_SET_GUID}">
-      <IDSymbol name="MyMenuGroup" value="0x1020" />
-      <IDSymbol name="FIGLetCommentCommandId" value="0x0100" />
+      <IDSymbol name="FIGLetEditMenuGroup" value="{ID_EDIT}" />
+      <IDSymbol name="FIGLetCommentCommandId" value="{ID_COMMAND}" />
     </GuidSymbol>
 
-    <GuidSymbol name="guidImages" value="{IMAGES_GUID}">
-      <IDSymbol name="bmpPic1" value="1" />
+    <GuidSymbol name="guidFIGLetContextMenuCmdSet" value="{CONTEXT_MENU_GUID}">
+      <IDSymbol name="FIGLetContextMenuGroup" value="{ID_CONTEXT_MENU}" />
+      <IDSymbol name="InsertFIGLetBannerCommandId" value="{ID_BANNER}" />
+      <IDSymbol name="InsertFIGLetClassBannerCommandId" value="{ID_CLASS_BANNER}" />
+      <IDSymbol name="InsertFIGLetMethodBannerCommandId" value="{ID_METHOD_BANNER}" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

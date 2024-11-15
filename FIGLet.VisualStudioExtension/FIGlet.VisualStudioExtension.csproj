@@ -46,15 +46,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CodeContextDetector.cs" />
+    <Compile Include="CodeElementDetector.cs" />
     <Compile Include="DialogHelper.cs" />
+    <Compile Include="FIGLetCommentCommand.cs" />
+    <Compile Include="FIGLetCommentPackage.cs" />
     <Compile Include="FIGLetFontManager.cs" />
-    <Compile Include="InsertLocation.cs" />
     <Compile Include="LanguageCommentStyles.cs" />
     <Compile Include="FIGLetOptions.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Package.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\FIGLetInputDialogView .xaml.cs">
       <DependentUpon>FIGLetInputDialogView .xaml</DependentUpon>

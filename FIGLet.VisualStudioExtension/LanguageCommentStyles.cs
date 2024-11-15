@@ -18,42 +18,47 @@ namespace FIGLet.VisualStudioExtension
         /// <summary>
         /// C-style block comments (/* ... */).
         /// </summary>
-        CStyleBlock,      // /* ... */
+        CStyleBlock,
 
         /// <summary>
         /// Single line comments (//).
         /// </summary>
-        DoubleSlashes,  // //
+        DoubleSlashes,
 
         /// <summary>
         /// Hash-style single line comments (#).
         /// </summary>
-        Hash,        // #
+        Hash,
 
         /// <summary>
         /// Semicolon-style single line comments (;).
         /// </summary>
-        Semicolon,   // ;
+        Semicolon,
 
         /// <summary>
         /// Quote-style single line comments (').
         /// </summary>
-        Quote,       // '
+        Quote,
 
         /// <summary>
         /// ML-style block comments ((* ... *)).
         /// </summary>
-        MLComment,   // (* ... *)
+        MLComment,
 
         /// <summary>
         /// HTML-style block comments (<!-- ... -->).
         /// </summary>
-        HTML,        // <!-- ... -->
+        HTML,
 
         /// <summary>
         /// SQL-style single line comments (--).
         /// </summary>
-        SQLLine      // --
+        SQLLine,
+
+        /// <summary>
+        /// Pascal-style comments ({}).
+        /// </summary>
+        Pascal
     }
 
     public class CommentStyleInfo
@@ -132,6 +137,11 @@ namespace FIGLet.VisualStudioExtension
                     BlockCommentStart = blockStart ?? "/*";
                     BlockCommentEnd = blockEnd ?? "*/";
                     SingleLinePrefix = singleLinePrefix ?? "--";
+                    break;
+                case CommentStyle.Pascal:
+                    BlockCommentStart = blockStart ?? "{";
+                    BlockCommentEnd = blockEnd ?? "}";
+                    SingleLinePrefix = singleLinePrefix ?? "//";
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(primary), primary, null);

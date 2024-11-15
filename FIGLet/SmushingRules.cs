@@ -1,44 +1,43 @@
-﻿namespace FIGLet
+﻿namespace FIGLet;
+
+/// <summary>
+/// Specifies the rules for smushing characters together in FIGLet text.
+/// </summary>
+[Flags]
+public enum SmushingRules
 {
     /// <summary>
-    /// Specifies the rules for smushing characters together in FIGLet text.
+    /// No smushing rules applied.
     /// </summary>
-    [Flags]
-    public enum SmushingRules
-    {
-        /// <summary>
-        /// No smushing rules applied.
-        /// </summary>
-        None = 0,
+    None = 0,
 
-        /// <summary>
-        /// Smushes characters that are the same.
-        /// </summary>
-        EqualCharacter = 1,
+    /// <summary>
+    /// Smushes characters that are the same.
+    /// </summary>
+    EqualCharacter = 1,
 
-        /// <summary>
-        /// Smushes underscores with other characters.
-        /// </summary>
-        Underscore = 2,
+    /// <summary>
+    /// Smushes underscores with other characters.
+    /// </summary>
+    Underscore = 2,
 
-        /// <summary>
-        /// Smushes characters based on a hierarchy of character importance.
-        /// </summary>
-        Hierarchy = 4,
+    /// <summary>
+    /// Smushes characters based on a hierarchy of character importance.
+    /// </summary>
+    Hierarchy = 4,
 
-        /// <summary>
-        /// Smushes characters that form opposite pairs.
-        /// </summary>
-        OppositePair = 8,
+    /// <summary>
+    /// Smushes characters that form opposite pairs.
+    /// </summary>
+    OppositePair = 8,
 
-        /// <summary>
-        /// Smushes characters to form a large 'X' shape.
-        /// </summary>
-        BigX = 16,
+    /// <summary>
+    /// Smushes characters to form a large 'X' shape.
+    /// </summary>
+    BigX = 16,
 
-        /// <summary>
-        /// Smushes hard blank characters.
-        /// </summary>
-        HardBlank = 32
-    }
+    /// <summary>
+    /// Smushes hard blank characters.
+    /// </summary>
+    HardBlank = 32
 }

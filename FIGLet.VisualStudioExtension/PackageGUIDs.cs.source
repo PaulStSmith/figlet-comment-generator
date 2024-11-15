@@ -5,24 +5,37 @@
 // </auto-generated>
 using System;
 
-namespace FIGLet.VisualStudioExtension
+namespace FIGLet.VisualStudioExtension;
+
+internal static class PackageGuids
 {
-    internal static class PackageGuids
-    {
-        // Main package GUID
-        public const string guidFIGLetCommentPackageString = "{PACKAGE_GUID}";
-        public static readonly Guid guidFIGLetCommentPackage = new Guid(guidFIGLetCommentPackageString);
+    // Main package GUID
+    public const string guidFIGLetCommentPackageString = "{PACKAGE_GUID}";
+    public static readonly Guid guidFIGLetCommentPackage = new Guid(guidFIGLetCommentPackageString);
         
-        // Command set GUID
-        public const string guidFIGLetCommentPackageCmdSetString = "{COMMAND_SET_GUID}";
-        public static readonly Guid guidFIGLetCommentPackageCmdSet = new Guid(guidFIGLetCommentPackageCmdSetString);
+    // Command set GUID
+    public const string guidFIGLetCommentPackageCmdSetString = "{COMMAND_SET_GUID}";
+    public static readonly Guid guidFIGLetCommentPackageCmdSet = new Guid(guidFIGLetCommentPackageCmdSetString);
         
-        // Images GUID
-        public const string guidImagesString = "{IMAGES_GUID}";
-        public static readonly Guid guidImages = new Guid(guidImagesString);
+    // Images GUID
+    public const string guidImagesString = "{IMAGES_GUID}";
+    public static readonly Guid guidImages = new Guid(guidImagesString);
         
-        // Options GUID
-        public const string guidFIGLetCommentPackageOptionsString = "{OPTIONS_GUID}";
-        public static readonly Guid guidFIGLetCommentPackageOptions = new Guid(guidImagesString);
-    }
+    // Options GUID
+    public const string guidFIGLetCommentPackageOptionsString = "{OPTIONS_GUID}";
+    public static readonly Guid guidFIGLetCommentPackageOptions = new Guid(guidImagesString);
+
+    // Add new GUIDs for context menu commands
+    public const string guidFIGLetContextMenuPackageString = "{CONTEXT_MENU_GUID}";
+    public static readonly Guid guidFIGLetContextMenuCmdSet = new Guid(guidFIGLetContextMenuPackageString);
+}
+
+internal static class PackageIds
+{
+    public const int FIGLetEditMenuGroup = {ID_EDIT};
+    public const int FIGLetCommentCommandId = {ID_COMMAND};
+    public const int FIGLetContextMenuGroup = {ID_CONTEXT_MENU};
+    public const int InsertFIGLetBannerCommandId = {ID_BANNER};
+    public const int InsertFIGLetClassBannerCommandId = {ID_CLASS_BANNER};
+    public const int InsertFIGLetMethodBannerCommandId = {ID_METHOD_BANNER};
 }

@@ -1,102 +1,66 @@
-﻿using System.ComponentModel;
+﻿using System;
 using System.IO;
 
-namespace FIGLet.VisualStudioExtension.UI
+namespace FIGLet.VisualStudioExtension.UI;
+
+/// <summary>
+/// Represents information about a FIGlet font.
+/// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="FontInfo"/> class with the specified file path.
+/// </remarks>
+/// <param name="filePath">The file path of the FIGlet font.</param>
+public class FontInfo(string filePath)
 {
-    public class FontInfo : INotifyPropertyChanged
+
+    /// <summary>
+    /// Gets the name of the font.
+    /// </summary>
+    public string Name { get; private set; } = Path.GetFileNameWithoutExtension(filePath);
+
+    /// <summary>
+    /// Gets the height of the font.
+    /// </summary>
+    public int Height => Font.Height;
+
+    /// <summary>
+    /// Gets the baseline of the font.
+    /// </summary>
+    public int Baseline => Font.Baseline;
+
+    /// <summary>
+    /// Gets the maximum length of the font.
+    /// </summary>
+    public int MaxLength => Font.MaxLength;
+
+    /// <summary>
+    /// Gets the smushing rules of the font.
+    /// </summary>
+    public SmushingRules SmushingRules => Font.SmushingRules;
+
+    /// <summary>
+    /// Gets or sets the file path of the font.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the value is null or whitespace.</exception>
+    public string FilePath
     {
-        private string _name;
-        private int _height;
-        private int _baseline;
-        private int _maxLength;
-        private SmushingRules _smushingRules;
-        private string _filePath;
-        private FIGFont _font;
-
-        public FontInfo(string filePath)
+        get => filePath;
+        set
         {
-            _filePath = filePath;
-            _font = FIGFont.FromFile(filePath);
-            _name = Path.GetFileNameWithoutExtension(filePath);
-            _height = _font.Height;
-            _baseline = _font.Baseline;
-            _maxLength = _font.MaxLength;
-            _smushingRules = _font.SmushingRules;
-        }
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(value));
 
-        public string Name
-        {
-            get => _name;
-            set
+            if (filePath != value)
             {
-                if (_name == value) return;
-                _name = value;
-                OnPropertyChanged(nameof(Name));
+                filePath = value;
+                Font = FIGFont.FromFile(value);
+                Name = Path.GetFileNameWithoutExtension(value);
             }
-        }
-
-        public int Height
-        {
-            get => _height;
-            set
-            {
-                if (_height == value) return;
-                _height = value;
-                OnPropertyChanged(nameof(Height));
-            }
-        }
-
-        public int Baseline
-        {
-            get => _baseline;
-            set
-            {
-                if (_baseline == value) return;
-                _baseline = value;
-                OnPropertyChanged(nameof(Baseline));
-            }
-        }
-
-        public int MaxLength
-        {
-            get => _maxLength;
-            set
-            {
-                if (_maxLength == value) return;
-                _maxLength = value;
-                OnPropertyChanged(nameof(MaxLength));
-            }
-        }
-
-        public SmushingRules SmushingRules
-        {
-            get => _smushingRules;
-            set
-            {
-                if (_smushingRules == value) return;
-                _smushingRules = value;
-                OnPropertyChanged(nameof(SmushingRules));
-            }
-        }
-
-        public string FilePath
-        {
-            get => _filePath;
-            set
-            {
-                if (_filePath == value) return;
-                _filePath = value;
-                OnPropertyChanged(nameof(FilePath));
-            }
-        }
-
-        public FIGFont Font => _font;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
+    /// <summary>
+    /// Gets the FIGFont object.
+    /// </summary>
+    public FIGFont Font { get; private set; } = FIGFont.FromFile(filePath);
 }
