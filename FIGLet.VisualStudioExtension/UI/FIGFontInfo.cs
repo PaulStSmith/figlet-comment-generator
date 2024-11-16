@@ -6,19 +6,24 @@ namespace FIGLet.VisualStudioExtension.UI;
 /// <summary>
 /// Represents information about a FIGlet font.
 /// </summary>
-public class FontInfo
+public class FIGFontInfo
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="FontInfo"/> class with the specified file path.
+    /// Gets the default FIGFontInfo instance.
     /// </summary>
-    /// <param name="filePath">The file path of the font.</param>
-    public FontInfo(string filePath) => FilePath = filePath;
+    public static FIGFontInfo Default => new FIGFontInfo(FIGFont.Default, "<Default>");
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FontInfo"/> class with the specified FIGFont object.
+    /// Initializes a new instance of the <see cref="FIGFontInfo"/> class with the specified file path.
+    /// </summary>
+    /// <param name="filePath">The file path of the font.</param>
+    public FIGFontInfo(string filePath) => FilePath = filePath;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FIGFontInfo"/> class with the specified FIGFont object.
     /// </summary>
     /// <param name="font">The FIGFont object.</param>
-    public FontInfo(FIGFont font)
+    public FIGFontInfo(FIGFont font)
     {
         _filePath = null;
         _name = string.Empty;
@@ -26,11 +31,11 @@ public class FontInfo
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FontInfo"/> class with the specified FIGFont object and name.
+    /// Initializes a new instance of the <see cref="FIGFontInfo"/> class with the specified FIGFont object and name.
     /// </summary>
     /// <param name="font">The FIGFont object.</param>
     /// <param name="name">The name of the font.</param>
-    public FontInfo(FIGFont font, string name) : this(font) => _name = name;
+    public FIGFontInfo(FIGFont font, string name) : this(font) => _name = name;
 
     /// <summary>
     /// Gets the name of the font.

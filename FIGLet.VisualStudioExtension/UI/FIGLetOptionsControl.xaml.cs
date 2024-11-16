@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -15,7 +17,7 @@ namespace FIGLet.VisualStudioExtension.UI;
 public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
 {
     private readonly FIGLetOptions _options;
-    private readonly ObservableCollection<FontInfo> _fonts = new();
+    private readonly List<FIGFontInfo> _fonts = [];
     private FIGFont _currentFont;
 
     /// <summary>
@@ -63,7 +65,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
         _options.FontPath = FontDirectoryTextBox.Text;
         _options.LayoutMode = (LayoutMode)LayoutModeComboBox.SelectedItem;
 
-        if (FontListView.SelectedItem is FontInfo selectedFont)
+        if (FontListView.SelectedItem is FIGFontInfo selectedFont)
             _options.LastSelectedFont = selectedFont.Name;
     }
 
@@ -80,46 +82,10 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     /// </summary>
     private void LoadFonts()
     {
+        FIGLetFontManager.SetFontDirectory(FontDirectoryTextBox.Text);
         _fonts.Clear();
+        _fonts.AddRange(FIGLetFontManager.AvaliableFonts);
         UpdateFontCount();
-
-        if (string.IsNullOrEmpty(FontDirectoryTextBox.Text) ||
-            !Directory.Exists(FontDirectoryTextBox.Text))
-        {
-            return;
-        }
-
-        try
-        {
-            foreach (var file in Directory.GetFiles(FontDirectoryTextBox.Text, "*.flf"))
-            {
-                try
-                {
-                    _fonts.Add(new FontInfo(file));
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error loading font {file}: {ex.Message}");
-                }
-            }
-
-            // Select the default font if it exists
-            var defaultFont = _fonts.FirstOrDefault(f => f.Name == _options.LastSelectedFont);
-            if (defaultFont != null)
-            {
-                FontListView.SelectedItem = defaultFont;
-            }
-
-            UpdateFontCount();
-        }
-        catch (Exception ex)
-        {
-            System.Windows.MessageBox.Show(
-                $"Error loading fonts: {ex.Message}",
-                "FIGLet Font Manager",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-        }
     }
 
     /// <summary>
@@ -186,7 +152,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     /// <param name="e">The event arguments.</param>
     private void FontListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var selectedFont = FontListView.SelectedItem as FontInfo;
+        var selectedFont = FontListView.SelectedItem as FIGFontInfo;
         if (selectedFont != null)
         {
             try

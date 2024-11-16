@@ -13,7 +13,6 @@ namespace FIGLet.VisualStudioExtension.UI;
 /// </summary>
 public partial class FIGLetInputDialogView : UserControl
 {
-    private const string DEFAULT_FONT_NAME = "<Default>";
     private readonly string _language;
     private readonly AsyncPackage _package;
 
@@ -56,20 +55,14 @@ public partial class FIGLetInputDialogView : UserControl
         if (!string.IsNullOrEmpty(options.FontPath) && Directory.Exists(options.FontPath))
             LoadFonts(options.FontPath);
 
-        // Load default font if no fonts are loaded
-        if (FontComboBox.Items.Count == 0)
-            FontComboBox.Items.Add(new FontInfo(FIGFont.Default, DEFAULT_FONT_NAME));
-        else
+        // Try to select the last used font
+        if (!string.IsNullOrEmpty(options.LastSelectedFont))
         {
-            // Try to select the last used font
-            if (!string.IsNullOrEmpty(options.LastSelectedFont))
+            var lastFont = FontComboBox.Items.Cast<FIGFontInfo>().FirstOrDefault(f => f.Name == options.LastSelectedFont);
+            if (lastFont != null)
             {
-                var lastFont = FontComboBox.Items.Cast<FontInfo>().FirstOrDefault(f => f.Name == options.LastSelectedFont);
-                if (lastFont != null)
-                {
-                    FontComboBox.SelectedItem = lastFont;
-                    SelectedFont = lastFont.Font;
-                }
+                FontComboBox.SelectedItem = lastFont;
+                SelectedFont = lastFont.Font;
             }
         }
 
@@ -77,7 +70,7 @@ public partial class FIGLetInputDialogView : UserControl
         if (SelectedFont == null && FontComboBox.Items.Count > 0)
         {
             FontComboBox.SelectedIndex = 0;
-            SelectedFont = ((FontInfo)FontComboBox.SelectedItem).Font;
+            SelectedFont = ((FIGFontInfo)FontComboBox.SelectedItem).Font;
         }
 
         PreviewBlock.Foreground = ThemeHelper.GetCommentColorBrush(_package);
@@ -155,30 +148,10 @@ public partial class FIGLetInputDialogView : UserControl
     /// <param name="fontDirectory">The font directory.</param>
     private void LoadFonts(string fontDirectory)
     {
+        FIGLetFontManager.SetFontDirectory(fontDirectory);
         FontComboBox.Items.Clear();
-
-        try
-        {
-            foreach (var file in Directory.GetFiles(fontDirectory, "*.flf"))
-            {
-                try
-                {
-                    FontComboBox.Items.Add(new FontInfo(file));
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Error loading font {file}: {ex.Message}");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(
-                $"Error loading fonts: {ex.Message}",
-                "FIGLet Font Manager",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-        }
+        foreach (var itm in FIGLetFontManager.AvaliableFonts)
+            FontComboBox.Items.Add(itm);
     }
 
     /// <summary>
@@ -188,14 +161,11 @@ public partial class FIGLetInputDialogView : UserControl
     /// <param name="e">The event arguments.</param>
     private void FontComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (FontComboBox.SelectedItem is FontInfo selectedFont)
+        if (FontComboBox.SelectedItem is FIGFontInfo selectedFont)
         {
             SelectedFont = selectedFont.Font;
             UpdatePreview();
-
-            // Update the options to remember this font
-            if (selectedFont.Name != DEFAULT_FONT_NAME)
-                options.LastSelectedFont = selectedFont.Name;
+            options.LastSelectedFont = selectedFont.Name;
         }
     }
 

@@ -64,7 +64,7 @@
     <Compile Include="UI\FIGLetOptionsControl.xaml.cs">
       <DependentUpon>FIGLetOptionsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\FontInfo.cs" />
+    <Compile Include="UI\FIGFontInfo.cs" />
     <Compile Include="VSClassLikeElement.cs" />
     <Compile Include="VSCOMElement.cs" />
     <Compile Include="VSMemberElement.cs" />

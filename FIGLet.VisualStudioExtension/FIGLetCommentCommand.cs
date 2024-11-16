@@ -285,6 +285,15 @@ internal sealed class FIGLetCommentCommand
          */
 
         /*
+         * Avoids a documentation/code decoration line.
+         */
+        while (IsDocOrDecorationLine(line, language) && insertPoint.Line > 1)
+        {
+            insertPoint.LineUp();
+            line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
+        }
+
+        /*
          * Avoids a block comment.
          */
         var commentInfo = LanguageCommentStyles.GetCommentStyle(language);
@@ -298,52 +307,130 @@ internal sealed class FIGLetCommentCommand
             }
         }
 
-        /*
-         * Avoids a documentation/code decoration line.
-         */
-        while (IsDocumentationLine(line) && insertPoint.Line > 1)
-        {
-            insertPoint.LineUp();
-            line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
-        }
-
         return insertPoint;
     }
 
-    private bool IsDocumentationLine(string line)
+    /// <summary>
+    /// Determines if the given line is a documentation line or a code decoration based on the language.
+    /// </summary>
+    /// <param name="line">The line of text to check.</param>
+    /// <param name="language">The programming language of the document.</param>
+    /// <returns>True if the line is a documentation line or decoration, otherwise false.</returns>
+    private bool IsDocOrDecorationLine(string line, string language)
     {
-        var isDoc = false;
+        if (string.IsNullOrWhiteSpace(line))
+            return false;
+
         line = line.TrimStart();
 
-        /*
-         * We'll consider a line as a documentation line
-         * only if it starts with a documentation comment.
-         * 
-         * For instance, in C# we'll consider lines starting with /// as documentation lines.
-         * 
-         * However, we will not consider the language of the document here.
-         * 
-         * We'll simply check for the most common documentation comment styles.
-         */
-        isDoc |= line.StartsWith("///"); // C#
-        isDoc |= line.StartsWith("'''"); // VB
-        isDoc |= line.StartsWith("*");   // Java, JavaScript, etc.
-        isDoc |= line.StartsWith("#");   // Python
+        // Normalize language identifier
+        language = language.ToLowerInvariant().Trim();
 
-        /*
-         * We'll also consider a line as a documentation line
-         * code decoration lines.
-         * 
-         * For instance, in C# we'll consider lines starting 
-         * with [ or ( as code decoration lines.
-         */
-        isDoc |= line.StartsWith("["); // C#
-        isDoc |= line.StartsWith("<"); // VB
-        isDoc |= line.StartsWith("@"); // Python
+        // Group languages by their documentation style
+        switch (language)
+        {
+            // Triple-slash documentation style
+            case "csharp":
+            case "fsharp":
+            case "rust":
+                return line.StartsWith("///") ||           // Doc comments
+                       line.StartsWith("[");               // Attributes/Decorators
 
-        return isDoc;
+            // Single-slash documentation
+            case "c/c++":
+            case "cpp":
+            case "d":
+            case "objective-c":
+                return line.StartsWith("///") ||           // Doc comments
+                       line.StartsWith("//!") ||           // Alternative doc comments
+                       line.StartsWith("@");               // Attributes (Objective-C)
+
+            // Triple-quote documentation
+            case "basic":
+            case "vb":
+                return line.StartsWith("'''") ||           // Doc comments
+                       line.StartsWith("<");               // Attributes
+
+            // Hash-based documentation
+            case "python":
+            case "ruby":
+            case "perl":
+            case "yaml":
+            case "shell":
+            case "ps1":
+            case "powershell":
+            case "sh":
+            case "zsh":
+            case "bash":
+            case "fish":
+            case "shellscript":
+                return line.StartsWith("#") ||             // Doc comments
+                       line.StartsWith("@");               // Decorators (Python)
+
+            // R-specific documentation
+            case "r":
+                return line.StartsWith("#'");              // Roxygen2 doc comments
+
+            // Fortran documentation
+            case "fortran":
+                return line.StartsWith("!>") ||            // Doc comments
+                       line.StartsWith("!<");              // Alternative doc comments
+
+            // Lisp-family documentation
+            case "lisp":
+            case "scheme":
+                return line.StartsWith(";;;") ||           // Doc comments
+                       line.StartsWith(";;");              // Secondary doc comments
+
+            // SQL-family documentation
+            case "sql":
+            case "tsql":
+            case "mysql":
+            case "pgsql":
+            case "plsql":
+            case "sqlite":
+                return line.StartsWith("--") ||            // Doc comments
+                       line.StartsWith("--/");             // Alternative doc style (some dialects)
+
+            // Pascal documentation
+            case "pascal":
+                return line.StartsWith("///") ||           // Doc comments
+                       line.StartsWith("//");              // Alternative doc comments
+
+            // Batch/DOS documentation
+            case "bat":
+            case "cmd":
+            case "dos":
+            case "batch":
+                return line.StartsWith("::") ||            // Doc comments
+                       line.StartsWith("rem", StringComparison.OrdinalIgnoreCase); // REM comments
+
+            // XML-style documentation
+            case "html":
+            case "xml":
+            case "xaml":
+            case "svg":
+            case "aspx":
+                return line.StartsWith("<!--");            // XML comments
+
+            // Languages that don't typically use line-based documentation
+            case "java":
+            case "javascript":
+            case "typescript":
+            case "css":
+            case "go":
+            case "swift":
+            case "php":
+            case "kotlin":
+            case "scala":
+                return line.StartsWith("@");               // Only check for annotations/decorators
+                                                           // (Their doc comments are typically block-based)
+
+            default:
+                return false;
+        }
     }
-
+    
     /// <summary>
     /// Inserts a FIGLet banner at the specified insertion point or at the current selection if no insertion point is provided.
     /// </summary>
