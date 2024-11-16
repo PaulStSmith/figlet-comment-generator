@@ -7,6 +7,13 @@ using Task = System.Threading.Tasks.Task;
 
 namespace FIGLet.VisualStudioExtension;
 
+/*
+ *  ___ ___ ___ _        _    ___                         _   ___         _                 
+ * | __|_ _/ __| |   ___| |_ / __|___ _ __  _ __  ___ _ _| |_| _ \__ _ __| |____ _ __ _ ___ 
+ * | _| | | (_ | |__/ -_)  _| (__/ _ \ '  \| '  \/ -_) ' \  _|  _/ _` / _| / / _` / _` / -_)
+ * |_| |___\___|____\___|\__|\___\___/_|_|_|_|_|_\___|_||_\__|_| \__,_\__|_\_\__,_\__, \___|
+ *                                                                                |___/     
+ */
 /// <summary>
 /// This class implements the package exposed by this assembly.
 /// </summary>

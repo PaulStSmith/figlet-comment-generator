@@ -9,6 +9,13 @@ using System.Windows.Media;
 
 namespace FIGLet.VisualStudioExtension;
 
+/*
+ *  _____ _                  _  _     _               
+ * |_   _| |_  ___ _ __  ___| || |___| |_ __  ___ _ _ 
+ *   | | | ' \/ -_) '  \/ -_) __ / -_) | '_ \/ -_) '_|
+ *   |_| |_||_\___|_|_|_\___|_||_\___|_| .__/\___|_|  
+ *                                     |_|            
+ */
 /// <summary>
 /// Provides helper methods for applying Visual Studio themes to WPF controls.
 /// </summary>

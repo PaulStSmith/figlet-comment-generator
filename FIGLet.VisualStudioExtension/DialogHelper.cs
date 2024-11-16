@@ -4,6 +4,13 @@ using System.Windows.Forms;
 
 namespace FIGLet.VisualStudioExtension;
 
+/*
+ *  ___  _      _           _  _     _               
+ * |   \(_)__ _| |___  __ _| || |___| |_ __  ___ _ _ 
+ * | |) | / _` | / _ \/ _` | __ / -_) | '_ \/ -_) '_|
+ * |___/|_\__,_|_\___/\__, |_||_\___|_| .__/\___|_|  
+ *                    |___/           |_|            
+ */
 public static class DialogHelper
 {
     public static bool? ShowDialog(FIGLetInputDialogView content)

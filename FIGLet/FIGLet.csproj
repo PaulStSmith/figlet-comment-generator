@@ -15,14 +15,10 @@
 
   <ItemGroup>
     <None Remove="fonts\small.flf" />
-    <None Remove="fonts\standard.flf" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="fonts\small.flf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="fonts\standard.flf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

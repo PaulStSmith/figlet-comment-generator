@@ -12,6 +12,13 @@ using System.Threading.Tasks;
 
 namespace FIGLet.VisualStudioExtension;
 
+/*
+ *   ___         _     ___ _                   _   ___      _          _           
+ *  / __|___  __| |___| __| |___ _ __  ___ _ _| |_|   \ ___| |_ ___ __| |_ ___ _ _ 
+ * | (__/ _ \/ _` / -_) _|| / -_) '  \/ -_) ' \  _| |) / -_)  _/ -_) _|  _/ _ \ '_|
+ *  \___\___/\__,_\___|___|_\___|_|_|_\___|_||_\__|___/\___|\__\___\__|\__\___/_|  
+ *                                                                                 
+ */
 /// <summary>
 /// Detects code elements within the active document in Visual Studio.
 /// </summary>
