@@ -47,6 +47,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CodeElementDetector.cs" />
+    <Compile Include="CodeElementInfo.cs" />
     <Compile Include="DialogHelper.cs" />
     <Compile Include="FIGLetCommentCommand.cs" />
     <Compile Include="FIGLetCommentPackage.cs" />
@@ -64,6 +65,10 @@
       <DependentUpon>FIGLetOptionsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\FontInfo.cs" />
+    <Compile Include="VSClassLikeElement.cs" />
+    <Compile Include="VSCOMElement.cs" />
+    <Compile Include="VSMemberElement.cs" />
+    <Compile Include="VSStatementElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Template source files - these are not included in compilation -->

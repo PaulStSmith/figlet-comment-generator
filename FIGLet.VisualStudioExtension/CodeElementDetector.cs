@@ -6,53 +6,25 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace FIGLet.VisualStudioExtension;
 
-public readonly struct CodeElementInfo
-{
-    public string ClassName { get; }
-
-    public string MethodName { get; }
-
-    public string FullName { get; }
-
-    public CodeElement CodeElement { get; }
-
-    internal CodeElementInfo(string className, string methodName, string fullName, CodeElement codeElement)
-    {
-        ClassName = className;
-        MethodName = methodName;
-        FullName = fullName;
-        CodeElement = codeElement;
-    }
-
-    public static CodeElementInfo Empty => new(null, null, null, null);
-
-    public override string ToString()
-    {
-        return $"{ClassName}.{MethodName}";
-    }
-}
-
 /// <summary>
 /// Detects code elements within the active document in Visual Studio.
 /// </summary>
-internal class CodeElementDetector
+/// <remarks>
+/// Initializes a new instance of the <see cref="CodeElementDetector"/> class.
+/// </remarks>
+/// <param name="package">The async package.</param>
+internal partial class CodeElementDetector(AsyncPackage package)
 {
-    private readonly AsyncPackage package;
-    private readonly DTE2 dte;
-
     /// <summary>
-    /// Initializes a new instance of the <see cref="CodeElementDetector"/> class.
+    /// The DTE2 object for interacting with the Visual Studio environment.
     /// </summary>
-    /// <param name="package">The async package.</param>
-    public CodeElementDetector(AsyncPackage package)
-    {
-        this.package = package;
-        dte = package.GetService<DTE, DTE2>();
-    }
+    private readonly DTE2 dte = package.GetService<DTE, DTE2>();
 
     /// <summary>
     /// Gets the active code window.
@@ -84,14 +56,16 @@ internal class CodeElementDetector
         }
     }
 
-    private FileCodeModel FileCodeModel
-    {
-        get
-        {
-            return ActiveDocument?.ProjectItem?.FileCodeModel;
-        }
-    }
+    /// <summary>
+    /// Gets the FileCodeModel of the active document.
+    /// </summary>
+    /// <returns>The <see cref="FileCodeModel"/> of the active document or null if not found.</returns>
+    private FileCodeModel FileCodeModel => ActiveDocument?.ProjectItem?.FileCodeModel;
 
+    /// <summary>
+    /// Gets the active document.
+    /// </summary>
+    /// <returns>The active <see cref="Document"/> or null if not found.</returns>
     private Document ActiveDocument
     {
         get
@@ -105,20 +79,40 @@ internal class CodeElementDetector
     /// Gets the code element at the cursor asynchronously.
     /// </summary>
     /// <returns>A tuple containing the class name and method name at the cursor position.</returns>
-    public async Task<CodeElementInfo> GetCodeElementAtCursorAsync()
+    public async Task<CodeElementInfo> GetCodeElementAtCursorAsync(Type enumeration = null)
     {
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+        enumeration = enumeration ?? typeof(vsCMElement);
+        if (enumeration.IsEnum == false)
+            throw new ArgumentException("Enumeration type expected.", nameof(enumeration));
+
         try
         {
             if (FileCodeModel != null)
             {
                 var selection = ActiveDocument.Selection as TextSelection;
-                var element = FileCodeModel.CodeElementFromPoint(selection.ActivePoint, vsCMElement.vsCMElementFunction);
-
-                if (element != null)
+                var ep = selection.ActivePoint.CreateEditPoint();
+                CodeElement element;
+                var values = Enum.GetValues(enumeration);
+                foreach (var scope in values.Cast<vsCMElement>())
                 {
-                    var (cn, mn) = ExtractClassAndMethodName(element.FullName);
-                    return new CodeElementInfo(cn, mn, element.FullName, element);
+                    try
+                    {
+                        element = FileCodeModel.CodeElementFromPoint(ep, scope) as CodeElement;
+                    }
+                    catch (COMException ex)
+                    {
+                        if (ex.ErrorCode == -2147467259) // E_FAIL
+                            continue;   
+                        throw;
+                    }
+                    if (element != null)
+                    {
+                        var fqName = element.FullName;
+                        var (cn, mn) = ExtractClassAndMethodName(fqName, element);
+                        return new CodeElementInfo(cn, mn, element.FullName, element);
+                    }
                 }
             }
 
@@ -133,6 +127,10 @@ internal class CodeElementDetector
         return CodeElementInfo.Empty;
     }
 
+    /// <summary>
+    /// Gets the class and method name at the cursor position from the active code window.
+    /// </summary>
+    /// <returns>A tuple containing the class name and method name at the cursor position.</returns>
     private (string className, string methodName) GetElementAtCursorFromWindow()
     {
         ThreadHelper.ThrowIfNotOnUIThread();
@@ -151,20 +149,34 @@ internal class CodeElementDetector
         return ExtractClassAndMethodName(fqName);
     }
 
-    private static (string className, string methodName) ExtractClassAndMethodName(string fqName)
+    /// <summary>
+    /// Extracts the class and method name from the fully qualified name.
+    /// </summary>
+    /// <param name="fqName">The fully qualified name.</param>
+    /// <param name="el">The code element (optional).</param>
+    /// <returns>A tuple containing the class name and method name.</returns>
+    private static (string className, string methodName) ExtractClassAndMethodName(string fqName, CodeElement el = null)
     {
+        ThreadHelper.ThrowIfNotOnUIThread();
         fqName = fqName ?? string.Empty;
         if (fqName.Contains("("))
             fqName = fqName.Substring(0, fqName.IndexOf("("));
 
-        var parts = fqName.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
-        switch (parts.Length)
+        var parts = fqName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+        if (el != null)
         {
-            case 0: return (null, null);
-            case 1: return (parts[0], null);
-            case 2: return (parts[0], parts[1]);
-            default: return (parts[parts.Length - 2], parts[parts.Length - 1]);
+            if (Enum.GetValues(typeof(VSClassLikeElement)).Cast<vsCMElement>().Contains((vsCMElement)el.Kind))
+                return (parts[parts.Length - 1], null);
         }
+
+        return parts.Length switch
+        {
+            0 => (null, null),
+            1 => (parts[0], null),
+            2 => (parts[0], parts[1]),
+            _ => (parts[parts.Length - 2], parts[parts.Length - 1]),
+        };
     }
 
     /// <summary>

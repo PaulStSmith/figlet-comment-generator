@@ -1,5 +1,13 @@
 ﻿namespace FIGLet;
 
+/*
+ *  ___              _    _           ___      _        
+ * / __|_ __ _  _ __| |_ (_)_ _  __ _| _ \_  _| |___ ___
+ * \__ \ '  \ || (_-< ' \| | ' \/ _` |   / || | / -_)_-<
+ * |___/_|_|_\_,_/__/_||_|_|_||_\__, |_|_\\_,_|_\___/__/
+ *                              |___/                   
+ */
+
 /// <summary>
 /// Specifies the rules for smushing characters together in FIGLet text.
 /// </summary>

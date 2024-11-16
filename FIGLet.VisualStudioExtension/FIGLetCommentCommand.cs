@@ -1,15 +1,15 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using FIGLet.VisualStudioExtension.UI;
-using Microsoft.VisualStudio.RpcContracts.Commands;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FIGLet.VisualStudioExtension;
 
@@ -156,7 +156,7 @@ internal sealed class FIGLetCommentCommand
 
             var _ = package.JoinableTaskFactory.RunAsync(async () =>
             {
-                var ce = await detector.GetCodeElementAtCursorAsync();
+                var ce = await detector.GetCodeElementAtCursorAsync(typeof(CodeElementDetector.VSClassLikeElement));
 
                 // Switch back to UI thread for VS operations
                 await package.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -170,12 +170,70 @@ internal sealed class FIGLetCommentCommand
                     InputText = ce.ClassName
                 };
 
+                /*
+                 * Check if the element is a class, struct, interface, or enum.
+                 */
+                if (ce.CodeElement != null)
+                {
+                    if ((ce.CodeElement.Kind != vsCMElement.vsCMElementClass) && 
+                        (ce.CodeElement.Kind != vsCMElement.vsCMElementStruct) &&
+                        (ce.CodeElement.Kind != vsCMElement.vsCMElementInterface) &&
+                        (ce.CodeElement.Kind != vsCMElement.vsCMElementEnum))
+                    {
+                        Debug.WriteLine("Element is not a class or struct.");
+                        while ((ce.CodeElement.Kind != vsCMElement.vsCMElementClass) &&
+                               (ce.CodeElement.Kind != vsCMElement.vsCMElementStruct) &&
+                               (ce.CodeElement.Kind != vsCMElement.vsCMElementInterface) &&
+                               (ce.CodeElement.Kind != vsCMElement.vsCMElementEnum))
+                            ce.CodeElement = ce.CodeElement.Collection.Parent as CodeElement;
+                    }
+                }
+
                 InsertCodeBanner(doc, ce, dialogContent);
             });
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Error executing class banner: {ex.Message}");
+            HandleException(ex);
+        }
+    }
+
+    /// <summary>
+    /// Executes the command to insert a FIGLet banner for a method.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="e">The event data.</param>
+    private void ExecuteMethodBanner(object sender, EventArgs e)
+    {
+        ThreadHelper.ThrowIfNotOnUIThread();
+
+        try
+        {
+            var doc = dte?.ActiveDocument;
+            if (doc == null) return;
+
+            var _ = package.JoinableTaskFactory.RunAsync(async () =>
+            {
+                var ce = await detector.GetCodeElementAtCursorAsync(typeof(CodeElementDetector.VSMemberElement));
+
+                // Switch back to UI thread for VS operations
+                await package.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                if (string.IsNullOrEmpty(ce.ClassName))
+                    return;
+
+                // Show input dialog with member name pre-filled
+                var dialogContent = new FIGLetInputDialogView(package, doc.Language)
+                {
+                    InputText = ce.MethodName
+                };
+
+                InsertCodeBanner(doc, ce, dialogContent);
+            });
+        }
+        catch (Exception ex)
+        {
+            HandleException(ex);
         }
     }
 
@@ -206,45 +264,6 @@ internal sealed class FIGLetCommentCommand
     }
 
     /// <summary>
-    /// Executes the command to insert a FIGLet banner for a method.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The event data.</param>
-    private void ExecuteMethodBanner(object sender, EventArgs e)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-
-        try
-        {
-            var doc = dte?.ActiveDocument;
-            if (doc == null) return;
-
-            var _ = package.JoinableTaskFactory.RunAsync(async () =>
-            {
-                var ce = await detector.GetCodeElementAtCursorAsync();
-
-                // Switch back to UI thread for VS operations
-                await package.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                if (string.IsNullOrEmpty(ce.MethodName))
-                    return;
-
-                // Show input dialog with method name pre-filled
-                var dialogContent = new FIGLetInputDialogView(package, doc.Language)
-                {
-                    InputText = ce.MethodName
-                };
-
-                InsertCodeBanner(doc, ce, dialogContent);
-            });
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Error executing method banner: {ex.Message}");
-        }
-    }
-
-    /// <summary>
     /// Finds the insertion point for the banner starting from the given text point.
     /// </summary>
     /// <param name="startPoint">The starting text point.</param>
@@ -257,39 +276,72 @@ internal sealed class FIGLetCommentCommand
         var doc = dte.ActiveDocument;
         var language = doc.Language?.ToLower();
 
-        // Move up until we find a non-documentation line
-        while (IsDocumentationLine(insertPoint, language))
+        // Get the line above the start point
+        var line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
+
+        /*
+         * We'll always insert the banner above the code element (or the current line).
+         * However, we will not mess up with existing block comments or code decorations.
+         */
+
+        /*
+         * Avoids a block comment.
+         */
+        var commentInfo = LanguageCommentStyles.GetCommentStyle(language);
+        if (commentInfo.SupportsBlockComments && line.Contains(commentInfo.BlockCommentEnd))
+        {
+            // Move up until we find the start of the block comment
+            while (!line.Contains(commentInfo.BlockCommentStart) && insertPoint.Line > 1)
+            {
+                insertPoint.LineUp();
+                line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
+            }
+        }
+
+        /*
+         * Avoids a documentation/code decoration line.
+         */
+        while (IsDocumentationLine(line) && insertPoint.Line > 1)
         {
             insertPoint.LineUp();
+            line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
         }
 
         return insertPoint;
     }
 
-    /// <summary>
-    /// Determines if the given edit point is at a documentation line based on the language.
-    /// </summary>
-    /// <param name="point">The edit point to check.</param>
-    /// <param name="language">The programming language of the document.</param>
-    /// <returns>True if the line is a documentation line, otherwise false.</returns>
-    private bool IsDocumentationLine(EditPoint point, string language)
+    private bool IsDocumentationLine(string line)
     {
-        ThreadHelper.ThrowIfNotOnUIThread();
+        var isDoc = false;
+        line = line.TrimStart();
 
-        var line = point.GetLines(point.Line, point.Line + 1).TrimStart();
+        /*
+         * We'll consider a line as a documentation line
+         * only if it starts with a documentation comment.
+         * 
+         * For instance, in C# we'll consider lines starting with /// as documentation lines.
+         * 
+         * However, we will not consider the language of the document here.
+         * 
+         * We'll simply check for the most common documentation comment styles.
+         */
+        isDoc |= line.StartsWith("///"); // C#
+        isDoc |= line.StartsWith("'''"); // VB
+        isDoc |= line.StartsWith("*");   // Java, JavaScript, etc.
+        isDoc |= line.StartsWith("#");   // Python
 
-        switch (language)
-        {
-            case "csharp":
-                return line.StartsWith("///");
-            case "c/c++":
-                return line.StartsWith("/**") || line.StartsWith("*/") || line.StartsWith("*");
-            case "python":
-                return line.StartsWith("\"\"\"") || line.StartsWith("'''");
-            // Add more languages as needed
-            default:
-                return false;
-        }
+        /*
+         * We'll also consider a line as a documentation line
+         * code decoration lines.
+         * 
+         * For instance, in C# we'll consider lines starting 
+         * with [ or ( as code decoration lines.
+         */
+        isDoc |= line.StartsWith("["); // C#
+        isDoc |= line.StartsWith("<"); // VB
+        isDoc |= line.StartsWith("@"); // Python
+
+        return isDoc;
     }
 
     /// <summary>
@@ -307,70 +359,19 @@ internal sealed class FIGLetCommentCommand
         var selection = (TextSelection)doc.Selection;
         insertPoint ??= selection.ActivePoint.CreateEditPoint();
 
-        var indentation = GenerateIndentation(doc);
+        var indentation = GenerateIndentation(insertPoint);
         var lines = bannerText.Split([ '\r', '\n' ], StringSplitOptions.RemoveEmptyEntries);
 
         insertPoint.StartOfLine();
         insertPoint.Insert(indentation + string.Join(Environment.NewLine + indentation, lines) + Environment.NewLine);
     }
 
-    /// <summary>
-    /// Generates the indentation string for the current line in the document.
-    /// </summary>
-    /// <param name="doc">The active document.</param>
-    /// <returns>The indentation string.</returns>
-    private string GenerateIndentation(Document doc)
+    private string GenerateIndentation(EditPoint insertPoint)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
-
-        // Get the current line's indentation
-        var selection = (TextSelection)doc.Selection;
-        var ep = selection.ActivePoint.CreateEditPoint();
-        var lineText = ep.GetText(-ep.LineCharOffset + 1);
+        var lineText = insertPoint.GetText(-insertPoint.LineCharOffset + 1);
         var m = Regex.Match(lineText, @"^[\t ]*");
-        if (m.Success) return m.Value;
-
-        /*
-         * Line indentation could not be determined from the text selection.
-         * So, we'll try to determine the indentation based on the language settings
-         * and the current cursor position.
-         */
-        var lineCharOffset = ep.LineCharOffset;
-
-        // Determine the language of the active document
-        var language = doc.Language;
-
-        // Access the text editor properties for the active language
-        Properties languageProperties;
-        try
-        {
-            languageProperties = doc.DTE.Properties["TextEditor", language];
-        }
-        catch (COMException ex)
-        {
-            Debug.WriteLine($"Failed to retrieve language properties for {language}: {{{ex.GetType()}}} {ex.Message}");
-            // Fallback to all languages if the specific language properties are not available
-            languageProperties = doc.DTE.Properties["TextEditor", "AllLanguages"];
-        }
-
-        // Retrieve specific tab settings
-        var tabSize = TryGetValue(languageProperties, "TabSize", 4);
-        var useSpaces = TryGetValue(languageProperties, "InsertSpaces", true);
-
-        if (useSpaces)
-            return new string(' ', lineCharOffset);
-        else
-        {
-            // Calculate the number of tabs and spaces needed
-            var spacesToNextTabStop = tabSize - (lineCharOffset % tabSize);
-            if (spacesToNextTabStop == tabSize)
-                spacesToNextTabStop = 0;
-
-            var tabsNeeded = spacesToNextTabStop / tabSize;
-            var spacesNeeded = spacesToNextTabStop % tabSize;
-
-            return new string('\t', tabsNeeded) + new string(' ', spacesNeeded);
-        }
+        return m.Value;
     }
     
     /// <summary>
@@ -394,5 +395,12 @@ internal sealed class FIGLetCommentCommand
             Debug.WriteLine($"Failed to retrieve property value: {{{ex.GetType()}}} {ex.Message}");
             return defaultValue;
         }
+    }
+
+    static void HandleException(Exception ex, [CallerMemberName] string source = "")
+    {
+        var msg = $"Error executing {source}:{Environment.NewLine}{ex.Message}";
+        Debug.WriteLine(msg);
+        MessageBox.Show(msg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }

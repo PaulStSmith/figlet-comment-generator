@@ -60,8 +60,14 @@ namespace FIGLet.VisualStudioExtension
         /// </summary>
         Pascal,
 
+        /// <summary>
+        /// PowerShell-style comments (<# ... #>) 
+        /// </summary>
         PowerShell,
 
+        /// <summary>
+        /// Bash-style comments (: ' ... ') 
+        /// </summary>
         Bash
     }
 
@@ -336,6 +342,19 @@ namespace FIGLet.VisualStudioExtension
             { "dos", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
             { "batch", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
         };
+
+        /// <summary>
+        /// Gets the comment style information for the specified language.
+        /// </summary>
+        /// <param name="language">The programming language to get the comment style for.</param>
+        /// <returns>The <see cref="CommentStyleInfo"/> for the specified language.</returns>
+        /// <remarks>
+        /// If the language is not found in the predefined list, the default comment style (double slashes) is returned.
+        /// </remarks>
+        public static CommentStyleInfo GetCommentStyle(string language)
+        {
+            return LanguageMap.TryGetValue(language, out var styleInfo) ? styleInfo : Default;
+        }
 
         /// <summary>
         /// Wraps the given text in comments appropriate for the specified language.

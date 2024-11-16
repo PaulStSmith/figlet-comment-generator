@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e" Version="1.0" Language="en-US" Publisher="Paulo Santos" />
+        <Identity Id="FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e" Version="1.1" Language="en-US" Publisher="Paulo Santos - Paul.St.Smith" />
         <DisplayName>FIGLet Comment Generator</DisplayName>
-        <Description xml:space="preserve"><![CDATA[
-Create beautiful ASCII art comments that make your code documentation stand out!<br/>
-<br/>
-FIGLet Comment Generator provides a powerful and intuitive way to create eye-catching ASCII art banners within Visual Studio.<br/> 
-<br/>
-Features include: <br/><ul>
-<li> seamless VS integration with context menu support,</li>
-<li> smart detection of classes and methods,</li>
-<li> multiple fonts with live preview,</li>
-<li> language-aware comment formatting, and</li>
-<li> full Visual Studio theme integration.</li>
-</ul><br/>
+        <Description xml:space="preserve">
+Create beautiful ASCII art comments that make your code documentation stand out!
+&lt;br/&gt;
+FIGLet Comment Generator provides a powerful and intuitive way to create eye-catching ASCII art banners within Visual Studio.&lt;br/&gt; 
+&lt;br/&gt;
+Features include: &lt;br/&gt;&lt;ul&gt;
+&lt;li&gt; seamless VS integration with context menu support,&lt;/li&gt;
+&lt;li&gt; smart detection of classes and methods,&lt;/li&gt;
+&lt;li&gt; multiple fonts with live preview,&lt;/li&gt;
+&lt;li&gt; language-aware comment formatting, and&lt;/li&gt;
+&lt;li&gt; full Visual Studio theme integration.&lt;/li&gt;
+&lt;/ul&gt;&lt;br/&gt;
 Transform your code documentation with professional ASCII art banners.
-]]></Description>
+</Description>
         <License>LICENSE.txt</License>
         <GettingStartedGuide>GettingStarted.html</GettingStartedGuide>
         <ReleaseNotes>ReleaseNotes.html</ReleaseNotes>
         <Icon>Resources\icon-90.png</Icon>
         <PreviewImage>Resources\preview.png</PreviewImage>
-        <Tags>&lt;Tags&gt;comments, ascii art, figlet, documentation, banner, code organization, formatting, productivity&lt;/Tags&gt;</Tags>
+        <Tags>comments, ascii art, figlet, documentation, banner, code organization, formatting, productivity</Tags>
         <Preview>true</Preview>
     </Metadata>
     <Installation>

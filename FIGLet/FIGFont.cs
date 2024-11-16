@@ -1,5 +1,12 @@
 ﻿namespace FIGLet;
 
+/*
+ *  ___ ___ ___ ___        _   
+ * | __|_ _/ __| __|__ _ _| |_ 
+ * | _| | | (_ | _/ _ \ ' \  _|
+ * |_| |___\___|_|\___/_||_\__|
+ *                             
+ */
 /// <summary>
 /// Represents a FIGfont used for rendering text in FIGLet style.
 /// </summary>
