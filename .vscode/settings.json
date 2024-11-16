@@ -1,0 +1,27 @@
+{
+    // VSCode settings.json configuration
+    
+    // Set PowerShell as the default integrated terminal
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    
+    // Configure the PowerShell terminal profile
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "fnm env --use-on-cd | Out-String | Invoke-Expression; fnm use 22"
+            ]
+        }
+    },
+
+    // Optional: Auto save settings
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+
+    // Optional: Node.js path settings (if needed)
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "npm.autoDetect": "on"
+}

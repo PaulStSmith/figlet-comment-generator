@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug FIGLet",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/TS.FIGLet/dist/index.js",
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/TS.FIGLet/dist/**/*.js"
+            ],
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/TS.FIGLet/**",
+                "!**/node_modules/**"
+            ],
+            "runtimeExecutable": "C:\\Users\\pauls\\AppData\\Roaming\\fnm\\node-versions\\v22.11.0\\installation\\node.exe",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/TS.FIGLet"
+        }
+    ]
+}
