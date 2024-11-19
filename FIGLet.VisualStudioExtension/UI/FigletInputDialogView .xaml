@@ -16,6 +16,13 @@
     BorderThickness="1">
 
     <UserControl.Resources>
+        <!--
+           -   ___  _     _        _   ___       _        ___             _    _        _     _                       _   __  __         _        
+           -  / _ \| |__ (_)___ __| |_|   \ __ _| |_ __ _| _ \_ _ _____ _(_)__| |___ _ (_)   | |   __ _ _  _ ___ _  _| |_|  \/  |___  __| |___ ___
+           - | (_) | '_ \| / -_) _|  _| |) / _` |  _/ _` |  _/ '_/ _ \ V / / _` / -_) '_|    | |__/ _` | || / _ \ || |  _| |\/| / _ \/ _` / -_)_-<
+           -  \___/|_.__// \___\__|\__|___/\__,_|\__\__,_|_| |_| \___/\_/|_\__,_\___|_|(_)   |____\__,_|\_, \___/\_,_|\__|_|  |_\___/\__,_\___/__/
+           -           |__/                                                                             |__/                                      
+           -->
         <ObjectDataProvider 
             x:Key="LayoutModes" 
             MethodName="GetValues"
@@ -25,6 +32,13 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
+        <!--
+           - __   _____  ___           _         ___           ___ _        _     
+           - \ \ / / __|/ __|___ _ __ | |__  ___| _ ) _____ __/ __| |_ _  _| |___ 
+           -  \ V /\__ \ (__/ _ \ '  \| '_ \/ _ \ _ \/ _ \ \ /\__ \  _| || | / -_)
+           -   \_/ |___/\___\___/_|_|_|_.__/\___/___/\___/_\_\|___/\__|\_, |_\___|
+           -                                                           |__/       
+           -->
         <Style x:Key="VSComboBoxStyle" TargetType="{x:Type ComboBox}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -114,7 +128,13 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Font Selection -->
+        <!--
+           -  ___        _       ___      _        _           
+           - | __|__ _ _| |_    / __| ___| |___ __| |_ ___ _ _ 
+           - | _/ _ \ ' \  _|   \__ \/ -_) / -_) _|  _/ _ \ '_|
+           - |_|\___/_||_\__|   |___/\___|_\___\__|\__\___/_|  
+           -                                                   
+           -->
         <StackPanel
             Grid.Row="0" 
             Orientation="Horizontal" 
@@ -148,16 +168,30 @@
             Text="Enter text to convert:" 
             Margin="0,0,0,5"/>
 
+        <!--
+           -  ___                _   ___          
+           - |_ _|_ _  _ __ _  _| |_| _ ) _____ __
+           -  | || ' \| '_ \ || |  _| _ \/ _ \ \ /
+           - |___|_||_| .__/\_,_|\__|___/\___/_\_\
+           -          |_|                         
+           -->
         <TextBox 
             Grid.Row="2" 
             Foreground="{DynamicResource {x:Static vs_shell:CommonControlsColors.TextBoxTextBrushKey}}"
             Background="{DynamicResource {x:Static vs_shell:CommonControlsColors.TextBoxBackgroundBrushKey}}"
             x:Name="InputTextBox"
-            AcceptsReturn="True"
-            TextWrapping="Wrap"
+            AcceptsReturn="False"
+            TextWrapping="NoWrap"
             Margin="0,0,0,10"
             VerticalScrollBarVisibility="Auto"/>
 
+        <!--
+           -  ___        _       ___             _            
+           - | __|__ _ _| |_    | _ \_ _ _____ _(_)_____ __ __
+           - | _/ _ \ ' \  _|   |  _/ '_/ -_) V / / -_) V  V /
+           - |_|\___/_||_\__|   |_| |_| \___|\_/|_\___|\_/\_/ 
+           -                                                  
+           -->
         <Border 
             Grid.Row="3" 
             BorderThickness="2"
@@ -176,21 +210,61 @@
             </ScrollViewer>
         </Border>
 
-        <StackPanel Grid.Row="4" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right">
-            <Button x:Name="OkButton"
+        <DockPanel
+            Grid.Row="4">
+            <StackPanel
+                DockPanel.Dock="Top"
+                Orientation="Horizontal" 
+                HorizontalAlignment="Left">
+                <TextBlock 
+                    Text="Language:" 
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,0"/>
+                <ComboBox 
+                    x:Name="LanguageComboBox"
+                    Width="150"
+                    Style="{StaticResource VSComboBoxStyle}"
+                    HorizontalAlignment="Left"
+                    SelectionChanged="LanguageComboBox_SelectionChanged"/>
+            </StackPanel>
+            <StackPanel 
+                DockPanel.Dock="Left" 
+                Orientation="Horizontal" 
+                HorizontalAlignment="Left">
+                <TextBlock 
+                    DockPanel.Dock="Left"
+                    VerticalAlignment="Center">
+                    <Hyperlink NavigateUri="https://bityl.co/Snpw">
+                        FIGLet Comment Generator
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+            <!--
+               -  ___      _   _               
+               - | _ )_  _| |_| |_ ___ _ _  ___
+               - | _ \ || |  _|  _/ _ \ ' \(_-<
+               - |___/\_,_|\__|\__\___/_||_/__/
+               -                               
+               -->
+            <StackPanel
+                DockPanel.Dock="Right"
+                Orientation="Horizontal" 
+                HorizontalAlignment="Right">
+                <Button 
+                    x:Name="OkButton"
                     Content="OK"
                     Margin="0,0,10,0"
                     Padding="8"
                     Width="120"
                     IsEnabled="False"
                     Click="OkButton_Click"/>
-            <Button x:Name="CancelButton"
+                <Button 
+                    x:Name="CancelButton"
                     Content="Cancel"
                     Padding="8"
                     Width="120"
                     Click="CancelButton_Click"/>
-        </StackPanel>
+            </StackPanel>
+        </DockPanel>
     </Grid>
 </UserControl>

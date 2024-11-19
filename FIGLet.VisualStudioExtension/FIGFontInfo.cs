@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace FIGLet.VisualStudioExtension.UI;
+namespace FIGLet.VisualStudioExtension;
 
 /// <summary>
 /// Represents information about a FIGlet font.

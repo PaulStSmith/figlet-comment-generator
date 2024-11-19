@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,7 +14,7 @@ namespace FIGLet.VisualStudioExtension.UI;
 /// </summary>
 public partial class FIGLetInputDialogView : UserControl
 {
-    private readonly string _language;
+    private string _language;
     private readonly AsyncPackage _package;
 
     /// <summary>
@@ -50,10 +51,56 @@ public partial class FIGLetInputDialogView : UserControl
 
         InputTextBox.TextChanged += (s, e) => UpdatePreview();
 
-        // Load fonts from settings
         options = (FIGLetOptions)package.GetDialogPage(typeof(FIGLetOptions));
-        if (!string.IsNullOrEmpty(options.FontPath) && Directory.Exists(options.FontPath))
-            LoadFonts(options.FontPath);
+
+        InitializeFonts();
+
+        PreviewBlock.Foreground = ThemeHelper.GetCommentColorBrush(_package);
+
+        ThreadHelper.ThrowIfNotOnUIThread();
+        ThemeHelper.ApplyVsThemeToButton(OkButton);
+        ThemeHelper.ApplyVsThemeToButton(CancelButton);
+
+        LanguageComboBox.Loaded += (s, e) =>
+        {
+            var items = LanguageCommentStyles.SupportedLanguages.OrderBy(x => x.Value.Name).Select(x => x.Value).ToList();
+            LanguageComboBox.ItemsSource = items;
+            LanguageComboBox.SelectedItem = items.FirstOrDefault(x => string.Compare(x.Key, language, StringComparison.OrdinalIgnoreCase) == 0);
+
+            items = LanguageCommentStyles.SupportedLanguages.Select(x => x.Value).Skip(51).OrderBy(x => x.Name).ToList();
+            var rndr = new FIGLetRenderer(FIGFont.Default);
+            for (var i = 0; i < items.Count; i++)
+            {
+                var txt = FIGLetRenderer.Render(items[i].Name, FIGFont.Default, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
+                var comment = LanguageCommentStyles.WrapInComments(txt, items[i].Key);
+                var enc = HtmlEncoder.Create(new TextEncoderSettings());
+                Debug.WriteLine("<div class=\"language-item\">");
+                Debug.WriteLine(items[i].Name);
+                Debug.WriteLine($"<div class=\"tooltip\">{enc.Encode(comment)}</div>");
+                Debug.WriteLine("</div>");
+            }
+        };
+
+        LanguageComboBox.SelectionChanged += (s, e) =>
+        {
+            if (LanguageComboBox.SelectedItem is CommentInfo info)
+            {
+                _language = info.Key;
+                UpdatePreview();
+            }
+        };
+
+        LayoutModeComboBox.Loaded += (s, e) =>
+        {
+            LayoutModeComboBox.SelectedItem = options.LayoutMode;
+            UpdatePreview();
+        };
+    }
+
+    private void InitializeFonts()
+    {
+        // Load fonts from settings
+        LoadFonts(options.FontPath);
 
         // Try to select the last used font
         if (!string.IsNullOrEmpty(options.LastSelectedFont))
@@ -72,18 +119,6 @@ public partial class FIGLetInputDialogView : UserControl
             FontComboBox.SelectedIndex = 0;
             SelectedFont = ((FIGFontInfo)FontComboBox.SelectedItem).Font;
         }
-
-        PreviewBlock.Foreground = ThemeHelper.GetCommentColorBrush(_package);
-
-        ThreadHelper.ThrowIfNotOnUIThread();
-        ThemeHelper.ApplyVsThemeToButton(OkButton);
-        ThemeHelper.ApplyVsThemeToButton(CancelButton);
-
-        LayoutModeComboBox.Loaded += (s, e) =>
-        {
-            LayoutModeComboBox.SelectedItem = options.LayoutMode;
-            UpdatePreview();
-        };
     }
 
     /// <summary>
@@ -178,5 +213,10 @@ public partial class FIGLetInputDialogView : UserControl
     {
         UpdatePreview();
         options.LayoutMode = (LayoutMode)LayoutModeComboBox.SelectedIndex;
+    }
+
+    private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+
     }
 }

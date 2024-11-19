@@ -259,13 +259,13 @@ internal sealed class FIGLetCommentCommand
         EditPoint insertPoint;
         if (ce.CodeElement != null)
         {
-            insertPoint = FindInsertionPoint(ce.CodeElement.StartPoint);
+            insertPoint = FindInsertionPoint(ce.CodeElement.StartPoint, doc.Language);
         }
         else
         {
             // Fallback to current selection (if any)
             var selection = (TextSelection)doc.Selection;
-            insertPoint = FindInsertionPoint(selection.ActivePoint);
+            insertPoint = FindInsertionPoint(selection.ActivePoint, doc.Language);
         }
         InsertBanner(dialogContent.PreviewBlock.Text, insertPoint);
     }
@@ -275,15 +275,16 @@ internal sealed class FIGLetCommentCommand
     /// </summary>
     /// <param name="startPoint">The starting text point.</param>
     /// <returns>The edit point where the banner should be inserted.</returns>
-    private EditPoint FindInsertionPoint(TextPoint startPoint)
+    /// <param name="language"></param>
+    private EditPoint FindInsertionPoint(TextPoint startPoint, string language)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
 
         var insertPoint = startPoint.CreateEditPoint();
-        var doc = dte.ActiveDocument;
-        var language = doc.Language?.ToLower();
 
         // Get the line above the start point
+        if (insertPoint.Line == 1)
+            return insertPoint;
         var line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
 
         /*

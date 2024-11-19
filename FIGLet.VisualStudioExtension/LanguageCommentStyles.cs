@@ -4,13 +4,6 @@ using System.Linq;
 
 namespace FIGLet.VisualStudioExtension;
 
-/*
- *   ___                         _   ___ _        _     
- *  / __|___ _ __  _ __  ___ _ _| |_/ __| |_ _  _| |___ 
- * | (__/ _ \ '  \| '  \/ -_) ' \  _\__ \  _| || | / -_)
- *  \___\___/_|_|_|_|_|_\___|_||_\__|___/\__|\_, |_\___|
- *                                           |__/       
- */
 /// <summary>
 /// Enum representing different styles of comments.
 /// </summary>
@@ -47,7 +40,7 @@ public enum CommentStyle
     Quote,
 
     /// <summary>
-    /// ML-style block comments ((* ... *)).
+    /// ML-style block comments ((* ... *)). 
     /// </summary>
     MLComment,
 
@@ -67,14 +60,44 @@ public enum CommentStyle
     Pascal,
 
     /// <summary>
-    /// PowerShell-style comments (<# ... #>) 
+    /// PowerShell-style comments (<# ... #>).
     /// </summary>
     PowerShell,
 
     /// <summary>
-    /// Bash-style comments (: ' ... ') 
+    /// Bash-style comments (: ' ... ').
     /// </summary>
-    Bash
+    Bash,
+
+    /// <summary>
+    /// Lua-style comments (-- and --[[ ... ]]).
+    /// </summary>
+    Lua,
+
+    /// <summary>
+    /// MATLAB-style comments (% and %{ ... %}).
+    /// </summary>
+    Matlab,
+
+    /// <summary>
+    /// Haskell-style comments (-- and {- ... -}).
+    /// </summary>
+    Haskell,
+
+    /// <summary>
+    /// Handlebars-style comments ({{! ... }} and {{!-- ... --}}).
+    /// </summary>
+    Handlebars,
+
+    /// <summary>
+    /// Razor-style comments (@* ... *@).
+    /// </summary>
+    Razor,
+
+    /// <summary>
+    /// Twig-style comments ({# ... #}).
+    /// </summary>
+    Twig
 }
 
 public class CommentStyleInfo
@@ -133,47 +156,92 @@ public class CommentStyleInfo
                 BlockCommentEnd = blockEnd ?? "*/";
                 SingleLinePrefix = singleLinePrefix ?? "//";
                 break;
+
             case CommentStyle.DoubleSlashes:
                 SingleLinePrefix = singleLinePrefix ?? "//";
                 break;
+
             case CommentStyle.Hash:
                 SingleLinePrefix = singleLinePrefix ?? "#";
                 break;
+
             case CommentStyle.Semicolon:
                 SingleLinePrefix = singleLinePrefix ?? ";";
                 break;
+
             case CommentStyle.Quote:
                 SingleLinePrefix = singleLinePrefix ?? "'";
                 break;
+
             case CommentStyle.MLComment:
                 BlockCommentStart = blockStart ?? "(*";
                 BlockCommentEnd = blockEnd ?? "*)";
                 SingleLinePrefix = singleLinePrefix ?? "//";
                 break;
+
             case CommentStyle.HTML:
                 BlockCommentStart = blockStart ?? "<!--";
                 BlockCommentEnd = blockEnd ?? "-->";
                 SingleLinePrefix = null;
                 break;
+
             case CommentStyle.SQLLine:
                 BlockCommentStart = blockStart ?? "/*";
                 BlockCommentEnd = blockEnd ?? "*/";
                 SingleLinePrefix = singleLinePrefix ?? "--";
                 break;
+
             case CommentStyle.Pascal:
                 BlockCommentStart = blockStart ?? "{";
                 BlockCommentEnd = blockEnd ?? "}";
                 SingleLinePrefix = singleLinePrefix ?? "//";
                 break;
+
             case CommentStyle.PowerShell:
                 SingleLinePrefix = singleLinePrefix ?? "#";
                 BlockCommentStart = blockStart ?? "<#";
                 BlockCommentEnd = blockEnd ?? "#>";
                 break;
+
             case CommentStyle.Bash:
                 SingleLinePrefix = singleLinePrefix ?? "#";
                 BlockCommentStart = blockStart ?? ": '#";
                 BlockCommentEnd = blockEnd ?? "#'";     
+                break;
+
+            case CommentStyle.Lua:
+                SingleLinePrefix = singleLinePrefix ?? "--";
+                BlockCommentStart = blockStart ?? "--[[";
+                BlockCommentEnd = blockEnd ?? "]]";
+                break;
+
+            case CommentStyle.Matlab:
+                SingleLinePrefix = singleLinePrefix ?? "%";
+                BlockCommentStart = blockStart ?? "%{";
+                BlockCommentEnd = blockEnd ?? "%}";
+                break;
+
+            case CommentStyle.Haskell:
+                SingleLinePrefix = singleLinePrefix ?? "--";
+                BlockCommentStart = blockStart ?? "{-";
+                BlockCommentEnd = blockEnd ?? "-}";
+                break;
+
+            case CommentStyle.Handlebars:
+                SingleLinePrefix = singleLinePrefix ?? "{{!";
+                BlockCommentStart = blockStart ?? "{{!--";
+                BlockCommentEnd = blockEnd ?? "--}}";
+                break;
+
+            case CommentStyle.Razor:
+                SingleLinePrefix = singleLinePrefix ?? "@*";
+                BlockCommentStart = blockStart ?? "@*";
+                BlockCommentEnd = blockEnd ?? "*@";
+                break;
+
+            case CommentStyle.Twig:
+                SingleLinePrefix = singleLinePrefix ?? "{#";
+                BlockCommentEnd = blockEnd ?? "#}";
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(primary), primary, null);
@@ -215,6 +283,42 @@ public class CommentStyleInfo
     }
 }
 
+/// <summary>
+/// Represents information about a specific comment style.
+/// </summary>
+/// <param name="key">The unique key identifying the comment style.</param>
+/// <param name="name">The name of the comment style.</param>
+/// <param name="style">The <see cref="CommentStyleInfo"/> associated with the comment style.</param>
+public readonly struct CommentInfo(string key, string name, CommentStyleInfo style)
+{
+    /// <summary>
+    /// Gets the unique key identifying the comment style.
+    /// </summary>
+    public string Key { get; } = key;
+
+    /// <summary>
+    /// Gets the name of the comment style.
+    /// </summary>
+    public string Name { get; } = name;
+
+    /// <summary>
+    /// Gets the <see cref="CommentStyleInfo"/> associated with the comment style.
+    /// </summary>
+    public CommentStyleInfo Style { get; } = style;
+
+    /// <summary>
+    /// Returns the name of the comment style.
+    /// </summary>
+    /// <returns>The name of the comment style.</returns>
+    public override string ToString()
+    {
+        return Name;
+    }
+}
+
+/// <summary>
+/// Provides comment style information and utilities for various programming languages.
+/// </summary>
 public static class LanguageCommentStyles
 {
     /// <summary>
@@ -278,75 +382,129 @@ public static class LanguageCommentStyles
     public static readonly CommentStyleInfo Bash = new(CommentStyle.Bash);
 
     /// <summary>
+    /// Lua-style comments (-- and --[[ ... ]]).
+    /// </summary>
+    public static readonly CommentStyleInfo Lua = new(CommentStyle.Lua);
+
+    /// <summary>
+    /// MATLAB-style comments (% and %{ ... %}).
+    /// </summary>
+    public static readonly CommentStyleInfo Matlab = new(CommentStyle.Matlab);
+
+    /// <summary>
+    /// Haskell-style comments (-- and {- ... -}).
+    /// </summary>
+    public static readonly CommentStyleInfo Haskell = new(CommentStyle.Haskell);
+
+    /// <summary>
+    /// Handlebars-style comments ({{! ... }} and {{!-- ... --}}).
+    /// </summary>
+    public static readonly CommentStyleInfo Handlebars = new(CommentStyle.Handlebars);
+
+    /// <summary>
+    /// Razor-style comments (@* ... *@).
+    /// </summary>
+    public static readonly CommentStyleInfo Razor = new(CommentStyle.Razor);
+
+    /// <summary>
+    /// Twig-style comments ({# ... #}).
+    /// </summary>
+    public static readonly CommentStyleInfo Twig = new(CommentStyle.Twig);
+
+    /// <summary>
     /// Dictionary mapping language names to their respective comment styles.
     /// </summary>
-    private static readonly Dictionary<string, CommentStyleInfo> LanguageMap = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly Dictionary<string, CommentInfo> SupportedLanguages = new(StringComparer.OrdinalIgnoreCase)
     {
-        // C-style block comments primary
-        { "csharp",CStyleBlock},
-        { "c/c++", CStyleBlock },
-        { "cpp", CStyleBlock },
-        { "java", CStyleBlock },
-        { "javascript", CStyleBlock },
-        { "typescript", CStyleBlock },
-        { "css", CStyleBlock },
-        { "rust", CStyleBlock },
-        { "go", CStyleBlock },
-        { "swift", CStyleBlock },
-        { "php", CStyleBlock },
-        { "kotlin", CStyleBlock },
-        { "scala", CStyleBlock },
-        { "d", CStyleBlock },
-        { "objective-c", CStyleBlock },
-        
-        // Single line comments primary
-        { "python", Hash },
-        { "ruby", Hash },
-        { "perl", Hash },
-        { "r", Hash },
-        { "yaml", Hash },
-        { "shell", Hash },
-        { "basic", Quote },
-        { "vb", Quote },
-        { "fortran", Quote },
-        { "lisp", Semicolon },
-        { "scheme", Semicolon },
-        { "fsharp", MLComment },
-        
+        // C-style block comments
+        { "csharp", new CommentInfo("csharp", "C#", CStyleBlock) },
+        { "c/c++", new CommentInfo("c/c++", "C/C++", CStyleBlock) },
+        { "cpp", new CommentInfo("cpp", "C++", CStyleBlock) },
+        { "java", new CommentInfo("java", "Java", CStyleBlock) },
+        { "javascript", new CommentInfo("javascript", "JavaScript", CStyleBlock) },
+        { "typescript", new CommentInfo("typescript", "TypeScript", CStyleBlock) },
+        { "css", new CommentInfo("css", "CSS", CStyleBlock) },
+        { "rust", new CommentInfo("rust", "Rust", CStyleBlock) },
+        { "go", new CommentInfo("go", "Go", CStyleBlock) },
+        { "swift", new CommentInfo("swift", "Swift", CStyleBlock) },
+        { "php", new CommentInfo("php", "PHP", CStyleBlock) },
+        { "kotlin", new CommentInfo("kotlin", "Kotlin", CStyleBlock) },
+        { "scala", new CommentInfo("scala", "Scala", CStyleBlock) },
+        { "d", new CommentInfo("d", "D", CStyleBlock) },
+        { "objective-c", new CommentInfo("objective-c", "Objective-C", CStyleBlock) },
+    
+        // Single line comments
+        { "python", new CommentInfo("python", "Python", Hash) },
+        { "ruby", new CommentInfo("ruby", "Ruby", Hash) },
+        { "perl", new CommentInfo("perl", "Perl", Hash) },
+        { "r", new CommentInfo("r", "R", Hash) },
+        { "yaml", new CommentInfo("yaml", "YAML", Hash) },
+        { "shell", new CommentInfo("shell", "Shell", Hash) },
+        { "basic", new CommentInfo("basic", "BASIC", Quote) },
+        { "vb", new CommentInfo("vb", "Visual Basic", Quote) },
+        { "fortran", new CommentInfo("fortran", "FORTRAN", Quote) },
+        { "lisp", new CommentInfo("lisp", "Lisp", Semicolon) },
+        { "scheme", new CommentInfo("scheme", "Scheme", Semicolon) },
+        { "fsharp", new CommentInfo("fsharp", "F#", MLComment) },
+    
         // HTML-style comments
-        { "html", HTML },
-        { "xml", HTML },
-        { "xaml", HTML },
-        { "svg", HTML },
-        { "aspx", HTML },
-        
+        { "html", new CommentInfo("html", "HTML", HTML) },
+        { "xml", new CommentInfo("xml", "XML", HTML) },
+        { "xaml", new CommentInfo("xaml", "XAML", HTML) },
+        { "svg", new CommentInfo("svg", "SVG", HTML) },
+        { "aspx", new CommentInfo("aspx", "ASP.NET", HTML) },
+    
         // SQL variants
-        { "sql", SQLLine },
-        { "tsql", SQLLine },
-        { "mysql", SQLLine },
-        { "pgsql", SQLLine },
-        { "plsql", SQLLine },
-        { "sqlite", SQLLine },
-
+        { "sql", new CommentInfo("sql", "SQL", SQLLine) },
+        { "tsql", new CommentInfo("tsql", "T-SQL", SQLLine) },
+        { "mysql", new CommentInfo("mysql", "MySQL", SQLLine) },
+        { "pgsql", new CommentInfo("pgsql", "PostgreSQL", SQLLine) },
+        { "plsql", new CommentInfo("plsql", "PL/SQL", SQLLine) },
+        { "sqlite", new CommentInfo("sqlite", "SQLite", SQLLine) },
+    
         // Pascal-style comments
-        { "pascal", Pascal },
-
+        { "pascal", new CommentInfo("pascal", "Pascal", Pascal) },
+    
         // PowerShell
-        { "ps1", PowerShell },
-        { "powershell", PowerShell },
-
+        { "ps1", new CommentInfo("ps1", "PowerShell", PowerShell) },
+        { "powershell", new CommentInfo("powershell", "PowerShell", PowerShell) },
+    
         // Bash
-        { "sh", Bash },
-        { "zsh", Bash },
-        { "bash", Bash },
-        { "fish", Bash },
-        { "shellscript", Bash },
+        { "sh", new CommentInfo("sh", "Shell Script", Bash) },
+        { "zsh", new CommentInfo("zsh", "Z Shell", Bash) },
+        { "bash", new CommentInfo("bash", "Bash", Bash) },
+        { "fish", new CommentInfo("fish", "Fish Shell", Bash) },
+        { "shellscript", new CommentInfo("shellscript", "Shell Script", Bash) },
+    
+        // Batch files
+        { "bat", new CommentInfo("bat", "Batch File", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
+        { "cmd", new CommentInfo("cmd", "Command Prompt", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
+        { "dos", new CommentInfo("dos", "DOS Batch", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
+        { "batch", new CommentInfo("batch", "Batch File", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
 
-        // Add batch file support
-        { "bat", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
-        { "cmd", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
-        { "dos", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
-        { "batch", new CommentStyleInfo(CommentStyle.Custom, "::", null, null) },
+        // Unique comment styles
+        { "lua", new CommentInfo("lua", "Lua", Lua) },
+        { "matlab", new CommentInfo("matlab", "MATLAB", Matlab) },
+        { "octave", new CommentInfo("octave", "Octave", Matlab) },
+        { "haskell", new CommentInfo("haskell", "Haskell", Haskell) },
+        { "handlebars", new CommentInfo("handlebars", "Handlebars", Handlebars) },
+        { "razor", new CommentInfo("razor", "Razor", Razor) },
+        { "twig", new CommentInfo("twig", "Twig", Twig) },
+
+        // Using existing comment styles
+        { "dart", new CommentInfo("dart", "Dart", CStyleBlock) },
+        { "julia", new CommentInfo("julia", "Julia", Hash) },
+        { "erlang", new CommentInfo("erlang", "Erlang", new CommentStyleInfo(CommentStyle.Custom, "%", null, null)) },
+        { "elixir", new CommentInfo("elixir", "Elixir", Hash) },
+        { "groovy", new CommentInfo("groovy", "Groovy", CStyleBlock) },
+        { "ini", new CommentInfo("ini", "INI", Semicolon) },
+        { "toml", new CommentInfo("toml", "TOML", Hash) },
+        { "dockerfile", new CommentInfo("dockerfile", "Dockerfile", Hash) },
+        { "makefile", new CommentInfo("makefile", "Makefile", Hash) },
+        { "cmake", new CommentInfo("cmake", "CMake", Hash) },
+        { "gradle", new CommentInfo("gradle", "Gradle", CStyleBlock) },
+        { "autohotkey", new CommentInfo("autohotkey", "AutoHotkey", Semicolon) },
+        { "powerquery", new CommentInfo("powerquery", "Power Query", CStyleBlock) },
     };
 
     /// <summary>
@@ -359,7 +517,7 @@ public static class LanguageCommentStyles
     /// </remarks>
     public static CommentStyleInfo GetCommentStyle(string language)
     {
-        return LanguageMap.TryGetValue(language, out var styleInfo) ? styleInfo : Default;
+        return SupportedLanguages.TryGetValue(language, out var styleInfo) ? styleInfo.Style : Default;
     }
 
     /// <summary>
@@ -372,9 +530,10 @@ public static class LanguageCommentStyles
     public static string WrapInComments(string text, string language, bool preferBlockComments = true)
     {
         // Default to single-line slashes if language not found
-        if (!LanguageMap.TryGetValue(language, out var styleInfo))
+        if (!SupportedLanguages.TryGetValue(language, out var info))
             return WrapInSingleLineComments(text, "//");
 
+        var styleInfo = info.Style;
         // If block comments are preferred and supported, use them
         if (preferBlockComments && styleInfo.SupportsBlockComments)
             return styleInfo.WrapInBlockComment(text);
