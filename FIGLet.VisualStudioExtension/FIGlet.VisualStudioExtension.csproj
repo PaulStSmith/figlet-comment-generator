@@ -113,6 +113,9 @@
     </VsctCompileDependsOn>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Resources\figlet-settings.png" />
+    <Content Include="Resources\figlet-ui.png" />
+    <Content Include="Resources\style.css" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

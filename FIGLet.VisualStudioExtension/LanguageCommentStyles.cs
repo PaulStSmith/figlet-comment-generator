@@ -474,10 +474,8 @@ public static class LanguageCommentStyles
         { "zsh", new CommentInfo("zsh", "Z Shell", Bash) },
         { "bash", new CommentInfo("bash", "Bash", Bash) },
         { "fish", new CommentInfo("fish", "Fish Shell", Bash) },
-        { "shellscript", new CommentInfo("shellscript", "Shell Script", Bash) },
     
         // Batch files
-        { "bat", new CommentInfo("bat", "Batch File", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
         { "cmd", new CommentInfo("cmd", "Command Prompt", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
         { "dos", new CommentInfo("dos", "DOS Batch", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
         { "batch", new CommentInfo("batch", "Batch File", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },

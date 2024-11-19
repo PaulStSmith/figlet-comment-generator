@@ -1,0 +1,299 @@
+﻿/* Design System Variables */
+:root {
+    /* Colors */
+    --primary: #0066cc;
+    --primary-dark: #1e40af;
+    --primary-light: #dbeafe;
+    --secondary: #2c5898;
+    --text: #333;
+    --text-light: #6b7280;
+    --border: #e2e8f0;
+    --highlight: #e6f3ff;
+    --warning: #fef3c7;
+    --warning-border: #d97706;
+    --code-bg: #f5f5f5;
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    /* Spacing */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-12: 3rem;
+}
+
+/* Base Layout */
+body {
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0 auto;
+    max-width: 900px;
+    padding: var(--space-8);
+    background-color: #fafafa;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+    margin: 0 0 var(--space-4);
+    line-height: 1.3;
+    color: var(--secondary);
+}
+
+h1 {
+    font-size: 2.25rem;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-8);
+}
+
+h2 {
+    font-size: 1.75rem;
+    margin-top: var(--space-8);
+}
+
+h3 {
+    font-size: 1.25rem;
+    margin-top: var(--space-6);
+}
+
+/* Content Sections */
+.step, .method, .important, .tip, .feature-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    margin: var(--space-6) 0;
+    padding: var(--space-6);
+    transition: box-shadow 0.3s ease;
+}
+
+    .step:hover, .method:hover, .feature-section:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+/* Version Sections */
+.version {
+    color: var(--primary);
+    font-size: 1.5em;
+    margin: var(--space-8) 0 var(--space-4);
+    font-weight: bold;
+}
+
+.version-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-8);
+    padding: var(--space-6);
+}
+
+.version-tag {
+    background: var(--primary-light);
+    border-radius: 9999px;
+    color: var(--primary-dark);
+    display: inline-block;
+    font-size: 0.875rem;
+    margin-bottom: var(--space-6);
+    padding: var(--space-1) var(--space-3);
+}
+
+/* Special Sections */
+.important {
+    border-left: 4px solid var(--primary);
+    background-color: var(--highlight);
+}
+
+.tip, .note {
+    border-left: 4px solid var(--warning-border);
+    background-color: var(--warning);
+}
+
+/* Language Grid System */
+.language-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    margin: var(--space-6) 0;
+}
+
+.language-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: var(--shadow-sm);
+    color: var(--text);
+    cursor: help;
+    font-size: 0.95rem;
+    padding: var(--space-3);
+    position: relative;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+    .language-item:hover {
+        border-color: var(--primary);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+/* Tooltips */
+.tooltip {
+    background: #1e293b;
+    border-radius: 6px;
+    bottom: 100%;
+    box-shadow: var(--shadow-md);
+    color: white;
+    font-family: 'Fira Code', Consolas, monospace;
+    font-size: 0.875rem;
+    left: 50%;
+    opacity: 0;
+    padding: var(--space-3);
+    position: absolute;
+    text-align: left;
+    transform: translate(-50%, 0);
+    transition: all 0.2s ease;
+    visibility: hidden;
+    white-space: pre;
+    width: max-content;
+    z-index: 10;
+}
+
+.language-item:hover .tooltip {
+    opacity: 1;
+    transform: translate(-50%, -0.5rem);
+    visibility: visible;
+}
+
+.tooltip::after {
+    border-color: #1e293b transparent transparent transparent;
+    border-style: solid;
+    border-width: 5px;
+    content: '';
+    left: 50%;
+    margin-left: -5px;
+    position: absolute;
+    top: 100%;
+}
+
+/* Lists */
+ul, ol {
+    padding-left: var(--space-6);
+    margin: var(--space-4) 0;
+}
+
+li {
+    margin: var(--space-2) 0;
+}
+
+.feature-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+}
+
+    .feature-item::before {
+        content: "→";
+        color: var(--primary);
+        font-weight: bold;
+    }
+
+/* Code Elements */
+.code, code {
+    background-color: var(--code-bg);
+    border-radius: 4px;
+    font-family: 'Fira Code', Consolas, monospace;
+    padding: 0.2em 0.4em;
+    font-size: 0.9em;
+}
+
+/* Images */
+.feature-image {
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    display: block;
+    margin: var(--space-6) auto;
+    max-width: 100%;
+}
+
+/* Utility Classes */
+.emoji {
+    font-size: 1.4em;
+    margin-right: var(--space-2);
+    vertical-align: middle;
+}
+
+.highlight {
+    background-color: var(--highlight);
+    border-radius: 4px;
+    padding: 0.2em 0.4em;
+}
+
+/* ASCII Art Display */
+pre {
+    background-color: var(--code-bg);
+    border-radius: 8px;
+    padding: var(--space-4);
+    overflow-x: auto;
+    margin: var(--space-4) 0;
+    font-family: 'Fira Code', Consolas, monospace;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: var(--space-4);
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+
+    .language-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .step, .method, .important, .tip, .feature-section {
+        padding: var(--space-4);
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background: white;
+        padding: 2cm;
+    }
+
+    .step, .method, .important, .tip, .feature-section {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid var(--border);
+    }
+
+    .tooltip {
+        display: none;
+    }
+
+    .language-grid {
+        break-inside: avoid;
+    }
+}
