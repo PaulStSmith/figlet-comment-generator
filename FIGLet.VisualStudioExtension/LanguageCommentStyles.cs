@@ -284,12 +284,13 @@ public class CommentStyleInfo
 }
 
 /// <summary>
-/// Represents information about a specific comment style.
+/// Represents information about a specific programming language.
 /// </summary>
-/// <param name="key">The unique key identifying the comment style.</param>
-/// <param name="name">The name of the comment style.</param>
-/// <param name="style">The <see cref="CommentStyleInfo"/> associated with the comment style.</param>
-public readonly struct CommentInfo(string key, string name, CommentStyleInfo style)
+/// <param name="key">A unique key identifying the programming language.</param>
+/// <param name="name">The name of the programming language.</param>
+/// <param name="extenstions">A string containing the most common file extensions associated with the programming language.</param>
+/// <param name="style">The <see cref="CommentStyleInfo"/> associated with the programming language.</param>
+public readonly struct ProgrammingLanguageInfo(string key, string name, string extenstions, CommentStyleInfo style)
 {
     /// <summary>
     /// Gets the unique key identifying the comment style.
@@ -300,6 +301,11 @@ public readonly struct CommentInfo(string key, string name, CommentStyleInfo sty
     /// Gets the name of the comment style.
     /// </summary>
     public string Name { get; } = name;
+
+    /// <summary>
+    /// Gets an array of the most common file extensions associated with the programming language.
+    /// </summary>
+    public string[] Extensions => extenstions.ToLowerInvariant().Split(';').Select(ext => ext.Trim()).ToArray();
 
     /// <summary>
     /// Gets the <see cref="CommentStyleInfo"/> associated with the comment style.
@@ -414,95 +420,94 @@ public static class LanguageCommentStyles
     /// <summary>
     /// Dictionary mapping language names to their respective comment styles.
     /// </summary>
-    public static readonly Dictionary<string, CommentInfo> SupportedLanguages = new(StringComparer.OrdinalIgnoreCase)
+    public static readonly Dictionary<string, ProgrammingLanguageInfo> SupportedLanguages = new(StringComparer.OrdinalIgnoreCase)
     {
         // C-style block comments
-        { "csharp", new CommentInfo("csharp", "C#", CStyleBlock) },
-        { "c/c++", new CommentInfo("c/c++", "C/C++", CStyleBlock) },
-        { "cpp", new CommentInfo("cpp", "C++", CStyleBlock) },
-        { "java", new CommentInfo("java", "Java", CStyleBlock) },
-        { "javascript", new CommentInfo("javascript", "JavaScript", CStyleBlock) },
-        { "typescript", new CommentInfo("typescript", "TypeScript", CStyleBlock) },
-        { "css", new CommentInfo("css", "CSS", CStyleBlock) },
-        { "rust", new CommentInfo("rust", "Rust", CStyleBlock) },
-        { "go", new CommentInfo("go", "Go", CStyleBlock) },
-        { "swift", new CommentInfo("swift", "Swift", CStyleBlock) },
-        { "php", new CommentInfo("php", "PHP", CStyleBlock) },
-        { "kotlin", new CommentInfo("kotlin", "Kotlin", CStyleBlock) },
-        { "scala", new CommentInfo("scala", "Scala", CStyleBlock) },
-        { "d", new CommentInfo("d", "D", CStyleBlock) },
-        { "objective-c", new CommentInfo("objective-c", "Objective-C", CStyleBlock) },
+        { "csharp", new ProgrammingLanguageInfo("csharp", "C#", "cs; csx", CStyleBlock) },
+        { "c/c++", new ProgrammingLanguageInfo("c/c++", "C/C++", "c; h; cpp; hpp", CStyleBlock) },
+        { "cpp", new ProgrammingLanguageInfo("cpp", "C++", "cpp; hpp; cc; hh; cxx; hxx", CStyleBlock) },
+        { "java", new ProgrammingLanguageInfo("java", "Java", "java", CStyleBlock) },
+        { "javascript", new ProgrammingLanguageInfo("javascript", "JavaScript", "js; jsx; mjs", CStyleBlock) },
+        { "typescript", new ProgrammingLanguageInfo("typescript", "TypeScript", "ts; tsx", CStyleBlock) },
+        { "css", new ProgrammingLanguageInfo("css", "CSS", "css", CStyleBlock) },
+        { "rust", new ProgrammingLanguageInfo("rust", "Rust", "rs", CStyleBlock) },
+        { "go", new ProgrammingLanguageInfo("go", "Go", "go", CStyleBlock) },
+        { "swift", new ProgrammingLanguageInfo("swift", "Swift", "swift", CStyleBlock) },
+        { "php", new ProgrammingLanguageInfo("php", "PHP", "php; phtml", CStyleBlock) },
+        { "kotlin", new ProgrammingLanguageInfo("kotlin", "Kotlin", "kt; kts", CStyleBlock) },
+        { "scala", new ProgrammingLanguageInfo("scala", "Scala", "scala", CStyleBlock) },
+        { "d", new ProgrammingLanguageInfo("d", "D", "d", CStyleBlock) },
+        { "objective-c", new ProgrammingLanguageInfo("objective-c", "Objective-C", "m; mm", CStyleBlock) },
     
         // Single line comments
-        { "python", new CommentInfo("python", "Python", Hash) },
-        { "ruby", new CommentInfo("ruby", "Ruby", Hash) },
-        { "perl", new CommentInfo("perl", "Perl", Hash) },
-        { "r", new CommentInfo("r", "R", Hash) },
-        { "yaml", new CommentInfo("yaml", "YAML", Hash) },
-        { "shell", new CommentInfo("shell", "Shell", Hash) },
-        { "basic", new CommentInfo("basic", "BASIC", Quote) },
-        { "vb", new CommentInfo("vb", "Visual Basic", Quote) },
-        { "fortran", new CommentInfo("fortran", "FORTRAN", Quote) },
-        { "lisp", new CommentInfo("lisp", "Lisp", Semicolon) },
-        { "scheme", new CommentInfo("scheme", "Scheme", Semicolon) },
-        { "fsharp", new CommentInfo("fsharp", "F#", MLComment) },
+        { "python", new ProgrammingLanguageInfo("python", "Python", "py; pyw; pyx", Hash) },
+        { "ruby", new ProgrammingLanguageInfo("ruby", "Ruby", "rb; rbw", Hash) },
+        { "perl", new ProgrammingLanguageInfo("perl", "Perl", "pl; pm", Hash) },
+        { "r", new ProgrammingLanguageInfo("r", "R", "r; R", Hash) },
+        { "yaml", new ProgrammingLanguageInfo("yaml", "YAML", "yaml; yml", Hash) },
+        { "shell", new ProgrammingLanguageInfo("shell", "Shell", "sh", Hash) },
+        { "basic", new ProgrammingLanguageInfo("basic", "BASIC", "bas", Quote) },
+        { "vb", new ProgrammingLanguageInfo("vb", "Visual Basic", "vb; bas", Quote) },
+        { "fortran", new ProgrammingLanguageInfo("fortran", "FORTRAN", "f; f90; f95; f03; f08", Quote) },
+        { "lisp", new ProgrammingLanguageInfo("lisp", "Lisp", "lisp; lsp; l", Semicolon) },
+        { "scheme", new ProgrammingLanguageInfo("scheme", "Scheme", "scm; ss", Semicolon) },
+        { "fsharp", new ProgrammingLanguageInfo("fsharp", "F#", "fs; fsx", MLComment) },
     
         // HTML-style comments
-        { "html", new CommentInfo("html", "HTML", HTML) },
-        { "xml", new CommentInfo("xml", "XML", HTML) },
-        { "xaml", new CommentInfo("xaml", "XAML", HTML) },
-        { "svg", new CommentInfo("svg", "SVG", HTML) },
-        { "aspx", new CommentInfo("aspx", "ASP.NET", HTML) },
+        { "html", new ProgrammingLanguageInfo("html", "HTML", "html; htm", HTML) },
+        { "xml", new ProgrammingLanguageInfo("xml", "XML", "xml", HTML) },
+        { "xaml", new ProgrammingLanguageInfo("xaml", "XAML", "xaml", HTML) },
+        { "svg", new ProgrammingLanguageInfo("svg", "SVG", "svg", HTML) },
+        { "aspx", new ProgrammingLanguageInfo("aspx", "ASP.NET", "aspx; ascx", HTML) },
     
         // SQL variants
-        { "sql", new CommentInfo("sql", "SQL", SQLLine) },
-        { "tsql", new CommentInfo("tsql", "T-SQL", SQLLine) },
-        { "mysql", new CommentInfo("mysql", "MySQL", SQLLine) },
-        { "pgsql", new CommentInfo("pgsql", "PostgreSQL", SQLLine) },
-        { "plsql", new CommentInfo("plsql", "PL/SQL", SQLLine) },
-        { "sqlite", new CommentInfo("sqlite", "SQLite", SQLLine) },
+        { "sql", new ProgrammingLanguageInfo("sql", "SQL", "sql", SQLLine) },
+        { "tsql", new ProgrammingLanguageInfo("tsql", "T-SQL", "sql", SQLLine) },
+        { "mysql", new ProgrammingLanguageInfo("mysql", "MySQL", "sql", SQLLine) },
+        { "pgsql", new ProgrammingLanguageInfo("pgsql", "PostgreSQL", "sql", SQLLine) },
+        { "plsql", new ProgrammingLanguageInfo("plsql", "PL/SQL", "sql; pls", SQLLine) },
+        { "sqlite", new ProgrammingLanguageInfo("sqlite", "SQLite", "sql", SQLLine) },
     
         // Pascal-style comments
-        { "pascal", new CommentInfo("pascal", "Pascal", Pascal) },
+        { "pascal", new ProgrammingLanguageInfo("pascal", "Pascal", "pas; pp", Pascal) },
     
         // PowerShell
-        { "ps1", new CommentInfo("ps1", "PowerShell", PowerShell) },
-        { "powershell", new CommentInfo("powershell", "PowerShell", PowerShell) },
+        { "ps1", new ProgrammingLanguageInfo("ps1", "PowerShell", "ps1; psm1; psd1", PowerShell) },
+        { "powershell", new ProgrammingLanguageInfo("powershell", "PowerShell", "ps1; psm1; psd1", PowerShell) },
     
         // Bash
-        { "sh", new CommentInfo("sh", "Shell Script", Bash) },
-        { "zsh", new CommentInfo("zsh", "Z Shell", Bash) },
-        { "bash", new CommentInfo("bash", "Bash", Bash) },
-        { "fish", new CommentInfo("fish", "Fish Shell", Bash) },
+        { "sh", new ProgrammingLanguageInfo("sh", "Shell Script", "sh", Bash) },
+        { "zsh", new ProgrammingLanguageInfo("zsh", "Z Shell", "zsh", Bash) },
+        { "bash", new ProgrammingLanguageInfo("bash", "Bash", "sh; bash", Bash) },
+        { "fish", new ProgrammingLanguageInfo("fish", "Fish Shell", "fish", Bash) },
     
         // Batch files
-        { "cmd", new CommentInfo("cmd", "Command Prompt", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
-        { "dos", new CommentInfo("dos", "DOS Batch", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
-        { "batch", new CommentInfo("batch", "Batch File", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
+        { "dos", new ProgrammingLanguageInfo("dos", "DOS Batch", "bat", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
+        { "batch", new ProgrammingLanguageInfo("batch", "Batch File", "bat; cmd", new CommentStyleInfo(CommentStyle.Custom, "::", null, null)) },
 
         // Unique comment styles
-        { "lua", new CommentInfo("lua", "Lua", Lua) },
-        { "matlab", new CommentInfo("matlab", "MATLAB", Matlab) },
-        { "octave", new CommentInfo("octave", "Octave", Matlab) },
-        { "haskell", new CommentInfo("haskell", "Haskell", Haskell) },
-        { "handlebars", new CommentInfo("handlebars", "Handlebars", Handlebars) },
-        { "razor", new CommentInfo("razor", "Razor", Razor) },
-        { "twig", new CommentInfo("twig", "Twig", Twig) },
+        { "lua", new ProgrammingLanguageInfo("lua", "Lua", "lua", Lua) },
+        { "matlab", new ProgrammingLanguageInfo("matlab", "MATLAB", "m", Matlab) },
+        { "octave", new ProgrammingLanguageInfo("octave", "Octave", "m", Matlab) },
+        { "haskell", new ProgrammingLanguageInfo("haskell", "Haskell", "hs; lhs", Haskell) },
+        { "handlebars", new ProgrammingLanguageInfo("handlebars", "Handlebars", "hbs; handlebars", Handlebars) },
+        { "razor", new ProgrammingLanguageInfo("razor", "Razor", "cshtml; vbhtml", Razor) },
+        { "twig", new ProgrammingLanguageInfo("twig", "Twig", "twig", Twig) },
 
         // Using existing comment styles
-        { "dart", new CommentInfo("dart", "Dart", CStyleBlock) },
-        { "julia", new CommentInfo("julia", "Julia", Hash) },
-        { "erlang", new CommentInfo("erlang", "Erlang", new CommentStyleInfo(CommentStyle.Custom, "%", null, null)) },
-        { "elixir", new CommentInfo("elixir", "Elixir", Hash) },
-        { "groovy", new CommentInfo("groovy", "Groovy", CStyleBlock) },
-        { "ini", new CommentInfo("ini", "INI", Semicolon) },
-        { "toml", new CommentInfo("toml", "TOML", Hash) },
-        { "dockerfile", new CommentInfo("dockerfile", "Dockerfile", Hash) },
-        { "makefile", new CommentInfo("makefile", "Makefile", Hash) },
-        { "cmake", new CommentInfo("cmake", "CMake", Hash) },
-        { "gradle", new CommentInfo("gradle", "Gradle", CStyleBlock) },
-        { "autohotkey", new CommentInfo("autohotkey", "AutoHotkey", Semicolon) },
-        { "powerquery", new CommentInfo("powerquery", "Power Query", CStyleBlock) },
+        { "dart", new ProgrammingLanguageInfo("dart", "Dart", "dart", CStyleBlock) },
+        { "julia", new ProgrammingLanguageInfo("julia", "Julia", "jl", Hash) },
+        { "erlang", new ProgrammingLanguageInfo("erlang", "Erlang", "erl; hrl", new CommentStyleInfo(CommentStyle.Custom, "%", null, null)) },
+        { "elixir", new ProgrammingLanguageInfo("elixir", "Elixir", "ex; exs", Hash) },
+        { "groovy", new ProgrammingLanguageInfo("groovy", "Groovy", "groovy; gvy", CStyleBlock) },
+        { "ini", new ProgrammingLanguageInfo("ini", "INI", "ini", Semicolon) },
+        { "toml", new ProgrammingLanguageInfo("toml", "TOML", "toml", Hash) },
+        { "dockerfile", new ProgrammingLanguageInfo("dockerfile", "Dockerfile", "dockerfile", Hash) },
+        { "makefile", new ProgrammingLanguageInfo("makefile", "Makefile", "makefile; mk", Hash) },
+        { "cmake", new ProgrammingLanguageInfo("cmake", "CMake", "cmake", Hash) },
+        { "gradle", new ProgrammingLanguageInfo("gradle", "Gradle", "gradle", CStyleBlock) },
+        { "autohotkey", new ProgrammingLanguageInfo("autohotkey", "AutoHotkey", "ahk", Semicolon) },
+        { "powerquery", new ProgrammingLanguageInfo("powerquery", "Power Query", "pq", CStyleBlock) },    
     };
 
     /// <summary>

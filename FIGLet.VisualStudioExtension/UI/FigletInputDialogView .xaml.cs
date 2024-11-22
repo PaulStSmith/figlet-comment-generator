@@ -1,9 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.Encodings.Web;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -14,7 +12,6 @@ namespace FIGLet.VisualStudioExtension.UI;
 /// </summary>
 public partial class FIGLetInputDialogView : UserControl
 {
-    private string _language;
     private readonly AsyncPackage _package;
 
     /// <summary>
@@ -36,6 +33,14 @@ public partial class FIGLetInputDialogView : UserControl
     /// </summary>
     public bool? DialogResult { get; private set; }
 
+    /// <summary>
+    /// Gets or sets the current language.
+    /// </summary>
+    /// <remarks>
+    /// Language is used to determine the comment style for the preview text.
+    /// </remarks>
+    public string CurrentLanguage { get; set; }
+
     private readonly FIGLetOptions options;
 
     /// <summary>
@@ -43,11 +48,26 @@ public partial class FIGLetInputDialogView : UserControl
     /// </summary>
     /// <param name="package">The async package.</param>
     /// <param name="language">The programming language.</param>
-    public FIGLetInputDialogView(AsyncPackage package, string language)
+    /// <param name="fileName">The name of the file being edited.</param>
+    public FIGLetInputDialogView(AsyncPackage package, string language, string fileName)
     {
         InitializeComponent();
         _package = package;
-        _language = language;
+        CurrentLanguage = language;
+
+        if ((LanguageCommentStyles.SupportedLanguages.TryGetValue(language, out var langInfo) == false) && !string.IsNullOrEmpty(fileName))
+        {
+            /*
+             * Try to get the file extension of the active document
+             */
+             var ext = Path.GetExtension(fileName).ToLowerInvariant().TrimStart('.');
+            foreach (var lang in LanguageCommentStyles.SupportedLanguages)
+                if (lang.Value.Extensions.Contains(ext))
+                {
+                    CurrentLanguage = lang.Key;
+                    break;
+                }
+        }
 
         InputTextBox.TextChanged += (s, e) => UpdatePreview();
 
@@ -65,27 +85,14 @@ public partial class FIGLetInputDialogView : UserControl
         {
             var items = LanguageCommentStyles.SupportedLanguages.OrderBy(x => x.Value.Name).Select(x => x.Value).ToList();
             LanguageComboBox.ItemsSource = items;
-            LanguageComboBox.SelectedItem = items.FirstOrDefault(x => string.Compare(x.Key, language, StringComparison.OrdinalIgnoreCase) == 0);
-
-            items = LanguageCommentStyles.SupportedLanguages.Select(x => x.Value).Skip(51).OrderBy(x => x.Name).ToList();
-            var rndr = new FIGLetRenderer(FIGFont.Default);
-            for (var i = 0; i < items.Count; i++)
-            {
-                var txt = FIGLetRenderer.Render(items[i].Name, FIGFont.Default, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
-                var comment = LanguageCommentStyles.WrapInComments(txt, items[i].Key);
-                var enc = HtmlEncoder.Create(new TextEncoderSettings());
-                Debug.WriteLine("<div class=\"language-item\">");
-                Debug.WriteLine(items[i].Name);
-                Debug.WriteLine($"<div class=\"tooltip\">{enc.Encode(comment)}</div>");
-                Debug.WriteLine("</div>");
-            }
+            LanguageComboBox.SelectedItem = items.FirstOrDefault(x => string.Compare(x.Key, CurrentLanguage, StringComparison.OrdinalIgnoreCase) == 0);
         };
 
         LanguageComboBox.SelectionChanged += (s, e) =>
         {
-            if (LanguageComboBox.SelectedItem is CommentInfo info)
+            if (LanguageComboBox.SelectedItem is ProgrammingLanguageInfo info)
             {
-                _language = info.Key;
+                CurrentLanguage = info.Key;
                 UpdatePreview();
             }
         };
@@ -128,7 +135,7 @@ public partial class FIGLetInputDialogView : UserControl
     private string RenderDefaultPreview()
     {
         var text = FIGLetRenderer.Render("Hello, World!", SelectedFont, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
-        return LanguageCommentStyles.WrapInComments(text, _language);
+        return LanguageCommentStyles.WrapInComments(text, CurrentLanguage);
     }
 
     /// <summary>
@@ -144,7 +151,7 @@ public partial class FIGLetInputDialogView : UserControl
         }
 
         var txt = FIGLetRenderer.Render(InputTextBox.Text, SelectedFont, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
-        PreviewBlock.Text = LanguageCommentStyles.WrapInComments(txt, _language);
+        PreviewBlock.Text = LanguageCommentStyles.WrapInComments(txt, CurrentLanguage);
     }
 
     /// <summary>
@@ -217,6 +224,6 @@ public partial class FIGLetInputDialogView : UserControl
 
     private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-
+        UpdatePreview();
     }
 }

@@ -17,7 +17,7 @@ public static class DialogHelper
     {
         var window = new Window
         {
-            Title = "FIGLet Comment Generator",
+            Title = $"FIGLet Comment Generator - {content.CurrentLanguage}",
             Content = content,
             SizeToContent = SizeToContent.WidthAndHeight,
             WindowStartupLocation = WindowStartupLocation.CenterScreen,

@@ -29,6 +29,7 @@ internal sealed class FIGLetCommentCommand
     private readonly IMenuCommandService commandService;
     private readonly CodeElementDetector detector;
     private readonly DTE2 dte;
+    private readonly IInfoBarService infoBarService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FIGLetCommentCommand"/> class.
@@ -44,6 +45,7 @@ internal sealed class FIGLetCommentCommand
         this.commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
         this.dte = package.GetService<SDTE, DTE2>();
         this.detector = new CodeElementDetector(package);
+        this.infoBarService = new InfoBarService(package);
 
         var menuCommandID = new CommandID(PackageGuids.guidFIGLetCommentPackageCmdSet, PackageIds.FIGLetCommentCommandId);
         var oleMenuItem = new OleMenuCommand(Execute, menuCommandID);  // Changed to OleMenuCommand
@@ -136,15 +138,23 @@ internal sealed class FIGLetCommentCommand
     {
         ThreadHelper.ThrowIfNotOnUIThread();
 
-        var doc = dte?.ActiveDocument;
+        var doc = GetActiveDocument();
         if (doc == null) return;
 
         // Show input dialog
-        var dialogContent = new FIGLetInputDialogView(package, doc.Language);
+        var dialogContent = new FIGLetInputDialogView(package, doc.Language, doc.FullName);
         if (DialogHelper.ShowDialog(dialogContent) != true)
             return;
 
         InsertBanner(dialogContent.PreviewBlock.Text);
+    }
+
+    private Document GetActiveDocument()
+    {
+        var doc = dte?.ActiveDocument;
+        if (doc == null)
+            infoBarService.ShowMessage("No active document found.");
+        return doc;
     }
 
     /// <summary>
@@ -158,7 +168,7 @@ internal sealed class FIGLetCommentCommand
 
         try
         {
-            var doc = dte?.ActiveDocument;
+            var doc = GetActiveDocument();
             if (doc == null) return;
 
             var _ = package.JoinableTaskFactory.RunAsync(async () =>
@@ -172,7 +182,7 @@ internal sealed class FIGLetCommentCommand
                     return;
 
                 // Show input dialog with class name pre-filled
-                var dialogContent = new FIGLetInputDialogView(package, doc.Language)
+                var dialogContent = new FIGLetInputDialogView(package, doc.Language, doc.FullName)
                 {
                     InputText = ce.ClassName
                 };
@@ -216,7 +226,7 @@ internal sealed class FIGLetCommentCommand
 
         try
         {
-            var doc = dte?.ActiveDocument;
+            var doc = GetActiveDocument();
             if (doc == null) return;
 
             var _ = package.JoinableTaskFactory.RunAsync(async () =>
@@ -230,7 +240,7 @@ internal sealed class FIGLetCommentCommand
                     return;
 
                 // Show input dialog with member name pre-filled
-                var dialogContent = new FIGLetInputDialogView(package, doc.Language)
+                var dialogContent = new FIGLetInputDialogView(package, doc.Language, doc.FullName)
                 {
                     InputText = ce.MethodName
                 };

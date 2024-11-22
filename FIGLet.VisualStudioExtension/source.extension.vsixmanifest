@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e" Version="1.2" Language="en-US" Publisher="Paulo Santos - Paul.St.Smith" />
+        <Identity Id="FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e" Version="1.2.1" Language="en-US" Publisher="Paulo Santos - Paul.St.Smith" />
         <DisplayName>FIGLet Comment Generator</DisplayName>
         <Description xml:space="preserve">
 Create beautiful ASCII art comments that make your code documentation stand out!
