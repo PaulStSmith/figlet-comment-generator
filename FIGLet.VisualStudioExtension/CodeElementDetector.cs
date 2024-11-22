@@ -49,7 +49,7 @@ internal partial class CodeElementDetector(AsyncPackage package)
                 return null;
 
             // Get the current active IVsWindowFrame
-            if (monitorSelection.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out object activeFrame) != VSConstants.S_OK)
+            if (monitorSelection.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out var activeFrame) != VSConstants.S_OK)
                 return null;
 
             if (activeFrame is not IVsWindowFrame windowFrame)
@@ -90,7 +90,7 @@ internal partial class CodeElementDetector(AsyncPackage package)
     {
         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-        enumeration = enumeration ?? typeof(vsCMElement);
+        enumeration ??= typeof(vsCMElement);
         if (enumeration.IsEnum == false)
             throw new ArgumentException("Enumeration type expected.", nameof(enumeration));
 
@@ -165,11 +165,11 @@ internal partial class CodeElementDetector(AsyncPackage package)
     private static (string className, string methodName) ExtractClassAndMethodName(string fqName, CodeElement el = null)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
-        fqName = fqName ?? string.Empty;
+        fqName ??= string.Empty;
         if (fqName.Contains("("))
             fqName = fqName.Substring(0, fqName.IndexOf("("));
 
-        var parts = fqName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+        var parts = fqName.Split(['.'], StringSplitOptions.RemoveEmptyEntries);
 
         if (el != null)
         {

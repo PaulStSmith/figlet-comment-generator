@@ -81,7 +81,10 @@ internal sealed class FIGLetCommentCommand
     private void AddContextMenuCommand(int commandId, string text, EventHandler handler)
     {
         var commandID = new CommandID(PackageGuids.guidFIGLetContextMenuCmdSet, commandId);
-        var menuCommand = new OleMenuCommand(handler, commandID);
+        var menuCommand = new OleMenuCommand(handler, commandID)
+        {
+            Text = text
+        };
         menuCommand.BeforeQueryStatus += UpdateCommandStatus;
         commandService.AddCommand(menuCommand);
     }
@@ -95,8 +98,7 @@ internal sealed class FIGLetCommentCommand
     {
         ThreadHelper.ThrowIfNotOnUIThread();
 
-        var command = sender as OleMenuCommand;
-        if (command == null) return;
+        if (sender is not OleMenuCommand command) return;
 
         // Enable command only if we have an active text document
         var isEnabled = IsTextEditorActive();
@@ -345,108 +347,45 @@ internal sealed class FIGLetCommentCommand
         language = language.ToLowerInvariant().Trim();
 
         // Group languages by their documentation style
-        switch (language)
+        return language switch
         {
             // Triple-slash documentation style
-            case "csharp":
-            case "fsharp":
-            case "rust":
-                return line.StartsWith("///") ||           // Doc comments
-                       line.StartsWith("[");               // Attributes/Decorators
-
-            // Single-slash documentation
-            case "c/c++":
-            case "cpp":
-            case "d":
-            case "objective-c":
-                return line.StartsWith("///") ||           // Doc comments
-                       line.StartsWith("//!") ||           // Alternative doc comments
-                       line.StartsWith("@");               // Attributes (Objective-C)
-
-            // Triple-quote documentation
-            case "basic":
-            case "vb":
-                return line.StartsWith("'''") ||           // Doc comments
-                       line.StartsWith("<");               // Attributes
-
-            // Hash-based documentation
-            case "python":
-            case "ruby":
-            case "perl":
-            case "yaml":
-            case "shell":
-            case "ps1":
-            case "powershell":
-            case "sh":
-            case "zsh":
-            case "bash":
-            case "fish":
-            case "shellscript":
-                return line.StartsWith("#") ||             // Doc comments
-                       line.StartsWith("@");               // Decorators (Python)
-
-            // R-specific documentation
-            case "r":
-                return line.StartsWith("#'");              // Roxygen2 doc comments
-
-            // Fortran documentation
-            case "fortran":
-                return line.StartsWith("!>") ||            // Doc comments
-                       line.StartsWith("!<");              // Alternative doc comments
-
-            // Lisp-family documentation
-            case "lisp":
-            case "scheme":
-                return line.StartsWith(";;;") ||           // Doc comments
-                       line.StartsWith(";;");              // Secondary doc comments
-
-            // SQL-family documentation
-            case "sql":
-            case "tsql":
-            case "mysql":
-            case "pgsql":
-            case "plsql":
-            case "sqlite":
-                return line.StartsWith("--") ||            // Doc comments
-                       line.StartsWith("--/");             // Alternative doc style (some dialects)
-
-            // Pascal documentation
-            case "pascal":
-                return line.StartsWith("///") ||           // Doc comments
-                       line.StartsWith("//");              // Alternative doc comments
-
-            // Batch/DOS documentation
-            case "bat":
-            case "cmd":
-            case "dos":
-            case "batch":
-                return line.StartsWith("::") ||            // Doc comments
-                       line.StartsWith("rem", StringComparison.OrdinalIgnoreCase); // REM comments
-
-            // XML-style documentation
-            case "html":
-            case "xml":
-            case "xaml":
-            case "svg":
-            case "aspx":
-                return line.StartsWith("<!--");            // XML comments
-
-            // Languages that don't typically use line-based documentation
-            case "java":
-            case "javascript":
-            case "typescript":
-            case "css":
-            case "go":
-            case "swift":
-            case "php":
-            case "kotlin":
-            case "scala":
-                return line.StartsWith("@");               // Only check for annotations/decorators
-                                                           // (Their doc comments are typically block-based)
-
-            default:
-                return false;
-        }
+            "csharp" or "fsharp" or "rust" => line.StartsWith("///") ||           // Doc comments
+                                   line.StartsWith("["),// Attributes/Decorators
+                                                        // Single-slash documentation
+            "c/c++" or "cpp" or "d" or "objective-c" => line.StartsWith("///") ||           // Doc comments
+                                   line.StartsWith("//!") ||           // Alternative doc comments
+                                   line.StartsWith("@"),// Attributes (Objective-C)
+                                                        // Triple-quote documentation
+            "basic" or "vb" => line.StartsWith("'''") ||           // Doc comments
+                                   line.StartsWith("<"),// Attributes
+                                                        // Hash-based documentation
+            "python" or "ruby" or "perl" or "yaml" or "shell" or "ps1" or "powershell" or "sh" or "zsh" or "bash" or "fish" or "shellscript" => line.StartsWith("#") ||             // Doc comments
+                                   line.StartsWith("@"),// Decorators (Python)
+                                                        // R-specific documentation
+            "r" => line.StartsWith("#'"),// Roxygen2 doc comments
+                                         // Fortran documentation
+            "fortran" => line.StartsWith("!>") ||            // Doc comments
+                                   line.StartsWith("!<"),// Alternative doc comments
+                                                         // Lisp-family documentation
+            "lisp" or "scheme" => line.StartsWith(";;;") ||           // Doc comments
+                                   line.StartsWith(";;"),// Secondary doc comments
+                                                         // SQL-family documentation
+            "sql" or "tsql" or "mysql" or "pgsql" or "plsql" or "sqlite" => line.StartsWith("--") ||            // Doc comments
+                                   line.StartsWith("--/"),// Alternative doc style (some dialects)
+                                                          // Pascal documentation
+            "pascal" => line.StartsWith("///") ||           // Doc comments
+                                   line.StartsWith("//"),// Alternative doc comments
+                                                         // Batch/DOS documentation
+            "bat" or "cmd" or "dos" or "batch" => line.StartsWith("::") ||            // Doc comments
+                                   line.StartsWith("rem", StringComparison.OrdinalIgnoreCase),// REM comments
+                                                                                              // XML-style documentation
+            "html" or "xml" or "xaml" or "svg" or "aspx" => line.StartsWith("<!--"),// XML comments
+                                                                                    // Languages that don't typically use line-based documentation
+            "java" or "javascript" or "typescript" or "css" or "go" or "swift" or "php" or "kotlin" or "scala" => line.StartsWith("@"),// Only check for annotations/decorators
+                                                                                                                                       // (Their doc comments are typically block-based)
+            _ => false,
+        };
     }
     
     /// <summary>
@@ -479,29 +418,6 @@ internal sealed class FIGLetCommentCommand
         return m.Value;
     }
     
-    /// <summary>
-    /// Tries to get the value of a property from the given properties collection.
-    /// </summary>
-    /// <typeparam name="T">The type of the property value.</typeparam>
-    /// <param name="properties">The properties collection.</param>
-    /// <param name="name">The name of the property.</param>
-    /// <param name="defaultValue">The default value to return if the property is not found.</param>
-    /// <returns>The value of the property if found, otherwise the default value.</returns>
-    T TryGetValue<T>(Properties properties, string name, T defaultValue)
-    {
-        ThreadHelper.ThrowIfNotOnUIThread();
-
-        try
-        {
-            return (T)properties.Item(name).Value;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Failed to retrieve property value: {{{ex.GetType()}}} {ex.Message}");
-            return defaultValue;
-        }
-    }
-
     static void HandleException(Exception ex, [CallerMemberName] string source = "")
     {
         var msg = $"Error executing {source}:{Environment.NewLine}{ex.Message}";

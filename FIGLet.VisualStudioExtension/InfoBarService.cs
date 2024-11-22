@@ -37,12 +37,11 @@ public class InfoBarService : IInfoBarService
             KnownMonikers.StatusInformation,
             isCloseButtonVisible: true);
 
-        IVsInfoBarUIElement element = _infoBarUIFactory.CreateInfoBar(model);
+        var element = _infoBarUIFactory.CreateInfoBar(model);
 
-        var shell = _serviceProvider.GetService(typeof(SVsShell)) as IVsShell;
-        if (shell != null)
+        if (_serviceProvider.GetService(typeof(SVsShell)) is IVsShell shell)
         {
-            shell.GetProperty((int)__VSSPROPID7.VSSPROPID_MainWindowInfoBarHost, out object host);
+            shell.GetProperty((int)__VSSPROPID7.VSSPROPID_MainWindowInfoBarHost, out var host);
             var infoBarHost = host as IVsInfoBarHost;
             infoBarHost?.AddInfoBar(element);
         }
