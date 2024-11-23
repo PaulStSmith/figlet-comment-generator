@@ -1,0 +1,95 @@
+{
+  "name": "figlet",
+  "displayName": "FIGlet Comment Generator",
+  "description": "Create beautiful ASCII art comments in your code using FIGlet fonts",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "figlet.insertBanner",
+        "title": "Generate FIGlet Banner"
+      },
+      {
+        "command": "figlet.selectFontDirectory",
+        "title": "Select Font Directory",
+        "category": "FIGlet Comments",
+        "icon": "${folder}"
+      },
+      {
+        "command": "figlet.selectDefaultFont",
+        "title": "Select Default Font",
+        "category": "FIGlet Comments"
+      },
+      {
+        "command": "figlet.inspectConfig",
+        "title": "Inspect FIGlet Configuration"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "figlet.insertBanner",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "FIGlet Comments",
+      "properties": {
+        "figlet.fontDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Directory containing FIGlet font files (.flf)",
+          "markdownDescription": "Directory containing FIGlet font files (.flf). [Browse...](command:figlet.selectFontDirectory)"
+        },
+        "figlet.defaultFont": {
+          "type": "string",
+          "default": "small",
+          "description": "Default FIGlet font to use",
+          "markdownDescription": "Default FIGlet font to use. [Select Font...](command:figlet.selectDefaultFont)"
+        },
+        "figlet.layoutMode": {
+          "type": "string",
+          "enum": [
+            "full",
+            "kerning",
+            "smush"
+          ],
+          "default": "smush",
+          "description": "Layout mode for FIGlet text"
+        }
+      }
+    }
+  },
+  "files": [
+    "out/**/*",
+    "resources/**/*"
+  ],
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.95.0",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "eslint": "^9.13.0",
+    "typescript": "^5.6.3",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}

@@ -1,0 +1,37 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+	"files.exclude": {
+		"out": false // set this to true to hide the "out" folder with the compiled JS files
+	},
+	"search.exclude": {
+		"out": true // set this to false to include "out" folder in search results
+	},
+	// Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+	"typescript.tsc.autoDetect": "off",
+
+	// VSCode settings.json configuration
+    
+    // Set PowerShell as the default integrated terminal
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    
+    // Configure the PowerShell terminal profile
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "fnm env --use-on-cd | Out-String | Invoke-Expression; fnm use 22"
+            ]
+        }
+    },
+
+    // Optional: Auto save settings
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+
+    // Optional: Node.js path settings (if needed)
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "npm.autoDetect": "on"
+}
