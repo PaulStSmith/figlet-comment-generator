@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FIGPrint": {
+      "commandName": "Project",
+      "commandLineArgs": "--font standard Hello, World!"
+    }
+  }
+}
