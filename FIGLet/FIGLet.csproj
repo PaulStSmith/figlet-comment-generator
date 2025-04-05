@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="fonts\small.flf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 

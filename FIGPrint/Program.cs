@@ -59,6 +59,8 @@ namespace FIGPrint
                     return Task.FromResult(1);
                 }
 
+                Console.OutputEncoding = System.Text.Encoding.UTF8; // Ensure UTF-8 encoding for console output
+
                 return RenderTextWithFigletAsync(font, layout, string.Join(" ", text));
             }, fontOption, layoutOption, showListOption, textArgument);
 
@@ -71,7 +73,7 @@ namespace FIGPrint
             try
             {
                 // Find the font file
-                string fontPath = FindFontFile(fontName);
+                var fontPath = FindFontFile(fontName);
 
                 if (string.IsNullOrEmpty(fontPath))
                 {
@@ -87,7 +89,7 @@ namespace FIGPrint
                 var renderer = new FIGLetRenderer(font);
 
                 // Render the text using the specified layout mode
-                string renderedText = renderer.Render(textToRender, layout);
+                var renderedText = await Task.Run(() => renderer.Render(textToRender, layout));
 
                 // Output the rendered text
                 Console.WriteLine(renderedText);
@@ -101,7 +103,7 @@ namespace FIGPrint
             }
         }
 
-        private static string FindFontFile(string fontName)
+        private static string? FindFontFile(string fontName)
         {
             // Determine the fonts directory relative to the executable
             string exePath = AppDomain.CurrentDomain.BaseDirectory;

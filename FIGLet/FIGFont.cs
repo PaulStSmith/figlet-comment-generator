@@ -1,4 +1,6 @@
-﻿namespace FIGLet;
+﻿using System.Text;
+
+namespace FIGLet;
 
 /*
  *  ___ ___ ___ ___        _   
@@ -105,7 +107,7 @@ public class FIGFont
         if (stream == null)
             return null;
 
-        using var reader = new StreamReader(stream);
+        using var reader = new StreamReader(stream, Encoding.UTF8, true);
         return FromReader(reader);
     }
 
