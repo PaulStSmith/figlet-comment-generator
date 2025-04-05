@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIGLet.VisualStudioExtension", "FIGLet.VisualStudioExtension\FIGLet.VisualStudioExtension.csproj", "{E6189E8C-3834-4AB3-81BF-76308527EAF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIGPrint", "FIGPrint\FIGPrint.csproj", "{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,18 @@ Global
 		{E6189E8C-3834-4AB3-81BF-76308527EAF9}.Release|arm64.Build.0 = Release|arm64
 		{E6189E8C-3834-4AB3-81BF-76308527EAF9}.Release|x86.ActiveCfg = Release|x86
 		{E6189E8C-3834-4AB3-81BF-76308527EAF9}.Release|x86.Build.0 = Release|x86
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Debug|arm64.Build.0 = Debug|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Debug|x86.Build.0 = Debug|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Release|arm64.ActiveCfg = Release|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Release|arm64.Build.0 = Release|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Release|x86.ActiveCfg = Release|Any CPU
+		{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
