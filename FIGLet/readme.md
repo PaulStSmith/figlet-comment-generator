@@ -39,6 +39,18 @@ string asciiArt = renderer.Render("Hello World!", LayoutMode.Smushing);
 Console.WriteLine(asciiArt);
 ```
 
+### Sample Output
+
+Below is an example of text rendered using the default settings:
+
+```
+  _  _     _ _          _        _       _    _ _
+ | || |___| | |___      \ \    / /__ _ _| |__| | |
+ | __ / -_) | / _ \_     \ \/\/ / _ \ '_| / _` |_|
+ |_||_\___|_|_\___( )     \_/\_/\___/_| |_\__,_(_)
+                  |/
+```
+
 ### Layout Modes
 
 The library supports three layout modes:
@@ -133,5 +145,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Credits
 
 - Original FIGLet concept by Frank, Ian & Glenn
-- FIGLet specifications: http://www.figlet.org/
+- FIGLet specifications: http://www.org/
 - Implementation by Paulo Santos
