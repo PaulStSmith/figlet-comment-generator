@@ -130,10 +130,6 @@ The library consists of four main components:
 
 - .NET 8.0 or higher
 
-## Installation
-
-Coming soon to NuGet!
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

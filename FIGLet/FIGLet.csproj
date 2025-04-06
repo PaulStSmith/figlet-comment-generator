@@ -2,7 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net4.7.2;net8.0</TargetFrameworks>
+    <TargetFrameworks>
+      net4.7.2;net4.8;net4.8.1;
+      netstandard2.0;netstandard2.1;
+      netcoreapp3.1;
+      net5.0;net6.0;net7.0;net8.0
+    </TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>12.0</LangVersion>
@@ -22,6 +27,22 @@
     <EmbeddedResource Include="fonts\small.flf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PackageId>FIGLet</PackageId>
+    <Version>1.0.1</Version>
+    <Authors>Paulo Santos</Authors>
+    <Description>A C# implementation of FIGLet (Frank, Ian &amp; Glenn's letters) - a program for making large letters out of ordinary text.</Description>
+    <PackageTags>figlet;ascii-art;text-formatting</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/PaulStSmith/figlet-comment-generator</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PaulStSmith/figlet-comment-generator</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
