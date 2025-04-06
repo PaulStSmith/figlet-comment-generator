@@ -2,7 +2,7 @@
   "profiles": {
     "FIGPrint": {
       "commandName": "Project",
-      "commandLineArgs": "--font bmp-inverted-condensed Hello, World!"
+      "commandLineArgs": "--font bmp-inverted-condensed \"Hello World\" --ansi-colors"
     }
   }
 }

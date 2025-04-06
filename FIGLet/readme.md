@@ -20,6 +20,7 @@ This library provides a robust and efficient implementation of the FIGLet specif
   - Full Size (no smushing)
   - Kerning (minimal smushing)
   - Smushing (full character overlap)
+- ANSI color support for terminal output
 - Thread-safe design
 - Efficient string manipulation
 - Comprehensive XML documentation
@@ -53,6 +54,26 @@ string kerning = renderer.Render("Text", LayoutMode.Kerning);
 string smushing = renderer.Render("Text", LayoutMode.Smushing);
 ```
 
+### ANSI Color Support
+
+The library now supports ANSI color codes for terminal output, allowing you to create colorful FIGLet text:
+
+```csharp
+// Create a renderer with ANSI color support enabled
+var colorRenderer = new FIGLetRenderer(font, useANSIColors: true);
+
+// Render text with ANSI colors
+string colorfulText = "\u001b[31mRed\u001b[0m \u001b[32mGreen\u001b[0m \u001b[34mBlue\u001b[0m";
+string colorfulAsciiArt = colorRenderer.Render(colorfulText);
+Console.WriteLine(colorfulAsciiArt);
+```
+
+You can also enable color support when using the static rendering methods:
+
+```csharp
+string colorfulAsciiArt = FIGLetRenderer.Render(colorfulText, font, LayoutMode.Smushing, useANSIColors: true);
+```
+
 ### Smushing Rules
 
 The library implements all standard FIGLet smushing rules as defined in the FIGLet specification:
@@ -76,6 +97,7 @@ The library consists of four main components:
    - Converts input text to FIGLet output
    - Implements character smushing logic
    - Handles different layout modes
+   - Processes ANSI color codes
 
 3. `LayoutMode`: Enumeration defining rendering modes
    - Controls how characters are combined
@@ -90,6 +112,7 @@ The library consists of four main components:
 - Immutable design for thread safety
 - Efficient regular expressions for whitespace handling
 - Optimized character smushing calculations
+- Intelligent ANSI color code handling
 
 ## Requirements
 
@@ -110,5 +133,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Credits
 
 - Original FIGLet concept by Frank, Ian & Glenn
-- FIGLet specifications: http://www.org/
+- FIGLet specifications: http://www.figlet.org/
 - Implementation by Paulo Santos

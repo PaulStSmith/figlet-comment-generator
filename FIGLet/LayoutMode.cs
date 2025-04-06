@@ -31,5 +31,5 @@ public enum LayoutMode
     /// <summary>
     /// The default layout mode, which is smushing.
     /// </summary>
-    Default = -2
+    Default = Smushing
 }

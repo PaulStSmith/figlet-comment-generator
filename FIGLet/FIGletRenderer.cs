@@ -11,7 +11,7 @@ namespace FIGLet;
  */
 
 /// <summary>
-/// Class for rendering text using FIGLet fonts.
+/// Class for rendering text using FIGFonts.
 /// </summary>
 public partial class FIGLetRenderer
 {
@@ -19,6 +19,8 @@ public partial class FIGLetRenderer
     /// Characters used for hierarchy smushing.
     /// </summary>
     private const string HierarchyCharacters = "|/\\[]{}()<>";
+
+    private const string ANSIColorResetCode = "\u001b[0m";
 
     /// <summary>
     /// Dictionary of opposite character pairs for smushing.
@@ -32,9 +34,65 @@ public partial class FIGLetRenderer
         };
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the default FIGFont.
+    /// </summary>
+    public FIGLetRenderer() : this(null) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont.
+    /// </summary>
+    /// <param name="font">The FIGFont to use for rendering text.</param>
+    public FIGLetRenderer(FIGFont? font) => Font = font ?? FIGFont.Default;
+
+    public FIGLetRenderer(FIGFont? font, bool useANSIColors) : this(font) => UseANSIColors = useANSIColors;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont and layout mode.
+    /// </summary>
+    /// <param name="font">The FIGFont to use for rendering text.</param>
+    /// <param name="mode">The layout mode to use for rendering.</param>
+    public FIGLetRenderer(FIGFont? font, LayoutMode mode) : this(font) => LayoutMode = mode;
+
+    public FIGLetRenderer(FIGFont? font, LayoutMode mode, bool useANSIColors) : this(font, mode) => UseANSIColors = useANSIColors;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont, layout mode, and line separator.
+    /// </summary>
+    /// <param name="font">The FIGFont to use for rendering text.</param>
+    /// <param name="mode">The layout mode to use for rendering.</param>
+    /// <param name="lineSeparator">The line separator to use.</param>
+    public FIGLetRenderer(FIGFont? font, LayoutMode mode, string lineSeparator) : this(font, mode) => LineSeparator = lineSeparator;
+
+    public FIGLetRenderer(FIGFont? font, LayoutMode mode, string lineSeparator, bool useANSIColors) : this(font, mode, lineSeparator) => UseANSIColors = useANSIColors;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont and line separator.
+    /// </summary>
+    /// <param name="font">The FIGFont to use for rendering text.</param>
+    /// <param name="lineSeparator">The line separator to use.</param>
+    public FIGLetRenderer(FIGFont? font, string lineSeparator) : this(font) => LineSeparator = lineSeparator;
+
+    public FIGLetRenderer(FIGFont? font, string lineSeparator, bool useANSIColors) : this(font, lineSeparator) => UseANSIColors = useANSIColors;
+
+    /// <summary>
     /// Gets the FIGFont used for rendering text.
     /// </summary>
     public FIGFont Font { get; }
+
+    /// <summary>
+    /// Gets or sets the layout mode for rendering.
+    /// </summary>
+    public LayoutMode LayoutMode { get; set; } = LayoutMode.Default;
+
+    /// <summary>
+    /// Gets or sets the line separator used for rendering.
+    /// </summary>
+    public string LineSeparator { get; set; } = "\r\n";
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to use ANSI colors during rendering.
+    /// </summary>
+    public bool UseANSIColors { get; set; } = false;
 
     /// <summary>
     /// Renders the specified text using the given FIGFont and layout mode.
@@ -44,20 +102,81 @@ public partial class FIGLetRenderer
     /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
     /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
     /// <returns>The rendered text as a string.</returns>
-    public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n")
+    public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n", bool useANSIColors = false)
     {
-        var renderer = new FIGLetRenderer(font);
-        return renderer.Render(text, mode, lineSeparator);
+        var renderer = new FIGLetRenderer(font, mode, lineSeparator, useANSIColors);
+        return renderer.Render(text);
     }
+
+    public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n") => Render(text, font, mode, lineSeparator, false);
+
+    /// <summary>
+    /// Renders the specified text using the given FIGFont and line separator.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
+    /// <param name="font">The FIGFont to use for rendering the text.</param>
+    /// <param name="lineSeparator">The line separator to use.</param>
+    /// <returns>The rendered text as a string.</returns>
+    public static string Render(string text, FIGFont font, string lineSeparator) => Render(text, font, LayoutMode.Default, lineSeparator);
+
+    /// <summary>
+    /// Renders the specified text using the given FIGFont and layout mode.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
+    /// <param name="font">The FIGFont to use for rendering the text.</param>
+    /// <param name="mode">The layout mode to use for rendering.</param>
+    /// <returns>The rendered text as a string.</returns>
+    public static string Render(string text, FIGFont font, LayoutMode mode) => Render(text, font, mode, "\r\n", false);
+
+    public static string Render(string text, FIGFont font, LayoutMode mode, bool useANSIColors) => Render(text, font, mode, "\r\n", useANSIColors);
 
     /// <summary>
     /// Renders the specified text using the FIGFont and layout mode.
     /// </summary>
     /// <param name="text">The text to render.</param>
+    /// <returns>The rendered text as a string.</returns>
+    public string Render(string text) => Render(text, this.LayoutMode, this.LineSeparator, this.UseANSIColors);
+
+    public string Render(string text, bool useANSIColors) => Render(text, this.LayoutMode, this.LineSeparator, useANSIColors);
+
+    /// <summary>
+    /// Renders the specified text using the FIGFont and a specific layout mode.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
+    /// <param name="mode">The layout mode to use for rendering.</param>
+    /// <returns>The rendered text as a string.</returns>
+    public string Render(string text, LayoutMode mode) => Render(text, mode, this.LineSeparator);
+
+    public string Render(string text, LayoutMode mode, bool useANSIColors) => Render(text, mode, this.LineSeparator, useANSIColors);    
+
+    /// <summary>
+    /// Renders the specified text using the FIGFont and a specific line separator.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
+    /// <param name="lineSeparator">The line separator to use.</param>
+    /// <returns>The rendered text as a string.</returns>
+    public string Render(string text, string lineSeparator) => Render(text, this.LayoutMode, lineSeparator);
+
+    public string Render(string text, string lineSeparator, bool useANSIColors) => Render(text, this.LayoutMode, lineSeparator, useANSIColors);
+
+    /// <summary>
+    /// Renders the specified text using the FIGFont, layout mode, and line separator.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
+    /// <param name="mode">The layout mode to use for rendering.</param>
+    /// <param name="lineSeparator">The line separator to use.</param>
+    /// <returns>The rendered text as a string.</returns>
+    public string Render(string text, LayoutMode mode, string lineSeparator) => Render(text, mode, lineSeparator, this.UseANSIColors);
+
+    /// <summary>
+    /// Renders the specified text using the FIGFont and layout mode with optional ANSI color support.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
     /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
     /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
+    /// <param name="useANSIColors">Whether to process and preserve ANSI color codes. Default is false.</param>
     /// <returns>The rendered text as a string.</returns>
-    public string Render(string text, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n")
+    public string Render(string text, LayoutMode mode, string lineSeparator, bool useANSIColors = false)
     {
         if (string.IsNullOrEmpty(text))
             return string.Empty;
@@ -66,52 +185,127 @@ public partial class FIGLetRenderer
         for (var i = 0; i < Font.Height; i++)
             ol[i] = new StringBuilder();
 
-        mode = mode == LayoutMode.Default ? LayoutMode.Smushing : mode;
+        // Create ANSI processor if colors are enabled
+        var ansiProcessor = useANSIColors ? new ANSIProcessor() : null;
 
+        // Process each character in the input text
+        var charIndex = 0;
+        var plainText = new StringBuilder();
+        var colorDict = new Dictionary<int, string>();
+
+        if (ansiProcessor != null)
+        {
+            // First pass: Extract ANSI sequences and build plain text
+            for (charIndex = 0; charIndex < text.Length; charIndex++)
+            {
+                var c = text[charIndex];
+                var isAnsiCode = ansiProcessor.ProcessCharacter(c);
+
+                if (!isAnsiCode)
+                {
+                    if (!string.IsNullOrEmpty(ansiProcessor.CurrentColorSequence))
+                    {
+                        // Append the current color sequence to the plain text
+                        colorDict[plainText.Length] = ansiProcessor.CurrentColorSequence;
+                        ansiProcessor.ResetColorState();
+                    }
+
+                    // Skip characters not in the font
+                    if (Font.Characters.ContainsKey(c))
+                        plainText.Append(c);
+                }
+
+            }
+
+            // Reset for second pass
+            text = plainText.ToString();
+        }
+
+        // Second pass: Render the text with FIGfont
+        charIndex = 0;
         foreach (var c in text)
         {
-            // Debug.WriteLine($"Character being rendered: '{c}'");
-            if (!Font.Characters.ContainsKey(c))
-                continue;
+            // Skip characters not in the font
+            if (!useANSIColors && Font.Characters.ContainsKey(c))
+                plainText.Append(c);
 
             var charLines = Font.Characters[c];
+            var colorCode = string.Empty;
+            _ = colorDict.TryGetValue(charIndex++, out colorCode);
+
             if (ol[0].Length == 0)
             {
                 // First character, just append
-                // Debug.WriteLine("First character, just append");
                 for (var i = 0; i < Font.Height; i++)
+                {
+                    // Add color code if needed
+                    if (useANSIColors)
+                        ol[i].Append(colorCode);
                     ol[i].Append(charLines[i]);
-                continue;
+                }
             }
-
-            // Calculate overlap with previous character
-            var overlap = int.MaxValue;
-            for (var i = 0; i < Font.Height; i++)
-                overlap = Math.Min(overlap, CalculateOverlap(ol[i].ToString(), charLines[i], mode));
-
-            // Apply smushing rules
-            for (var i = 0; i < Font.Height; i++)
+            else
             {
-                if (overlap == 0)
-                    ol[i].Append(charLines[i]);
-                else
-                    Smush(ol[i], charLines[i], overlap, mode);
+                // Calculate overlap with previous character
+                var overlap = int.MaxValue;
+                for (var i = 0; i < Font.Height; i++)
+                    overlap = Math.Min(overlap, CalculateOverlap(ol[i].ToString(), charLines[i], mode));
+
+                // Apply smushing rules
+                for (var i = 0; i < Font.Height; i++)
+                {
+                    if (overlap == 0)
+                    {
+                        if (useANSIColors)
+                            ol[i].Append(colorCode);
+                        ol[i].Append(charLines[i]);
+                    }
+                    else
+                    {
+                        // Use enhanced Smush method with color support
+                        Smush(ol[i], charLines[i], overlap, mode, colorCode ?? string.Empty);
+                    }
+                }
             }
         }
+
+        // Add color reset codes at the end of each line if using ANSI colors
+        if (ansiProcessor != null)
+            for (var i = 0; i < Font.Height; i++)
+                ol[i].Append(ANSIColorResetCode);
 
         return string.Join(lineSeparator, ol.Select(x => x.Replace(Font.HardBlank[0], ' ').ToString()));
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGfont.
+    /// Smushes two lines together based on the specified layout mode.
     /// </summary>
-    /// <param name="font">The FIGfont to use for rendering text.</param>
-    public FIGLetRenderer(FIGFont? font) => Font = font ?? FIGFont.Default;
+    /// <param name="line">The first line.</param>
+    /// <param name="character">The second line.</param>
+    /// <param name="overlap">The number of characters to overlap.</param>
+    /// <param name="mode">The layout mode to use for smushing.</param>
+    /// <param name="colorCode">The current ANSI color state.</param>
+    private void Smush(StringBuilder line, string character, int overlap, LayoutMode mode, string colorCode = "")
+    {
+        var lineEnd = line.ToString().Substring(line.Length - overlap);
+        line.Length -= overlap;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class using the default FIGfont.
-    /// </summary>
-    public FIGLetRenderer() : this(null) { }
+
+        if (mode == LayoutMode.Kerning)
+        {
+            line.Append(colorCode);
+            line.Append(character);
+            return;
+        }
+
+        // Apply smushing rules character by character in the overlap area
+        for (var i = 0; i < overlap; i++)
+            line.Append(SmushCharacters(lineEnd[i], character[i], mode));
+
+        // Append the remaining part of the character (after the overlap)
+        line.Append(colorCode);
+        line.Append(character.Substring(overlap));
+    }
 
     /// <summary>
     /// Calculates the number of characters that can be overlapped between two lines based on the specified layout mode.
@@ -126,28 +320,19 @@ public partial class FIGLetRenderer
             return 0;
 
         var eol = line.Length < character.Length ? line : line.Substring(line.Length - character.Length);
-        var m1 = (LastNonWhitespaceRegex()).Match(eol);
-        var m2 = (FirstNonWhitespaceRegex()).Match(character);
-
-        // Debug.WriteLine($"Debug - Line end: '{eol}', Char start: '{character}'");
-        // Debug.WriteLine($"Debug - m1 success: {m1.Success}, index: {(m1.Success ? m1.Index : -1)}, value: '{(m1.Success ? m1.Value : "")}'");
-        // Debug.WriteLine($"Debug - m2 success: {m2.Success}, index: {(m2.Success ? m2.Index : -1)}, value: '{(m2.Success ? m2.Value : "")}'");
+        var m1 = LastNonWhitespaceRegex().Match(eol);
+        var m2 = FirstNonWhitespaceRegex().Match(character);
 
         if (!m1.Success || !m2.Success)
-        {
-            // Debug.WriteLine($"Debug - overlap: {character.Length}");
             return character.Length;
-        }
 
         var canSmush = CanSmush(m1.Value[0], m2.Value[0], mode);
-        // Debug.WriteLine($"Debug - Can smush: {canSmush}");
         var overlapLength = canSmush ? Math.Max(eol.Length - m1.Index, m2.Index) + 1 : 0;
         overlapLength = Math.Min(overlapLength, character.Length);
-        // Special case when we have oposing slashes
-        if ((canSmush && m1.Value[0] == '/' && m2.Value[0] == '\\') || 
+        // Special case when we have opposing slashes
+        if ((canSmush && m1.Value[0] == '/' && m2.Value[0] == '\\') ||
             (canSmush && m1.Value[0] == '\\' && m2.Value[0] == '/'))
             overlapLength = Math.Max(overlapLength - 1, 0);
-        // Debug.WriteLine($"Debug - overlap: {overlapLength}");
 
         return overlapLength;
     }
@@ -161,60 +346,30 @@ public partial class FIGLetRenderer
     /// <returns>True if the characters can be smushed together; otherwise, false.</returns>
     private bool CanSmush(char c1, char c2, LayoutMode mode)
     {
-        // Debug.WriteLine($"CanSmush called with c1='{c1}', c2='{c2}', mode={mode}");
-
         // Early return for kerning mode
         if (mode == LayoutMode.Kerning)
-        {
-            var result = c1 == c2 && c1 == ' ';
-            // Debug.WriteLine($"Kerning check: {result}");
-            return result;
-        }
+            return c1 == c2 && c1 == ' ';
 
         // Early return for full size
         if (mode == LayoutMode.FullSize)
-        {
-            // Debug.WriteLine("FullSize mode - returning false");
             return false;
-        }
 
         // Handle hardblanks first
         if (c1 == Font.HardBlank[0] || c2 == Font.HardBlank[0])
-        {
-            var result = Font.HasSmushingRule(SmushingRules.HardBlank);
-            // Debug.WriteLine($"Hardblank check: {result}");
-            return result;
-        }
+            return Font.HasSmushingRule(SmushingRules.HardBlank);
 
         // Handle spaces
-        if (c1 == ' ' && c2 == ' ')
-        {
-            // Debug.WriteLine("Both spaces - returning true");
-            return true;
-        }
-        if (c1 == ' ' || c2 == ' ')
-        {
-            // Debug.WriteLine("One space - returning true");
-            return true;
-        }
+        if (c1 == ' ' && c2 == ' ') return true;
+        if (c1 == ' ' || c2 == ' ') return true;
 
         // Rule 1: Equal Character Smushing
         if (Font.HasSmushingRule(SmushingRules.EqualCharacter) && c1 == c2)
-        {
-            // Debug.WriteLine("Equal character rule matched");
             return true;
-        }
 
         // Rule 2: Underscore Smushing
         if (Font.HasSmushingRule(SmushingRules.Underscore))
-        {
-            if ((c1 == '_' && HierarchyCharacters.Contains(c2)) ||
-                (c2 == '_' && HierarchyCharacters.Contains(c1)))
-            {
-                // Debug.WriteLine("Underscore rule matched");
+            if ((c1 == '_' && HierarchyCharacters.Contains(c2)) || (c2 == '_' && HierarchyCharacters.Contains(c1)))
                 return true;
-            }
-        }
 
         // Rule 3: Hierarchy Smushing
         if (Font.HasSmushingRule(SmushingRules.Hierarchy))
@@ -223,58 +378,21 @@ public partial class FIGLetRenderer
             var rank1 = hierarchy.IndexOf(c1);
             var rank2 = hierarchy.IndexOf(c2);
 
-            // Debug.WriteLine($"Hierarchy check - rank1: {rank1}, rank2: {rank2}");
             if (rank1 >= 0 && rank2 >= 0)
-            {
-                // Debug.WriteLine("Hierarchy rule matched");
                 return true;
-            }
         }
 
         // Rule 4: Opposite Pair Smushing
         if (Font.HasSmushingRule(SmushingRules.OppositePair))
-        {
             if (oppositePairs.TryGetValue(c1, out var opposite) && opposite == c2)
-            {
-                // Debug.WriteLine("Opposite pair rule matched");
                 return true;
-            }
-        }
 
         // Rule 5: Big X Smushing
         if (Font.HasSmushingRule(SmushingRules.BigX))
-        {
             if (c1 == '>' && c2 == '<')
-            {
-                // Debug.WriteLine("Big X rule matched");
                 return true;
-            }
-        }
 
-        // Debug.WriteLine("No rules matched - returning false");
         return false;
-    }
-
-    /// <summary>
-    /// Smushes the given character into the line with the specified overlap and layout mode.
-    /// </summary>
-    /// <param name="line">The line to smush the character into.</param>
-    /// <param name="character">The character to smush into the line.</param>
-    /// <param name="overlap">The number of characters to overlap.</param>
-    /// <param name="mode">The layout mode to use for smushing.</param>
-    private void Smush(StringBuilder line, string character, int overlap, LayoutMode mode)
-    {
-        var lineEnd = line.ToString().Substring(line.Length - overlap);
-        line.Length -= overlap;
-        if (mode == LayoutMode.Kerning)
-        {
-            line.Append(character);
-            return;
-        }
-        for (var i = 0; i < overlap; i++)
-            line.Append(SmushCharacters(lineEnd[i], character[i], mode));
-
-        line.Append(character.Substring(overlap));
     }
 
     /// <summary>
@@ -327,26 +445,22 @@ public partial class FIGLetRenderer
 
         // Rule 4: Opposite Pair Smushing
         if (Font.HasSmushingRule(SmushingRules.OppositePair))
-        {
             if (oppositePairs.TryGetValue(c1, out var opposite) && opposite == c2)
                 return '|';
-        }
 
         // Rule 5: Big X Smushing
         if (Font.HasSmushingRule(SmushingRules.BigX))
         {
             if ((c1 == '/' && c2 == '\\') || (c1 == '\\' && c2 == '/'))
                 return '|';
-            if ((c1 == '>' && c2 == '<'))
+            if (c1 == '>' && c2 == '<')
                 return 'X';
         }
 
         // Rule 6: Hardblank Smushing
         if (Font.HasSmushingRule(SmushingRules.HardBlank))
-        {
             if (c1 == Font.HardBlank[0] && c2 == Font.HardBlank[0])
                 return Font.HardBlank[0];
-        }
 
         // If no smushing rules apply or are enabled, return the first character
         return c1;
@@ -363,4 +477,97 @@ public partial class FIGLetRenderer
     /// </summary>
     /// <returns>A regex pattern to match the first non-whitespace character.</returns>
     private static Regex FirstNonWhitespaceRegex() => new(@"(?<=^|\s*)\S");
+
+    /// <summary>
+    /// Detects and processes ANSI escape sequences during rendering.
+    /// </summary>
+    private class ANSIProcessor
+    {
+        // Track if we're currently inside an escape sequence
+        private bool _inEscapeSequence = false;
+
+        // Buffer to store the current escape sequence
+        private readonly StringBuilder _escapeBuffer = new();
+
+        // List of ANSI sequence terminators that are NOT color-related
+        private static readonly HashSet<char> NonColorTerminators =
+        [
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'f',    // Cursor movement
+            'J', 'K',                                       // Screen clearing
+            'S', 'T',                                       // Scrolling
+            's', 'u',                                       // Cursor position
+            'n', 'h', 'l', 'i', 'r', 't', '@',              // Various controls
+            'P', 'X', 'L', 'M'                              // More controls
+        ];
+
+        // Current active color sequence to maintain color state
+        public string CurrentColorSequence { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// Processes a character, detecting and handling ANSI escape sequences.
+        /// </summary>
+        /// <param name="c">Character to process.</param>
+        /// <returns>True if the character was part of an escape sequence, false otherwise.</returns>
+        public bool ProcessCharacter(char c)
+        {
+            // Start of escape sequence
+            if (c == '\u001b') // ESC character (27)
+            {
+                _inEscapeSequence = true;
+                _escapeBuffer.Clear();
+                _escapeBuffer.Append(c);
+                return true;
+            }
+
+            // Continue building escape sequence
+            if (_inEscapeSequence)
+            {
+                _escapeBuffer.Append(c);
+
+                // Check for CSI sequences (Control Sequence Introducer)
+                if (_escapeBuffer.Length == 2 && c != '[')
+                {
+                    // Not a CSI sequence, reset
+                    _inEscapeSequence = false;
+                    return true;
+                }
+
+                // Complete sequence detection
+                if (_escapeBuffer.Length >= 3 &&
+                    ((c >= 0x40 && c <= 0x7E) || NonColorTerminators.Contains(c) || c == 'm'))
+                {
+                    // Sequence is complete
+                    _inEscapeSequence = false;
+                    var sequence = _escapeBuffer.ToString();
+
+                    // If color sequence (ends with 'm'), keep it
+                    if (c == 'm')
+                        CurrentColorSequence = sequence;
+
+                    return true;
+                }
+
+                return true; // Part of escape sequence, but not complete
+            }
+
+            return false; // Not part of escape sequence
+        }
+
+        /// <summary>
+        /// Gets the current ANSI color state.
+        /// </summary>
+        /// <returns>The current color sequence or empty string if no color is set.</returns>
+        public string GetColorState()
+        {
+            return CurrentColorSequence;
+        }
+
+        /// <summary>
+        /// Resets the color state.
+        /// </summary>
+        public void ResetColorState()
+        {
+            CurrentColorSequence = string.Empty;
+        }
+    }
 }

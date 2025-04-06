@@ -29,6 +29,11 @@ namespace FIGPrint
                 getDefaultValue: () => false,
                 description: "Display a list of available fonts");
 
+            var useANSIColorsOption = new Option<bool>(
+                "--ansi-colors",
+                getDefaultValue: () => false,
+                description: "Enable the use of ANSI colors");
+
             // Add text argument
             var textArgument = new Argument<string[]>(
                 "text",
@@ -42,10 +47,11 @@ namespace FIGPrint
             rootCommand.AddOption(fontOption);
             rootCommand.AddOption(layoutOption);
             rootCommand.AddOption(showListOption);
+            rootCommand.AddOption(useANSIColorsOption);
             rootCommand.AddArgument(textArgument);
 
             // Set the handler
-            rootCommand.SetHandler((string font, LayoutMode layout, bool showList, string[] text) =>
+            rootCommand.SetHandler((string font, LayoutMode layout, bool showList, bool useAnsi, string[] text) =>
             {
                 if (showList)
                 {
@@ -61,14 +67,14 @@ namespace FIGPrint
 
                 Console.OutputEncoding = System.Text.Encoding.UTF8; // Ensure UTF-8 encoding for console output
 
-                return RenderTextWithFigletAsync(font, layout, string.Join(" ", text));
-            }, fontOption, layoutOption, showListOption, textArgument);
+                return RenderTextWithFigletAsync(font, layout, useAnsi, string.Join(" ", text));
+            }, fontOption, layoutOption, showListOption, useANSIColorsOption, textArgument);
 
             // Parse the command line arguments
             return await rootCommand.InvokeAsync(args);
         }
 
-        private static async Task<int> RenderTextWithFigletAsync(string fontName, LayoutMode layout, string textToRender)
+        private static async Task<int> RenderTextWithFigletAsync(string fontName, LayoutMode layout, bool useAnsi, string textToRender)
         {
             try
             {
@@ -86,10 +92,10 @@ namespace FIGPrint
                 var font = FIGFont.FromFile(fontPath);
 
                 // Create a renderer
-                var renderer = new FIGLetRenderer(font);
+                var renderer = new FIGLetRenderer(font, layout, useAnsi);
 
                 // Render the text using the specified layout mode
-                var renderedText = await Task.Run(() => renderer.Render(textToRender, layout));
+                var renderedText = await Task.Run(() => renderer.Render(textToRender));
 
                 // Output the rendered text
                 Console.WriteLine(renderedText);
