@@ -1,8 +1,8 @@
-﻿using FIGLet.VisualStudioExtension.UI;
+﻿using ByteForge.FIGLet.VisualStudioExtension.UI;
 using System.Windows;
 using System.Windows.Forms;
 
-namespace FIGLet.VisualStudioExtension;
+namespace ByteForge.FIGLet.VisualStudioExtension;
 
 /*
  *  ___  _      _           _  _     _               

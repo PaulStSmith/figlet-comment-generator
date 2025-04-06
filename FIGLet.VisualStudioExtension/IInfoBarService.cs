@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell.Interop;
 
+namespace ByteForge.FIGLet.VisualStudioExtension;
+
 /// <summary>
 /// Interface for displaying information bars in Visual Studio.
 /// </summary>

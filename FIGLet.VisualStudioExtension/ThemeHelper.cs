@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace FIGLet.VisualStudioExtension;
+namespace ByteForge.FIGLet.VisualStudioExtension;
 
 /*
  *  _____ _                  _  _     _               

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace FIGLet.VisualStudioExtension;
+namespace ByteForge.FIGLet.VisualStudioExtension;
 
 /*
  *   ___         _     ___ _                   _   ___      _          _           

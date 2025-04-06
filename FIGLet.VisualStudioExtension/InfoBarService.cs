@@ -3,6 +3,8 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell;
 
+namespace ByteForge.FIGLet.VisualStudioExtension;
+
 /// <summary>
 /// Service to display information bars in Visual Studio.
 /// </summary>

@@ -1,10 +1,10 @@
-﻿using FIGLet.VisualStudioExtension.UI;
+﻿using ByteForge.FIGLet.VisualStudioExtension.UI;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-namespace FIGLet.VisualStudioExtension;
+namespace ByteForge.FIGLet.VisualStudioExtension;
 
 /*
  *  ___ ___ ___ _        _    ___       _   _             

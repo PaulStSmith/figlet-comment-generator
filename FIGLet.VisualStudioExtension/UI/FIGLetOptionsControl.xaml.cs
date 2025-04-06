@@ -1,15 +1,11 @@
 ﻿using Microsoft.VisualStudio.Shell;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 
-namespace FIGLet.VisualStudioExtension.UI;
+namespace ByteForge.FIGLet.VisualStudioExtension.UI;
 
 /// <summary>
 /// Interaction logic for FIGLetOptionsControl.xaml

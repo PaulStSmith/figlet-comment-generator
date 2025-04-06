@@ -1,6 +1,6 @@
 ﻿using EnvDTE;
 
-namespace FIGLet.VisualStudioExtension;
+namespace ByteForge.FIGLet.VisualStudioExtension;
 
 /*
  *   ___         _     ___ _                   _   ___      _          _           

@@ -5,7 +5,7 @@
 // </auto-generated>
 using System;
 
-namespace FIGLet.VisualStudioExtension;
+namespace ByteForge.FIGLet.VisualStudioExtension;
 
 //   ___         _                  ___      _    _    
 //  | _ \__ _ __| |____ _ __ _ ___ / __|_  _(_)__| |___

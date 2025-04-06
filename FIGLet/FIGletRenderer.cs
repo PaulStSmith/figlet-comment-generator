@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-namespace FIGLet;
+namespace ByteForge.FIGLet;
 /*
  *  ___ ___ ___ _        _   ___             _                 
  * | __|_ _/ __| |   ___| |_| _ \___ _ _  __| |___ _ _ ___ _ _ 

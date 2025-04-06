@@ -1,6 +1,6 @@
 ﻿using EnvDTE;
 using EnvDTE80;
-using FIGLet.VisualStudioExtension.UI;
+using ByteForge.FIGLet.VisualStudioExtension.UI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace FIGLet.VisualStudioExtension;
+namespace ByteForge.FIGLet.VisualStudioExtension;
 
 /*
  *  ___ ___ ___ _        _    ___                         _    ___                              _ 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace FIGLet.VisualStudioExtension.UI;
+namespace ByteForge.FIGLet.VisualStudioExtension.UI;
 
 /// <summary>
 /// Interaction logic for FIGLetInputDialogView.xaml

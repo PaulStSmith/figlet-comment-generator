@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace FIGLet;
+namespace ByteForge.FIGLet;
 
 /*
  *  ___ ___ ___ ___        _   

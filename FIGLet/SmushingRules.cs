@@ -1,4 +1,4 @@
-﻿namespace FIGLet;
+﻿namespace ByteForge.FIGLet;
 
 /*
  *  ___              _    _           ___      _        
