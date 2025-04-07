@@ -73,7 +73,7 @@ FigPrint looks for fonts in a `fonts` directory relative to the executable. All 
 
 The following features are planned for future releases:
 
-1. **Color support** - Add options to colorize the output using console colors
+1. **Color support** - Add options to colorize the output using ANSI colors
 2. **Custom font directory** - Allow specifying a custom font directory with a `--fontDir` parameter
 3. **Preview mode** - Show a sample of each font when listing available fonts
 4. **Horizontal alignment** - Add options for left, center, or right alignment

@@ -141,5 +141,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Credits
 
 - Original FIGLet concept by Frank, Ian & Glenn
-- FIGLet specifications: http://www.org/
+- FIGLet specifications: http://www.figlet.org/
 - Implementation by Paulo Santos
