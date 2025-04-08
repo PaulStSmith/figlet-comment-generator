@@ -101,9 +101,9 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
         try
         {
             PreviewTextBox.Text = FIGLetRenderer.Render(
-                SampleTextBox.Text,
-                _currentFont,
-                LayoutModeComboBox.SelectedItem == null ? LayoutMode.Default : (LayoutMode)LayoutModeComboBox.SelectedItem);
+                text: SampleTextBox.Text,
+                font: _currentFont,
+                mode: (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
         }
         catch (Exception ex)
         {

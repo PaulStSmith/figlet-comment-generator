@@ -39,10 +39,15 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/PaulStSmith/figlet-comment-generator</PackageProjectUrl>
     <RepositoryUrl>https://github.com/PaulStSmith/figlet-comment-generator</RepositoryUrl>
+    <RootNamespace>ByteForge.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="readme.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
 </Project>

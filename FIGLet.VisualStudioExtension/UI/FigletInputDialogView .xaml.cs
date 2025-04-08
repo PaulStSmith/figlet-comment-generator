@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace ByteForge.FIGLet.VisualStudioExtension.UI;
 
@@ -70,6 +71,11 @@ public partial class FIGLetInputDialogView : UserControl
         }
 
         InputTextBox.TextChanged += (s, e) => UpdatePreview();
+        InputTextBox.KeyDown += (s, e) =>
+        {
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None)
+                OkButton_Click(this, e);
+        };
 
         options = (FIGLetOptions)package.GetDialogPage(typeof(FIGLetOptions));
 
@@ -134,7 +140,7 @@ public partial class FIGLetInputDialogView : UserControl
     /// <returns>The rendered preview text.</returns>
     private string RenderDefaultPreview()
     {
-        var text = FIGLetRenderer.Render("Hello, World!", SelectedFont, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
+        var text = FIGLetRenderer.Render(text: "Hello, World!", font: SelectedFont, mode: (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
         return LanguageCommentStyles.WrapInComments(text, CurrentLanguage);
     }
 
@@ -150,7 +156,7 @@ public partial class FIGLetInputDialogView : UserControl
             return;
         }
 
-        var txt = FIGLetRenderer.Render(InputTextBox.Text, SelectedFont, (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
+        var txt = FIGLetRenderer.Render(text: InputTextBox.Text, font: SelectedFont, mode: (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
         PreviewBlock.Text = LanguageCommentStyles.WrapInComments(txt, CurrentLanguage);
     }
 

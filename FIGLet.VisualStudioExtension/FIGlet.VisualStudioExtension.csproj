@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Template source files - these are not included in compilation -->
+    <None Include="OriginalOverview.md" />
     <None Include="PackageGUIDs.h" />
     <None Include="GenerateGUIDs.ps1" />
     <!-- Template definitions for the generator -->
@@ -100,7 +101,7 @@
   <!-- Custom Target for Template Generation -->
   <Target Name="GenerateFIGLetTemplate" Inputs="%(FIGLetTemplate.Identity);PackageGUIDs.h;GenerateGUIDs.ps1" Outputs="%(FIGLetTemplate.OutputFile)" BeforeTargets="BeforeBuild;BeforeVsct">
     <Message Text="Processing template: %(FIGLetTemplate.Identity)" Importance="high" />
-    <Message Text="Output file: %(FIGLetTemplate.OutputFile)" Importance="normal" />
+    <Message Text="Output file: %(FIGLetTemplate.OutputFile)" Importance="high" />
     <!-- Create output directory if it doesn't exist -->
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <Exec Command="powershell.exe -ExecutionPolicy Bypass -NonInteractive -File &quot;$(MSBuildThisFileDirectory)GenerateGUIDs.ps1&quot; -TemplatePath &quot;%(FIGLetTemplate.Identity)&quot; -OutputPath &quot;%(FIGLetTemplate.OutputFile)&quot; -HeaderPath &quot;$(MSBuildThisFileDirectory)PackageGUIDs.h&quot;" />
@@ -119,6 +120,7 @@
     <Content Include="Resources\figlet-settings.png" />
     <Content Include="Resources\figlet-ui.png" />
     <Content Include="Resources\style.css" />
+    <None Include="readme.md" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

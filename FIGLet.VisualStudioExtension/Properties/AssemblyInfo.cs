@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("FIGLet Comment Generator")]
 [assembly: AssemblyDescription("Transform text into ASCII art comments using FIGLet fonts. Create distinctive header blocks and code section separators with customizable fonts and layout options.")]
-[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyConfiguration("Production")]
 [assembly: AssemblyCompany("Paulo Santos")]
 [assembly: AssemblyProduct("FIGLet Comment Generator")]
-[assembly: AssemblyCopyright("© 2024 - Paulo Santos")]
+[assembly: AssemblyCopyright("© 2025 - Paulo Santos")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.25.0408")]
+[assembly: AssemblyFileVersion("1.0.25.0408")]

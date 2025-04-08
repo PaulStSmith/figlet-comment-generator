@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 
 namespace ByteForge.FIGLet;
+
 /*
  *  ___ ___ ___ _        _   ___             _                 
  * | __|_ _/ __| |   ___| |_| _ \___ _ _  __| |___ _ _ ___ _ _ 
@@ -20,6 +21,9 @@ public partial class FIGLetRenderer
     /// </summary>
     private const string HierarchyCharacters = "|/\\[]{}()<>";
 
+    /// <summary>
+    /// ANSI color reset code for terminal output.
+    /// </summary>
     private const string ANSIColorResetCode = "\u001b[0m";
 
     /// <summary>
@@ -36,43 +40,29 @@ public partial class FIGLetRenderer
     /// <summary>
     /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the default FIGFont.
     /// </summary>
-    public FIGLetRenderer() : this(null) { }
+    public FIGLetRenderer() : this(FIGFont.Default) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont.
     /// </summary>
     /// <param name="font">The FIGFont to use for rendering text.</param>
-    public FIGLetRenderer(FIGFont? font) => Font = font ?? FIGFont.Default;
-
-    public FIGLetRenderer(FIGFont? font, bool useANSIColors) : this(font) => UseANSIColors = useANSIColors;
+    public FIGLetRenderer(FIGFont? font) => Font = font ?? throw new ArgumentNullException(nameof(font));
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont and layout mode.
-    /// </summary>
-    /// <param name="font">The FIGFont to use for rendering text.</param>
-    /// <param name="mode">The layout mode to use for rendering.</param>
-    public FIGLetRenderer(FIGFont? font, LayoutMode mode) : this(font) => LayoutMode = mode;
-
-    public FIGLetRenderer(FIGFont? font, LayoutMode mode, bool useANSIColors) : this(font, mode) => UseANSIColors = useANSIColors;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont, layout mode, and line separator.
+    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont, layout mode, line separator, and ANSI color usage.
     /// </summary>
     /// <param name="font">The FIGFont to use for rendering text.</param>
     /// <param name="mode">The layout mode to use for rendering.</param>
     /// <param name="lineSeparator">The line separator to use.</param>
-    public FIGLetRenderer(FIGFont? font, LayoutMode mode, string lineSeparator) : this(font, mode) => LineSeparator = lineSeparator;
-
-    public FIGLetRenderer(FIGFont? font, LayoutMode mode, string lineSeparator, bool useANSIColors) : this(font, mode, lineSeparator) => UseANSIColors = useANSIColors;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont and line separator.
-    /// </summary>
-    /// <param name="font">The FIGFont to use for rendering text.</param>
-    /// <param name="lineSeparator">The line separator to use.</param>
-    public FIGLetRenderer(FIGFont? font, string lineSeparator) : this(font) => LineSeparator = lineSeparator;
-
-    public FIGLetRenderer(FIGFont? font, string lineSeparator, bool useANSIColors) : this(font, lineSeparator) => UseANSIColors = useANSIColors;
+    /// <param name="useANSIColors">Whether to use ANSI colors during rendering.</param>
+    /// <param name="paragraphMode">Whether to use paragraph mode for rendering.</param>
+    public FIGLetRenderer(FIGFont? font, LayoutMode mode = LayoutMode.Default, string? lineSeparator = null, bool useANSIColors = false, bool paragraphMode = true) : this(font)
+    {
+        LayoutMode = mode;
+        LineSeparator = lineSeparator ?? Environment.NewLine;
+        UseANSIColors = useANSIColors;
+        ParagraphMode = paragraphMode;
+    }
 
     /// <summary>
     /// Gets the FIGFont used for rendering text.
@@ -87,7 +77,7 @@ public partial class FIGLetRenderer
     /// <summary>
     /// Gets or sets the line separator used for rendering.
     /// </summary>
-    public string LineSeparator { get; set; } = "\r\n";
+    public string LineSeparator { get; set; } = Environment.NewLine;
 
     /// <summary>
     /// Gets or sets a value indicating whether to use ANSI colors during rendering.
@@ -95,91 +85,59 @@ public partial class FIGLetRenderer
     public bool UseANSIColors { get; set; } = false;
 
     /// <summary>
-    /// Renders the specified text using the given FIGFont and layout mode.
+    /// Gets or sets a value indicating whether to use paragraph mode for rendering.
     /// </summary>
-    /// <param name="text">The text to render.</param>
-    /// <param name="font">The FIGFont to use for rendering the text.</param>
-    /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
-    /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
-    /// <returns>The rendered text as a string.</returns>
-    public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n", bool useANSIColors = false)
-    {
-        var renderer = new FIGLetRenderer(font, mode, lineSeparator, useANSIColors);
-        return renderer.Render(text);
-    }
-
-    public static string Render(string text, FIGFont font, LayoutMode mode = LayoutMode.Default, string lineSeparator = "\r\n") => Render(text, font, mode, lineSeparator, false);
-
-    /// <summary>
-    /// Renders the specified text using the given FIGFont and line separator.
-    /// </summary>
-    /// <param name="text">The text to render.</param>
-    /// <param name="font">The FIGFont to use for rendering the text.</param>
-    /// <param name="lineSeparator">The line separator to use.</param>
-    /// <returns>The rendered text as a string.</returns>
-    public static string Render(string text, FIGFont font, string lineSeparator) => Render(text, font, LayoutMode.Default, lineSeparator);
+    public bool ParagraphMode { get; set; } = true;
 
     /// <summary>
     /// Renders the specified text using the given FIGFont and layout mode.
     /// </summary>
     /// <param name="text">The text to render.</param>
     /// <param name="font">The FIGFont to use for rendering the text.</param>
-    /// <param name="mode">The layout mode to use for rendering.</param>
-    /// <returns>The rendered text as a string.</returns>
-    public static string Render(string text, FIGFont font, LayoutMode mode) => Render(text, font, mode, "\r\n", false);
-
-    public static string Render(string text, FIGFont font, LayoutMode mode, bool useANSIColors) => Render(text, font, mode, "\r\n", useANSIColors);
-
-    /// <summary>
-    /// Renders the specified text using the FIGFont and layout mode.
-    /// </summary>
-    /// <param name="text">The text to render.</param>
-    /// <returns>The rendered text as a string.</returns>
-    public string Render(string text) => Render(text, this.LayoutMode, this.LineSeparator, this.UseANSIColors);
-
-    public string Render(string text, bool useANSIColors) => Render(text, this.LayoutMode, this.LineSeparator, useANSIColors);
-
-    /// <summary>
-    /// Renders the specified text using the FIGFont and a specific layout mode.
-    /// </summary>
-    /// <param name="text">The text to render.</param>
-    /// <param name="mode">The layout mode to use for rendering.</param>
-    /// <returns>The rendered text as a string.</returns>
-    public string Render(string text, LayoutMode mode) => Render(text, mode, this.LineSeparator);
-
-    public string Render(string text, LayoutMode mode, bool useANSIColors) => Render(text, mode, this.LineSeparator, useANSIColors);    
-
-    /// <summary>
-    /// Renders the specified text using the FIGFont and a specific line separator.
-    /// </summary>
-    /// <param name="text">The text to render.</param>
-    /// <param name="lineSeparator">The line separator to use.</param>
-    /// <returns>The rendered text as a string.</returns>
-    public string Render(string text, string lineSeparator) => Render(text, this.LayoutMode, lineSeparator);
-
-    public string Render(string text, string lineSeparator, bool useANSIColors) => Render(text, this.LayoutMode, lineSeparator, useANSIColors);
-
-    /// <summary>
-    /// Renders the specified text using the FIGFont, layout mode, and line separator.
-    /// </summary>
-    /// <param name="text">The text to render.</param>
-    /// <param name="mode">The layout mode to use for rendering.</param>
-    /// <param name="lineSeparator">The line separator to use.</param>
-    /// <returns>The rendered text as a string.</returns>
-    public string Render(string text, LayoutMode mode, string lineSeparator) => Render(text, mode, lineSeparator, this.UseANSIColors);
-
-    /// <summary>
-    /// Renders the specified text using the FIGFont and layout mode with optional ANSI color support.
-    /// </summary>
-    /// <param name="text">The text to render.</param>
     /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
     /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
     /// <param name="useANSIColors">Whether to process and preserve ANSI color codes. Default is false.</param>
     /// <returns>The rendered text as a string.</returns>
-    public string Render(string text, LayoutMode mode, string lineSeparator, bool useANSIColors = false)
+    public static string Render(string text, FIGFont? font = null, LayoutMode mode = LayoutMode.Default, string? lineSeparator = null, bool useANSIColors = false, bool paragraphMode = true)
     {
         if (string.IsNullOrEmpty(text))
             return string.Empty;
+
+        font ??= FIGFont.Default;
+        lineSeparator ??= Environment.NewLine;
+        var renderer = new FIGLetRenderer(font, mode, lineSeparator, useANSIColors, paragraphMode);
+        return renderer.Render(text);
+    }
+
+    public string Render(string text){
+        if (string.IsNullOrEmpty(text))
+            return string.Empty;
+
+        if (ParagraphMode)
+        {
+            // Split the text into paragraphs based on line breaks
+            var emptlyLine = (new string('*', Font.Height)).Replace("*", LineSeparator);
+            var paragraphs = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            var renderedParagraphs = new StringBuilder();
+            foreach (var paragraph in paragraphs)
+                if (string.IsNullOrWhiteSpace(paragraph))
+                    // Add empty lines for paragraph separation
+                    renderedParagraphs.Append(emptlyLine);
+                else
+                    // Render the non-empty paragraph
+                    renderedParagraphs.Append(RenderLine(paragraph));
+            return renderedParagraphs.ToString();
+        }
+
+        text = text.Replace("\r", "").Replace("\n", " ");
+        return RenderLine(text);
+    }
+
+    private string RenderLine(string text) {
+
+        var mode = LayoutMode;
+        var lineSeparator = LineSeparator;
+        var useANSIColors = UseANSIColors;
 
         var ol = new StringBuilder[Font.Height];
         for (var i = 0; i < Font.Height; i++)
@@ -269,12 +227,9 @@ public partial class FIGLetRenderer
             }
         }
 
-        // Add color reset codes at the end of each line if using ANSI colors
-        if (ansiProcessor != null)
-            for (var i = 0; i < Font.Height; i++)
-                ol[i].Append(ANSIColorResetCode);
-
-        return string.Join(lineSeparator, ol.Select(x => x.Replace(Font.HardBlank[0], ' ').ToString()));
+        return string.Join(lineSeparator, ol.Select(x => x.Replace(Font.HardBlank[0], ' ')
+                                            .Append(ansiProcessor != null ? ANSIColorResetCode : string.Empty)
+                                            .ToString()));
     }
 
     /// <summary>

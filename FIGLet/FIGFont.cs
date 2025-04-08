@@ -107,7 +107,8 @@ public class FIGFont
         if (stream == null)
             return null;
 
-        using var reader = new StreamReader(stream, Encoding.UTF8, true);
+        using var zipStream = new FIGFontStream(stream);
+        using var reader = new StreamReader(zipStream, Encoding.UTF8, true);
         return FromReader(reader);
     }
 
@@ -188,7 +189,7 @@ public class FIGFont
             if (string.IsNullOrWhiteSpace(codeLine) || !char.IsDigit(codeLine[0]))
                 break;
 
-            var codePoint = int.Parse(codeLine.Split([' '], 2)[0]);
+            var codePoint = ParseInt(codeLine.Split([' '], 2)[0]);
             currentLine++; // Move past the code point line
 
             var charLines = new string[font.Height];
@@ -209,12 +210,38 @@ public class FIGFont
     }
 
     /// <summary>
+    /// Parses a string representation of a number into an integer.
+    /// </summary>
+    /// <param name="text">The string containing the number to parse. 
+    /// It can be in decimal, hexadecimal (prefixed with "0x"), 
+    /// binary (prefixed with "0b"), or octal (prefixed with "0").</param>
+    /// <returns>The parsed integer value. Returns 0 if the input is null.</returns>
+    /// <exception cref="FormatException">Thrown when the input string is not in a valid format.</exception>
+    /// <exception cref="OverflowException">Thrown when the input string represents a number less than <see cref="int.MinValue"/> or greater than <see cref="int.MaxValue"/>.</exception>
+    private static int ParseInt(string text)
+    {
+        if (text == null)
+            return 0;
+
+        if (text.StartsWith("0x"))
+            return int.Parse(text.Substring(2), System.Globalization.NumberStyles.HexNumber);
+        if (text.StartsWith("0b"))
+            return Convert.ToInt32(text.Substring(2), 2);
+        if (text.StartsWith("0"))
+            return Convert.ToInt32(text, 8);
+        return int.Parse(text);
+    }
+
+    /// <summary>
     /// Loads the default FIGfont from the embedded resource.
     /// </summary>
     /// <returns>The default FIGfont if found; otherwise, null.</returns>
     private static FIGFont? LoadDefaultFont()
     {
-        using var stream = typeof(FIGFont).Assembly.GetManifestResourceStream("FIGLet.fonts.small.flf");
+        var fontName = typeof(FIGFont).Assembly
+            .GetManifestResourceNames()
+            .First(name => name.EndsWith("small.flf", StringComparison.OrdinalIgnoreCase));
+        using var stream = typeof(FIGFont).Assembly.GetManifestResourceStream(fontName);
         return FromStream(stream);
     }
 

@@ -403,21 +403,35 @@ internal sealed class FIGLetCommentCommand
         var selection = (TextSelection)doc.Selection;
         insertPoint ??= selection.ActivePoint.CreateEditPoint();
 
-        var indentation = GenerateIndentation(insertPoint);
+        var indentation = GenerateIndentation(insertPoint, selection);
         var lines = bannerText.Split([ '\r', '\n' ], StringSplitOptions.RemoveEmptyEntries);
 
         insertPoint.StartOfLine();
         insertPoint.Insert(indentation + string.Join(Environment.NewLine + indentation, lines) + Environment.NewLine);
     }
 
-    private string GenerateIndentation(EditPoint insertPoint)
+    private string GenerateIndentation(EditPoint insertPoint, TextSelection selection)
     {
         ThreadHelper.ThrowIfNotOnUIThread();
-        var lineText = insertPoint.GetText(-insertPoint.LineCharOffset + 1);
-        var m = Regex.Match(lineText, @"^[\t ]*");
-        return m.Value;
+
+        // Check if we're on an empty line
+        var lineText = insertPoint.GetText(insertPoint.LineLength);
+        var isEmptyLine = string.IsNullOrWhiteSpace(lineText);
+
+        if (isEmptyLine && selection.ActivePoint.VirtualDisplayColumn > 0)
+        {
+            // Use virtual display column for empty lines with virtual space
+            return new string(' ', selection.ActivePoint.VirtualDisplayColumn);
+        }
+        else
+        {
+            // Original logic for non-empty lines
+            var lineStartText = insertPoint.GetText(-insertPoint.LineCharOffset + 1);
+            var m = Regex.Match(lineStartText, @"^[\t ]*");
+            return m.Value;
+        }
     }
-    
+
     static void HandleException(Exception ex, [CallerMemberName] string source = "")
     {
         var msg = $"Error executing {source}:{Environment.NewLine}{ex.Message}";

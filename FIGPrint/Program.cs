@@ -3,8 +3,16 @@ using System.CommandLine;
 
 namespace ByteForge.FIGPrint;
 
+/// <summary>
+/// The main program class for the FIGPrint application.
+/// </summary>
 class Program
 {
+    /// <summary>
+    /// The entry point of the application.
+    /// </summary>
+    /// <param name="args">Command-line arguments.</param>
+    /// <returns>An integer representing the exit code.</returns>
     static async Task<int> Main(string[] args)
     {
         // Create command line root command
@@ -37,7 +45,7 @@ class Program
         // Add text argument
         var textArgument = new Argument<string[]>(
             "text",
-            getDefaultValue: () => new string[0],
+            getDefaultValue: () => [],
             description: "The text to render")
         {
             Arity = ArgumentArity.ZeroOrMore
@@ -58,22 +66,67 @@ class Program
                 ShowAvailableFonts();
                 return Task.FromResult(0);
             }
+            Console.OutputEncoding = System.Text.Encoding.UTF8; // Ensure UTF-8 encoding for console output
+                                                                // Check if we have text from arguments
+            if (text.Length > 0)
+            {
+                return RenderTextWithFigletAsync(font, layout, useAnsi, string.Join(" ", text));
+            }
 
-            if (text.Length == 0)
+            // No text args provided, try to read from stdin
+            // Check if we have stdin data (i.e., if something was piped to the application)
+            if (!Console.IsInputRedirected)
             {
                 Console.WriteLine("No text provided to render. Use --help for usage information.");
                 return Task.FromResult(1);
             }
 
-            Console.OutputEncoding = System.Text.Encoding.UTF8; // Ensure UTF-8 encoding for console output
-
-            return RenderTextWithFigletAsync(font, layout, useAnsi, string.Join(" ", text));
+            // Read from stdin
+            return ProcessStdinAsync(font, layout, useAnsi);
         }, fontOption, layoutOption, showListOption, useANSIColorsOption, textArgument);
 
         // Parse the command line arguments
         return await rootCommand.InvokeAsync(args);
     }
 
+    /// <summary>
+    /// Processes input from standard input (stdin).
+    /// </summary>
+    /// <param name="font">The FIGlet font to use.</param>
+    /// <param name="layout">The layout mode to use.</param>
+    /// <param name="useAnsi">Whether to use ANSI colors.</param>
+    /// <returns>An integer representing the exit code.</returns>
+    private static async Task<int> ProcessStdinAsync(string font, LayoutMode layout, bool useAnsi)
+    {
+        try
+        {
+            // Read all text from stdin
+            var input = await Console.In.ReadToEndAsync();
+
+            // Process the input
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                Console.WriteLine("No input received from stdin.");
+                return 1;
+            }
+
+            return await RenderTextWithFigletAsync(font, layout, useAnsi, input);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing stdin: {ex.Message}");
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// Renders text using the specified FIGlet font and layout mode.
+    /// </summary>
+    /// <param name="fontName">The name of the FIGlet font to use.</param>
+    /// <param name="layout">The layout mode to use.</param>
+    /// <param name="useAnsi">Whether to use ANSI colors.</param>
+    /// <param name="textToRender">The text to render.</param>
+    /// <returns>An integer representing the exit code.</returns>
     private static async Task<int> RenderTextWithFigletAsync(string fontName, LayoutMode layout, bool useAnsi, string textToRender)
     {
         try
@@ -92,7 +145,7 @@ class Program
             var font = FIGFont.FromFile(fontPath);
 
             // Create a renderer
-            var renderer = new FIGLetRenderer(font, layout, useAnsi);
+            var renderer = new FIGLetRenderer(font: font, mode: layout, useANSIColors: useAnsi);
 
             // Render the text using the specified layout mode
             var renderedText = await Task.Run(() => renderer.Render(textToRender));
@@ -109,11 +162,16 @@ class Program
         }
     }
 
+    /// <summary>
+    /// Finds the file path of the specified FIGlet font.
+    /// </summary>
+    /// <param name="fontName">The name of the FIGlet font to find.</param>
+    /// <returns>The file path of the font, or null if not found.</returns>
     private static string? FindFontFile(string fontName)
     {
         // Determine the fonts directory relative to the executable
-        string exePath = AppDomain.CurrentDomain.BaseDirectory;
-        string fontsDir = Path.Combine(exePath, "fonts");
+        var exePath = AppDomain.CurrentDomain.BaseDirectory;
+        var fontsDir = Path.Combine(exePath, "fonts");
 
         // Check if directory exists
         if (!Directory.Exists(fontsDir))
@@ -123,12 +181,12 @@ class Program
         }
 
         // Look for the font file with various possible extensions
-        string[] possibleExtensions = { ".flf", ".FLF", "" };
+        string[] possibleExtensions = [".flf", ".FLF", ""];
 
         foreach (var ext in possibleExtensions)
         {
-            string fullFontName = fontName + ext;
-            string fontPath = Path.Combine(fontsDir, fullFontName);
+            var fullFontName = fontName + ext;
+            var fontPath = Path.Combine(fontsDir, fullFontName);
 
             if (File.Exists(fontPath))
             {
@@ -139,10 +197,13 @@ class Program
         return null;
     }
 
+    /// <summary>
+    /// Displays a list of available FIGlet fonts.
+    /// </summary>
     private static void ShowAvailableFonts()
     {
-        string exePath = AppDomain.CurrentDomain.BaseDirectory;
-        string fontsDir = Path.Combine(exePath, "fonts");
+        var exePath = AppDomain.CurrentDomain.BaseDirectory;
+        var fontsDir = Path.Combine(exePath, "fonts");
 
         if (!Directory.Exists(fontsDir))
         {
@@ -150,8 +211,7 @@ class Program
             return;
         }
 
-        string[] fontFiles = Directory.GetFiles(fontsDir, "*.flf")
-            .Concat(Directory.GetFiles(fontsDir, "*.flc"))
+        var fontFiles = Directory.GetFiles(fontsDir, "*.flf")
             .Concat(Directory.GetFiles(fontsDir, "*.tlf"))
             .ToArray();
 
@@ -164,7 +224,7 @@ class Program
         Console.WriteLine("Available fonts:");
         foreach (var fontFile in fontFiles.OrderBy(f => Path.GetFileNameWithoutExtension(f)))
         {
-            string fontName = Path.GetFileNameWithoutExtension(fontFile);
+            var fontName = Path.GetFileNameWithoutExtension(fontFile);
             Console.WriteLine($"  - {fontName}");
         }
     }
