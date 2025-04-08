@@ -74,13 +74,16 @@ public class FIGFont
     /// <summary>
     /// Gets the dictionary of characters in the FIGfont.
     /// </summary>
-    public Dictionary<char, string[]> Characters { get; private set; } = [];
+    public Dictionary<int, string[]> Characters { get; private set; } = [];
 
     /// <summary>
     /// Gets the smushing rules for the FIGfont.
     /// </summary>
     public SmushingRules SmushingRules { get; private set; } = SmushingRules.None;
 
+    /// <summary>
+    /// Gets the comments associated with the FIGfont.
+    /// </summary>
     public string Comments { get; private set; } = "";
 
     /// <summary>
@@ -167,17 +170,9 @@ public class FIGFont
             var charLines = new string[font.Height];
             for (var i = 0; i < font.Height; i++)
             {
-                charLines[i] = lines[currentLine + i].TrimEnd(['@', '\n', '\r']);
-
-                /*
-                 * A special case when FIG font designer uses a different hard blank character
-                 * than the one specified in the header. In this case, the "hard blank" character
-                 * will not be honored. This is a workaround to handle such cases.
-                 */
-                if (charLines[i].EndsWith("#") && font.HardBlank != "#")
-                    charLines[i] = charLines[i].TrimEnd('#');
+                ParseCharacterLine(lines, font, currentLine, charLines, i);
             }
-            font.Characters.Add((char)charCode, charLines);
+            font.Characters.Add(charCode, charLines);
             currentLine += font.Height;
         }
 
@@ -196,10 +191,9 @@ public class FIGFont
             for (var i = 0; i < font.Height; i++)
             {
                 if (currentLine + i >= lines.Length) break;
-                charLines[i] = lines[currentLine + i]
-                    .TrimEnd(['@', '\n', '\r']);
+                ParseCharacterLine(lines, font, currentLine, charLines, i);
             }
-            font.Characters.Add((char)codePoint, charLines);
+            font.Characters.Add(codePoint, charLines);
             currentLine += font.Height;
         }
 
@@ -207,6 +201,27 @@ public class FIGFont
         ParseLayoutParameters(font);
 
         return font;
+    }
+
+    /// <summary>
+    /// Parses a single character line from the FIGfont data.
+    /// </summary>
+    /// <param name="lines">The array of lines containing the FIGfont data.</param>
+    /// <param name="font">The FIGfont object being populated.</param>
+    /// <param name="currentLine">The current line index in the FIGfont data.</param>
+    /// <param name="charLines">The array of character lines being populated.</param>
+    /// <param name="i">The index of the current character line.</param>
+    private static void ParseCharacterLine(string[] lines, FIGFont font, int currentLine, string[] charLines, int i)
+    {
+        charLines[i] = lines[currentLine + i].TrimEnd(['@', '\n', '\r']);
+
+        /*
+         * A special case when FIG font designer uses a different hard blank character
+         * than the one specified in the header. In this case, the "hard blank" character
+         * will not be honored. This is a workaround to handle such cases.
+         */
+        if (charLines[i].EndsWith("#") && font.HardBlank != "#")
+            charLines[i] = charLines[i].TrimEnd('#');
     }
 
     /// <summary>
@@ -220,15 +235,28 @@ public class FIGFont
     /// <exception cref="OverflowException">Thrown when the input string represents a number less than <see cref="int.MinValue"/> or greater than <see cref="int.MaxValue"/>.</exception>
     private static int ParseInt(string text)
     {
-        if (text == null)
+        if (string.IsNullOrEmpty(text) || string.IsNullOrWhiteSpace(text))
             return 0;
 
+        // Remove leading and trailing whitespace
+        text = text.Trim();
+
+        // Handle special cases for negative numbers
+        if (text.StartsWith("-"))
+            return -ParseInt(text.Substring(1));
+
+        // Handle special cases for different number systems
         if (text.StartsWith("0x"))
+            // Hexadecimal
             return int.Parse(text.Substring(2), System.Globalization.NumberStyles.HexNumber);
         if (text.StartsWith("0b"))
+            // Binary
             return Convert.ToInt32(text.Substring(2), 2);
         if (text.StartsWith("0"))
+            // Octal
             return Convert.ToInt32(text, 8);
+
+        // Decimal
         return int.Parse(text);
     }
 

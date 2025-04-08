@@ -97,6 +97,7 @@ public partial class FIGLetRenderer
     /// <param name="mode">The layout mode to use for rendering. Default is LayoutMode.Smushing.</param>
     /// <param name="lineSeparator">The line separator to use. Default is "\r\n".</param>
     /// <param name="useANSIColors">Whether to process and preserve ANSI color codes. Default is false.</param>
+    /// <param name="paragraphMode">Whether to use paragraph mode for rendering. Default is true.</param>
     /// <returns>The rendered text as a string.</returns>
     public static string Render(string text, FIGFont? font = null, LayoutMode mode = LayoutMode.Default, string? lineSeparator = null, bool useANSIColors = false, bool paragraphMode = true)
     {
@@ -109,6 +110,11 @@ public partial class FIGLetRenderer
         return renderer.Render(text);
     }
 
+    /// <summary>
+    /// Renders the specified text using the current FIGFont and settings.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
+    /// <returns>The rendered text as a string.</returns>
     public string Render(string text){
         if (string.IsNullOrEmpty(text))
             return string.Empty;
@@ -133,6 +139,11 @@ public partial class FIGLetRenderer
         return RenderLine(text);
     }
 
+    /// <summary>
+    /// Renders a single line of text using the current FIGFont and settings.
+    /// </summary>
+    /// <param name="text">The text to render.</param>
+    /// <returns>The rendered line as a string.</returns>
     private string RenderLine(string text) {
 
         var mode = LayoutMode;
@@ -175,53 +186,95 @@ public partial class FIGLetRenderer
 
             }
 
+
             // Reset for second pass
             text = plainText.ToString();
         }
 
+        // Reverse the text for RTL fonts while preserving surrogate pairs
+        if (Font.PrintDirection == 1)
+        {
+            // Use StringInfo to properly handle surrogate pairs and combining characters
+            var textElements = new System.Globalization.StringInfo(text);
+            var textElementCount = textElements.LengthInTextElements;
+
+            // Build the reversed string
+            var reversedText = new StringBuilder(text.Length);
+            for (int i = textElementCount - 1; i >= 0; i--)
+            {
+                reversedText.Append(textElements.SubstringByTextElements(i, 1));
+            }
+
+            // Also reverse the color codes
+            var reversedColorDict = new Dictionary<int, string>();
+            foreach (var kvp in colorDict)
+            {
+                // Calculate the new position based on text elements, not raw chars
+                int newPos = plainText.Length - kvp.Key - 1;
+                reversedColorDict[newPos] = kvp.Value;
+            }
+
+            text = reversedText.ToString();
+            colorDict = reversedColorDict;
+        }
+
         // Second pass: Render the text with FIGfont
         charIndex = 0;
-        foreach (var c in text)
+        for (var i = 0; i < text.Length; i++)
         {
-            // Skip characters not in the font
-            if (!useANSIColors && Font.Characters.ContainsKey(c))
-                plainText.Append(c);
+            int codePoint;
 
-            var charLines = Font.Characters[c];
+            if (char.IsHighSurrogate(text[i]) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+            {
+                // This is a surrogate pair
+                codePoint = char.ConvertToUtf32(text[i], text[i + 1]);
+                i++; // Skip the low surrogate on the next iteration
+            }
+            else
+            {
+                // Regular BMP character
+                codePoint = (int)text[i];
+            }
+
+            // Skip characters not in the font
+            if (!useANSIColors && Font.Characters.ContainsKey(codePoint))
+                plainText.Append(char.ConvertFromUtf32(codePoint));
+
+            var charLines = Font.Characters[codePoint];
             var colorCode = string.Empty;
             _ = colorDict.TryGetValue(charIndex++, out colorCode);
 
             if (ol[0].Length == 0)
             {
                 // First character, just append
-                for (var i = 0; i < Font.Height; i++)
+                for (var lineIndex = 0; lineIndex < Font.Height; lineIndex++)
                 {
                     // Add color code if needed
                     if (useANSIColors)
-                        ol[i].Append(colorCode);
-                    ol[i].Append(charLines[i]);
+                        ol[lineIndex].Append(colorCode);
+                    ol[lineIndex].Append(charLines[lineIndex]);
                 }
             }
             else
             {
                 // Calculate overlap with previous character
                 var overlap = int.MaxValue;
-                for (var i = 0; i < Font.Height; i++)
-                    overlap = Math.Min(overlap, CalculateOverlap(ol[i].ToString(), charLines[i], mode));
+                for (var lineIndex = 0; lineIndex < Font.Height; lineIndex++)
+                    overlap = Math.Min(overlap, CalculateOverlap(ol[lineIndex].ToString(), charLines[lineIndex], mode));
 
                 // Apply smushing rules
-                for (var i = 0; i < Font.Height; i++)
+                for (var lineIndex = 0; lineIndex < Font.Height; lineIndex++)
                 {
                     if (overlap == 0)
                     {
                         if (useANSIColors)
-                            ol[i].Append(colorCode);
-                        ol[i].Append(charLines[i]);
+                            ol[lineIndex].Append(colorCode);
+                        ol[lineIndex].Append(charLines[lineIndex]);
                     }
                     else
                     {
                         // Use enhanced Smush method with color support
-                        Smush(ol[i], charLines[i], overlap, mode, colorCode ?? string.Empty);
+                        Smush(ol[lineIndex], charLines[lineIndex], overlap, mode, colorCode ?? string.Empty);
                     }
                 }
             }
