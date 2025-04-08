@@ -22,7 +22,7 @@ Add stylish ASCII art text banners to your code comments! This Visual Studio ext
 
 ## Installation
 
-Install directly from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ByteForge.FIGLetCommentGenerator).
+Install directly from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator).
 
 ## Usage
 
