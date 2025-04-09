@@ -66,12 +66,13 @@ class Program
                 ShowAvailableFonts();
                 return Task.FromResult(0);
             }
-            Console.OutputEncoding = System.Text.Encoding.UTF8; // Ensure UTF-8 encoding for console output
-                                                                // Check if we have text from arguments
+
+            // Ensure UTF-8 encoding for console output
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            // Check if we have text from arguments
             if (text.Length > 0)
-            {
                 return RenderTextWithFigletAsync(font, layout, useAnsi, string.Join(" ", text));
-            }
 
             // No text args provided, try to read from stdin
             // Check if we have stdin data (i.e., if something was piped to the application)
@@ -151,7 +152,7 @@ class Program
             var renderedText = await Task.Run(() => renderer.Render(textToRender));
 
             // Output the rendered text
-            Console.WriteLine(renderedText);
+            Console.Out.WriteLine(renderedText);
 
             return 0;
         }

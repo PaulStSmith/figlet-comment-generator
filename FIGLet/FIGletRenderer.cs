@@ -123,7 +123,7 @@ public partial class FIGLetRenderer
         {
             // Split the text into paragraphs based on line breaks
             var emptlyLine = (new string('*', Font.Height)).Replace("*", LineSeparator);
-            var paragraphs = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            var paragraphs = text.Split(["\r\n", "\n"], StringSplitOptions.None);
             var renderedParagraphs = new StringBuilder();
             foreach (var paragraph in paragraphs)
                 if (string.IsNullOrWhiteSpace(paragraph))

@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishSingleFile>true</PublishSingleFile>
-    <AssemblyName>ByteForge.$(MSBuildProjectName)</AssemblyName>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>ByteForge.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
@@ -35,9 +35,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="fonts\bmp.flf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="fonts\Ivrit.flf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
