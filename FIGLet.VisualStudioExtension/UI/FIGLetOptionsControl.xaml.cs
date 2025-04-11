@@ -13,8 +13,32 @@ namespace ByteForge.FIGLet.VisualStudioExtension.UI;
 public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
 {
     private readonly FIGLetOptions _options;
-    private readonly List<FIGFontInfo> _fonts = [];
     private FIGFont _currentFont;
+
+    private FIGLetFontManager FontManager { get { return _lazyFontManager.Value; } }
+    private readonly Lazy<FIGLetFontManager> _lazyFontManager = new(static () => new FIGLetFontManager(), true);
+
+    public class LayoutModeItem
+    {
+        public LayoutMode Value { get; set; }
+        public string DisplayName { get; set; }
+    }
+
+    private void InitializeLayoutModes()
+    {
+        var items = new List<LayoutModeItem>
+        {
+            new() { Value = LayoutMode.Default, DisplayName = "Default (Smushing)" },
+            new() { Value = LayoutMode.Smushing, DisplayName = "Smushing" },
+            new() { Value = LayoutMode.Kerning, DisplayName = "Kerning" },
+            new() { Value = LayoutMode.FullSize, DisplayName = "Full Size" },
+        };
+
+        LayoutModeComboBox.ItemsSource = items;
+        LayoutModeComboBox.DisplayMemberPath = "DisplayName";
+        LayoutModeComboBox.SelectedValuePath = "Value";
+    }
+
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FIGLetOptionsControl"/> class.
@@ -26,7 +50,15 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
         InitializeComponent();
 
         MinWidth = 400;
-        FontListView.ItemsSource = _fonts;
+        FontListView.ItemsSource = FontManager.AvailableFonts;
+
+        FontManager.FontsChanged += (s, e) =>
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            FontListView.ItemsSource = null;
+            FontListView.ItemsSource = FontManager.AvailableFonts;
+            UpdateFontCount();
+        };
 
         // Initialize controls
         LayoutModeComboBox.Loaded += (s, e) =>
@@ -34,6 +66,8 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
             UpdateControls();
             UpdatePreview();
         };
+
+        InitializeLayoutModes();
 
         // Set default sample text
         SampleTextBox.Text = "Hello World";
@@ -47,10 +81,11 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     /// </summary>
     public void UpdateControls()
     {
-        FontDirectoryTextBox.Text = _options.FontPath;
-        LayoutModeComboBox.SelectedItem = _options.LayoutMode;
-
-        LoadFonts();
+        if (FontDirectoryTextBox.Text != _options.FontPath)
+        {
+            FontDirectoryTextBox.Text = _options.FontPath;
+        }
+        LayoutModeComboBox.SelectedValue = _options.LayoutMode;
     }
 
     /// <summary>
@@ -59,7 +94,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     public void UpdateSettings()
     {
         _options.FontPath = FontDirectoryTextBox.Text;
-        _options.LayoutMode = (LayoutMode)LayoutModeComboBox.SelectedItem;
+        _options.LayoutMode = (LayoutMode?)LayoutModeComboBox.SelectedValue ?? LayoutMode.Default;
 
         if (FontListView.SelectedItem is FIGFontInfo selectedFont)
             _options.LastSelectedFont = selectedFont.Name;
@@ -70,18 +105,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     /// </summary>
     private void UpdateFontCount()
     {
-        FontCountText.Text = $"Available Fonts ({_fonts.Count})";
-    }
-
-    /// <summary>
-    /// Loads the fonts from the specified directory.
-    /// </summary>
-    private void LoadFonts()
-    {
-        FIGLetFontManager.SetFontDirectory(FontDirectoryTextBox.Text);
-        _fonts.Clear();
-        _fonts.AddRange(FIGLetFontManager.AvaliableFonts);
-        UpdateFontCount();
+        FontCountText.Text = $"Available Fonts ({FontManager.AvailableFonts.Count})";
     }
 
     /// <summary>
@@ -103,7 +127,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
             PreviewTextBox.Text = FIGLetRenderer.Render(
                 text: SampleTextBox.Text,
                 font: _currentFont,
-                mode: (LayoutMode)(LayoutModeComboBox.SelectedItem ?? LayoutMode.Default));
+                mode: (LayoutMode)(LayoutModeComboBox.SelectedValue ?? LayoutMode.Default));
         }
         catch (Exception ex)
         {
@@ -125,9 +149,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
             dialog.ShowNewFolderButton = true;
 
             if (dialog.ShowDialog() == DialogResult.OK)
-            {
-                FontDirectoryTextBox.Text = dialog.SelectedPath;
-            }
+                FontManager.FontDirectory = FontDirectoryTextBox.Text = dialog.SelectedPath;
         }
     }
 
@@ -138,7 +160,7 @@ public partial class FIGLetOptionsControl : System.Windows.Controls.UserControl
     /// <param name="e">The event arguments.</param>
     private void FontDirectoryTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        LoadFonts();
+        FontManager.FontDirectory = FontDirectoryTextBox.Text;
     }
 
     /// <summary>

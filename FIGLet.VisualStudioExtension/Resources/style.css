@@ -196,16 +196,17 @@ li {
 }
 
 .feature-item {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
+    position: relative;
+    padding-left: 1.5em; /* space for arrow */
+    text-indent: -1.5em; /* pull the text back */
 }
 
     .feature-item::before {
         content: "→";
         color: var(--primary);
         font-weight: bold;
+        display: inline-block;
+        margin-left: 1.5em; /* space for arrow */
     }
 
 /* Code Elements */

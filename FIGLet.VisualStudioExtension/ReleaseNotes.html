@@ -16,6 +16,22 @@
     <h1>FIGlet Comment Generator - Release Notes</h1>
 
     <div class="version">
+        Version 1.2.3 - Update Release (April 2025)
+    </div>
+
+    <div class="feature-section">
+        <h3>Enhancements and Refactoring</h3>
+        <ul class="feature-list">
+            <li class="feature-item">Refactored <span class="code">FIGLetFontManager</span> to implement <span class="code">IDisposable</span> and added <span class="code">FileSystemWatcher</span> for real-time font directory monitoring.</li>
+            <li class="feature-item">Updated font loading logic to use an instance method and improved font directory handling robustness.</li>
+            <li class="feature-item">Removed <span class="code">ObjectDataProvider</span> from <span class="code">FIGLetOptionsControl.xaml</span>; layout options now populated in span-behind using <span class="code">LayoutModeItem</span> objects.</li>
+            <li class="feature-item">Changed <span class="code">PreviewTextBox</span> font to "Cascadia Mono" for better visual consistency.</li>
+            <li class="feature-item">Reworked <span class="code">FIGLetOptionsControl.xaml.cs</span> to integrate the new <span class="code">FIGLetFontManager</span> instance-based font management.</li>
+            <li class="feature-item">Modified <span class="code">LoadFonts</span> method in <span class="code">FIGLetInputDialogView.xaml.cs</span> to align with updated font management logic, and added <span class="code">Hyperlink_Click</span> handler for clickable link support.</li>
+        </ul>
+    </div>
+
+    <div class="version">
         Version 1.2.2.1 - Update Release (April 2025)
     </div>
 

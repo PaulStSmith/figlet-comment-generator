@@ -1,9 +1,13 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace ByteForge.FIGLet.VisualStudioExtension.UI;
@@ -43,6 +47,8 @@ public partial class FIGLetInputDialogView : UserControl
     public string CurrentLanguage { get; set; }
 
     private readonly FIGLetOptions options;
+    private FIGLetFontManager FontManager { get { return _lazyFontManager.Value; } }
+    private readonly Lazy<FIGLetFontManager> _lazyFontManager = new(static () => new FIGLetFontManager(), true);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FIGLetInputDialogView"/> class.
@@ -196,9 +202,9 @@ public partial class FIGLetInputDialogView : UserControl
     /// <param name="fontDirectory">The font directory.</param>
     private void LoadFonts(string fontDirectory)
     {
-        FIGLetFontManager.SetFontDirectory(fontDirectory);
+        FontManager.FontDirectory = fontDirectory;
         FontComboBox.Items.Clear();
-        foreach (var itm in FIGLetFontManager.AvaliableFonts)
+        foreach (var itm in FontManager.AvailableFonts)
             FontComboBox.Items.Add(itm);
     }
 
@@ -231,5 +237,25 @@ public partial class FIGLetInputDialogView : UserControl
     private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         UpdatePreview();
+    }
+
+    private void Hyperlink_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Hyperlink hlb)
+            return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = hlb.NavigateUri.ToString(),
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            // Handle any exceptions that might occur
+            MessageBox.Show($"Error opening URL: {ex.Message}");
+        }
     }
 }

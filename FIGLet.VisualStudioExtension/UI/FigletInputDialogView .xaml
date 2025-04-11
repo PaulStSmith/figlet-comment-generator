@@ -206,7 +206,7 @@
                 <TextBlock x:Name="PreviewBlock"
                           Text="XXX"
                           TextWrapping="NoWrap"
-                          FontFamily="Consolas"/>
+                          FontFamily="Cascadia Mono"/>
             </ScrollViewer>
         </Border>
 
@@ -234,7 +234,9 @@
                 <TextBlock 
                     DockPanel.Dock="Left"
                     VerticalAlignment="Center">
-                    <Hyperlink NavigateUri="https://bityl.co/Snpw">
+                    <Hyperlink 
+                        NavigateUri="https://bitl.to/4Ll1"
+                        Click="Hyperlink_Click" >
                         FIGLet Comment Generator
                     </Hyperlink>
                 </TextBlock>
