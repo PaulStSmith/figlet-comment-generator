@@ -1,9 +1,9 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Updates and publishes the ByteForge.FIGLet NuGet package.
+    Updates and publishes the FIGLet NuGet package.
 .DESCRIPTION
-    This script builds, packs, and publishes the ByteForge.FIGLet library to NuGet.
+    This script builds, packs, and publishes the FIGLet library to NuGet.
     It also handles version incrementing and validation.
 .PARAMETER ProjectPath
     Path to the project directory. Default is current directory.
@@ -246,4 +246,4 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host "Successfully published ByteForge.FIGLet $NewVersion to NuGet!" -ForegroundColor Green
+Write-Host "Successfully published FIGLet $NewVersion to NuGet!" -ForegroundColor Green
