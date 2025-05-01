@@ -1,37 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFrameworks>
       net4.7.2;net4.8;net4.8.1;
       netstandard2.0;netstandard2.1;
       netcoreapp3.1;
-      net5.0;net6.0;net7.0;net8.0
+      net5.0;net6.0;net7.0;net8.0;net9.0
     </TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>12.0</LangVersion>
     <AssemblyName>ByteForge.$(MSBuildProjectName)</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="AsciiArt.cs" />
     <Compile Remove="Program.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <None Remove="fonts\small.flf" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="fonts\small.flf">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
-
   <PropertyGroup>
     <PackageId>FIGLet</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <Authors>Paulo Santos</Authors>
     <Description>A C# implementation of FIGLet (Frank, Ian &amp; Glenn's letters) - a program for making large letters out of ordinary text.</Description>
     <PackageTags>figlet;ascii-art;text-formatting</PackageTags>
@@ -41,13 +36,14 @@
     <RepositoryUrl>https://github.com/PaulStSmith/figlet-comment-generator</RepositoryUrl>
     <RootNamespace>ByteForge.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
-
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net4.7.2' OR '$(TargetFramework)' == 'net4.8' OR '$(TargetFramework)' == 'net4.8.1'">
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
-
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+  </ItemGroup>
 </Project>

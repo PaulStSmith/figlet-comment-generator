@@ -14,7 +14,11 @@ namespace ByteForge.FIGLet;
 /// <summary>
 /// Class for rendering text using FIGFonts.
 /// </summary>
-public partial class FIGLetRenderer
+/// <remarks>
+/// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont.
+/// </remarks>
+/// <param name="font">The FIGFont to use for rendering text.</param>
+public partial class FIGLetRenderer(FIGFont? font)
 {
     /// <summary>
     /// Characters used for hierarchy smushing.
@@ -43,12 +47,6 @@ public partial class FIGLetRenderer
     public FIGLetRenderer() : this(FIGFont.Default) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont.
-    /// </summary>
-    /// <param name="font">The FIGFont to use for rendering text.</param>
-    public FIGLetRenderer(FIGFont? font) => Font = font ?? throw new ArgumentNullException(nameof(font));
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="FIGLetRenderer"/> class with the specified FIGFont, layout mode, line separator, and ANSI color usage.
     /// </summary>
     /// <param name="font">The FIGFont to use for rendering text.</param>
@@ -67,7 +65,7 @@ public partial class FIGLetRenderer
     /// <summary>
     /// Gets the FIGFont used for rendering text.
     /// </summary>
-    public FIGFont Font { get; }
+    public FIGFont Font { get; } = font ?? throw new ArgumentNullException(nameof(font));
 
     /// <summary>
     /// Gets or sets the layout mode for rendering.
@@ -200,7 +198,7 @@ public partial class FIGLetRenderer
 
             // Build the reversed string
             var reversedText = new StringBuilder(text.Length);
-            for (int i = textElementCount - 1; i >= 0; i--)
+            for (var i = textElementCount - 1; i >= 0; i--)
             {
                 reversedText.Append(textElements.SubstringByTextElements(i, 1));
             }
@@ -210,7 +208,7 @@ public partial class FIGLetRenderer
             foreach (var kvp in colorDict)
             {
                 // Calculate the new position based on text elements, not raw chars
-                int newPos = plainText.Length - kvp.Key - 1;
+                var newPos = plainText.Length - kvp.Key - 1;
                 reversedColorDict[newPos] = kvp.Value;
             }
 
