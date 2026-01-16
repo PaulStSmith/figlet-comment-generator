@@ -8,7 +8,10 @@
       "Bash(powershell -ExecutionPolicy Bypass -File build-release.ps1)",
       "Bash(unzip:*)",
       "Bash(./test-extract/FIGPrint.exe:*)",
-      "Bash(winget validate:*)"
+      "Bash(winget validate:*)",
+      "Bash(msbuild:*)",
+      "Bash(cmd /c \"\"\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Professional\\\\Common7\\\\Tools\\\\VsDevCmd.bat\"\" && msbuild C:\\\\Users\\\\pauls\\\\source\\\\repos\\\\FIGLetAddIn\\\\FIGLet.VisualStudioExtension\\\\FIGlet.VisualStudioExtension.csproj /p:Configuration=Debug /v:normal\")",
+      "Bash(powershell -Command:*)"
     ],
     "deny": [],
     "ask": []
