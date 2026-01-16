@@ -5,7 +5,8 @@
 		"target": "es2022",
 			"outDir": "out",
 		"lib": [
-			"ES2022"
+			"ES2022",
+			"DOM"
 		],
 		"sourceMap": true,
 		"rootDir": "src",
@@ -13,8 +14,13 @@
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUnusedParameters": true,
-		"noUnusedLocals": true
+		"noUnusedLocals": true,
+		"jsx": "react",
+		"esModuleInterop": true
 	},
+	"include": [
+		"src/**/*"
+	],
 	"exclude": [
 		"node_modules",
 		".vscode-test"

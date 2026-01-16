@@ -1,4 +1,4 @@
-﻿# FIGLet Core Library
+# FIGLet Core Library
 
 A C# implementation of FIGLet (Frank, Ian & Glenn's letters) - a program for making large letters out of ordinary text.
 

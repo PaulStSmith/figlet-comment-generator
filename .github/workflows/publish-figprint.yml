@@ -1,0 +1,135 @@
+name: Publish FIGPrint
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'FIGPrint/**'
+      - '.github/workflows/publish-figprint.yml'
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for tags
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Extract version from csproj
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$csproj = Get-Content FIGPrint/FIGPrint.csproj
+          $version = $csproj.Project.PropertyGroup.Version | Where-Object { $_ }
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "Detected version: $version"
+
+      - name: Check if tag exists
+        id: check_tag
+        shell: bash
+        run: |
+          TAG_NAME="figprint-v${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME already exists, skipping publish"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME does not exist, will publish"
+          fi
+
+      - name: Build win-x64
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          dotnet publish FIGPrint/FIGPrint.csproj `
+            --configuration Release `
+            --runtime win-x64 `
+            --self-contained true `
+            --output ./publish/win-x64 `
+            /p:PublishSingleFile=true `
+            /p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Build win-arm64
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          dotnet publish FIGPrint/FIGPrint.csproj `
+            --configuration Release `
+            --runtime win-arm64 `
+            --self-contained true `
+            --output ./publish/win-arm64 `
+            /p:PublishSingleFile=true `
+            /p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Create ZIP archives
+        if: steps.check_tag.outputs.exists == 'false'
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+
+          # Clean up publish directories (keep only exe and fonts)
+          Get-ChildItem ./publish/win-x64 -Exclude "FIGPrint.exe", "fonts" | Remove-Item -Recurse -Force
+          Get-ChildItem ./publish/win-arm64 -Exclude "FIGPrint.exe", "fonts" | Remove-Item -Recurse -Force
+
+          # Create ZIPs
+          Compress-Archive -Path ./publish/win-x64/* -DestinationPath "./FIGPrint-$version-win-x64.zip"
+          Compress-Archive -Path ./publish/win-arm64/* -DestinationPath "./FIGPrint-$version-win-arm64.zip"
+
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: figprint-v${{ steps.version.outputs.version }}
+          name: FIGPrint v${{ steps.version.outputs.version }}
+          body: |
+            ## FIGPrint v${{ steps.version.outputs.version }}
+
+            A command-line utility for rendering text using FIGlet fonts.
+
+            ### Installation
+
+            **Windows (winget):**
+            ```
+            winget install ByteForge.FIGPrint
+            ```
+
+            **Manual:**
+            Download the ZIP for your architecture, extract, and add to PATH.
+
+            ### Usage
+            ```
+            figprint "Hello World"
+            figprint --font big "Hello"
+            figprint --showList
+            ```
+          files: |
+            FIGPrint-${{ steps.version.outputs.version }}-win-x64.zip
+            FIGPrint-${{ steps.version.outputs.version }}-win-arm64.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Submit to winget
+        if: steps.check_tag.outputs.exists == 'false'
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $x64Url = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
+          $arm64Url = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
+
+          # Install wingetcreate
+          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+
+          # Create and submit manifest
+          ./wingetcreate.exe update ByteForge.FIGPrint `
+            --version $version `
+            --urls "$x64Url|x64" "$arm64Url|arm64" `
+            --submit `
+            --token ${{ secrets.WINGET_GITHUB_TOKEN }}

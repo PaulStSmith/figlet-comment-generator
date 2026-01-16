@@ -1,9 +1,9 @@
 ```
  _____ ___ ____ _      _   
 |  ___|_ _/ ___| | ___| |_ 
-| |_   | | |  _| |/ _ \ __|
+|  | _ |  |  | _ |  | / _ \ __ |
 |  _|  | | |_| | |  __/ |_ 
-|_|   |___\____|_|\___|\__|
+| _ |  | ___\____ | _ | \___ | \__ |
 ```
 
 [ home ] [ font examples ] [ font database ] [ contributions ] [ FIGlet man page ] [ FAQ ] [ FIGstory ]
@@ -411,3 +411,4 @@
        (and the corresponding ftp://ftp.figlet.org/pub/figlet/)
 
 v2.2.5                            31 May 2012                        FIGLET(6)
+

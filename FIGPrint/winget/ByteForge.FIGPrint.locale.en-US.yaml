@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: ByteForge.FIGPrint
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Paulo Santos
+PublisherUrl: https://github.com/PaulStSmith
+PublisherSupportUrl: https://github.com/PaulStSmith/figlet-comment-generator/issues
+PackageName: FIGPrint
+PackageUrl: https://github.com/PaulStSmith/figlet-comment-generator
+License: MIT
+LicenseUrl: https://github.com/PaulStSmith/figlet-comment-generator/blob/master/FIGPrint/LICENSE
+ShortDescription: A command-line utility for rendering text using FIGlet fonts
+Description: |-
+  FIGPrint is a command-line application that renders text as ASCII art using FIGlet fonts.
+  It supports multiple layout modes (Full Size, Kerning, Smushing) and can process text from
+  command-line arguments or piped input. Perfect for creating eye-catching text banners for
+  console applications, scripts, or just for fun.
+Tags:
+  - ascii-art
+  - cli
+  - console
+  - figlet
+  - text
+  - banner
+  - terminal
+ReleaseNotesUrl: https://github.com/PaulStSmith/figlet-comment-generator/releases/tag/figprint-v1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

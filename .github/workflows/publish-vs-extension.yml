@@ -1,0 +1,130 @@
+name: Publish Visual Studio Extension
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'FIGLet.VisualStudioExtension/**'
+      - 'FIGLet/**'  # VS Extension depends on FIGLet library
+      - '.github/workflows/publish-vs-extension.yml'
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for tags
+
+      - name: Setup .NET Framework
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Extract version from vsixmanifest
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$manifest = Get-Content "FIGLet.VisualStudioExtension/source.extension.vsixmanifest"
+          $version = $manifest.PackageManifest.Metadata.Identity.Version
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "Detected version: $version"
+
+      - name: Check if tag exists
+        id: check_tag
+        shell: bash
+        run: |
+          TAG_NAME="vsext-v${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME already exists, skipping publish"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME does not exist, will publish"
+          fi
+
+      - name: Restore NuGet packages
+        if: steps.check_tag.outputs.exists == 'false'
+        run: nuget restore FIGLetAddIn.sln
+
+      - name: Build FIGLet library
+        if: steps.check_tag.outputs.exists == 'false'
+        run: dotnet build FIGLet/FIGLet.csproj --configuration Release
+
+      - name: Build VSIX
+        if: steps.check_tag.outputs.exists == 'false'
+        run: msbuild FIGLet.VisualStudioExtension/FIGlet.VisualStudioExtension.csproj /p:Configuration=Release /p:DeployExtension=false
+
+      - name: Find VSIX file
+        if: steps.check_tag.outputs.exists == 'false'
+        id: find_vsix
+        shell: pwsh
+        run: |
+          $vsix = Get-ChildItem -Path "FIGLet.VisualStudioExtension/bin/Release" -Filter "*.vsix" | Select-Object -First 1
+          if ($vsix) {
+            echo "vsix_path=$($vsix.FullName)" >> $env:GITHUB_OUTPUT
+            echo "Found VSIX: $($vsix.FullName)"
+          } else {
+            Write-Error "No VSIX file found"
+            exit 1
+          }
+
+      - name: Download VsixPublisher
+        if: steps.check_tag.outputs.exists == 'false'
+        shell: pwsh
+        run: |
+          # VsixPublisher is included in VS Build Tools, but we can use the marketplace API directly
+          # or download the VSCE tool. For VS Marketplace, we'll use the REST API approach.
+          Invoke-WebRequest -Uri "https://marketplace.visualstudio.com/_apis/public/gallery/publisher/Paulo%20Santos%20-%20Paul.St.Smith" -Method Head -ErrorAction SilentlyContinue
+
+      - name: Publish to VS Marketplace
+        if: steps.check_tag.outputs.exists == 'false'
+        shell: pwsh
+        env:
+          VS_MARKETPLACE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
+        run: |
+          $vsixPath = "${{ steps.find_vsix.outputs.vsix_path }}"
+
+          # Use VsixPublisher from VS installation or download it
+          $vsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+
+          if (-not (Test-Path $vsixPublisher)) {
+            # Try Community edition
+            $vsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Community\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+          }
+
+          if (-not (Test-Path $vsixPublisher)) {
+            # Download and use tfx-cli as alternative
+            npm install -g tfx-cli
+            tfx extension publish --vsix "$vsixPath" --token $env:VS_MARKETPLACE_PAT --no-prompt
+          } else {
+            # Create publish manifest
+            $publishManifest = @"
+          {
+            "categories": ["Other"],
+            "identity": {
+              "internalName": "FIGLet-Comment-Generator"
+            },
+            "overview": "Marketplace Overview.md",
+            "publisher": "Paulo Santos - Paul.St.Smith",
+            "assetFiles": [
+              { "pathOnDisk": "FIGLet.VisualStudioExtension/bin/Release/preview.png", "targetPath": "preview.png" }
+            ]
+          }
+          "@
+            $publishManifest | Out-File -FilePath "publish-manifest.json" -Encoding UTF8
+
+            & $vsixPublisher publish -payload "$vsixPath" -publishManifest "publish-manifest.json" -personalAccessToken $env:VS_MARKETPLACE_PAT
+          }
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.exists == 'false'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "vsext-v${{ steps.version.outputs.version }}" -m "VS Extension v${{ steps.version.outputs.version }}"
+          git push origin "vsext-v${{ steps.version.outputs.version }}"

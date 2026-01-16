@@ -1,4 +1,4 @@
-﻿# FIGLet Comment Generator for Visual Studio
+# FIGLet Comment Generator for Visual Studio
 
 ```
  ___ ___ ___ _        _        ___                         _        ___                       _           
