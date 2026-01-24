@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+
+PackageIdentifier: ByteForge.FIGPrint
+PackageVersion: 1.1.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: FIGPrint.exe
+    PortableCommandAlias: figprint
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/PaulStSmith/figlet-comment-generator/releases/download/figprint-v1.1.0/FIGPrint-1.1.0-win-x64.zip
+    InstallerSha256: 6960FEB44AB8E682166156FF8A0F916D9AA825C5C7807804F10600939DCAE2BF
+  - Architecture: arm64
+    InstallerUrl: https://github.com/PaulStSmith/figlet-comment-generator/releases/download/figprint-v1.1.0/FIGPrint-1.1.0-win-arm64.zip
+    InstallerSha256: 2EBD0ECA095081868B8404E9CA498A06B621C53ED866F171095F0B5D41156A34
+ManifestType: installer
+ManifestVersion: 1.6.0

@@ -226,11 +226,43 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+
+  <!-- Override FindExistingDeploymentPath to skip version check when same version is installed -->
+  <!-- This completely replaces the VSSDK target that throws the version error -->
+  <Target Name="FindExistingDeploymentPath" Condition="'$(DeployExtension)' == 'true' AND '$(CreateVsixContainer)' == 'true'">
+    <PropertyGroup>
+      <ExtensionId>FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e</ExtensionId>
+      <SkipDeploymentFlagFile>$(IntermediateOutputPath)skip_deploy.txt</SkipDeploymentFlagFile>
+    </PropertyGroup>
+
+    <!-- Check installed extension version using external PowerShell script -->
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)CheckExtensionVersion.ps1&quot; -ExtensionId &quot;$(ExtensionId)&quot; -CurrentVersion &quot;$(VsixVersion)&quot; -OutputFile &quot;$(SkipDeploymentFlagFile)&quot;"
+      ConsoleToMSBuild="true"
+      IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="ExtensionCheckOutput" />
+    </Exec>
+
+    <!-- Read the flag file to determine if we should skip -->
+    <ReadLinesFromFile File="$(SkipDeploymentFlagFile)" Condition="Exists('$(SkipDeploymentFlagFile)')">
+      <Output TaskParameter="Lines" PropertyName="SkipDeployFlag" />
+    </ReadLinesFromFile>
+
+    <Message Text="Extension deployment skipped - same or higher version already installed. Bump version in source.extension.vsixmanifest to deploy."
+             Importance="high"
+             Condition="'$(SkipDeployFlag)' == 'true'" />
+
+    <!-- Set DeployExtension to false if same version is installed -->
+    <CreateProperty Value="false" Condition="'$(SkipDeployFlag)' == 'true'">
+      <Output TaskParameter="Value" PropertyName="DeployExtension" />
+    </CreateProperty>
+
+    <!-- Only run original logic if we're not skipping -->
+    <FindInstalledExtension VsixIdentifier="$(VsixID)" RootSuffix="$(VSSDKTargetPlatformRegRootSuffix)" Condition="'$(SkipDeployFlag)' != 'true'">
+      <Output TaskParameter="VsixInstallPath" PropertyName="ExtensionInstallationPath" />
+      <Output TaskParameter="VsixInstallVersion" PropertyName="ExtensionInstallationVersion" />
+    </FindInstalledExtension>
+
+    <Error Text="Extension '$(VsixID)' is of the same or lower version than the installed extension. Please make sure that the extension version '$(VsixVersion)' is higher than that of the installed extension version '$(ExtensionInstallationVersion)'. Installed extension path '$(ExtensionInstallationPath)'."
+           Condition="'$(SkipDeployFlag)' != 'true' AND '$(ExtensionInstallationPath)' != '' AND $([System.Version]::Parse($(VsixVersion))) &lt;= $([System.Version]::Parse($(ExtensionInstallationVersion)))" />
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

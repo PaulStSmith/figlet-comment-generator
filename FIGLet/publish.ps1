@@ -36,24 +36,21 @@ param(
     [Parameter(Mandatory=$false)]
     [Alias("p")]
     [string]$ProjectPath = ".",
-    
+
     [Parameter(Mandatory=$false)]
     [switch]$Major,
-    
+
     [Parameter(Mandatory=$false)]
     [switch]$Minor,
-    
-    [Parameter(Mandatory=$false)]
-    [switch]$Patch,
-    
+
     [Parameter(Mandatory=$false)]
     [Alias("c")]
     [string]$Configuration = "Release",
-    
+
     [Parameter(Mandatory=$false)]
     [Alias("o")]
     [string]$OutputPath = "./nupkg",
-    
+
     [Parameter(Mandatory=$false)]
     [Alias("s")]
     [switch]$SkipPublish = $false,
@@ -63,18 +60,113 @@ param(
     [string]$ApiKey = $null
 )
 
-# Apply switch-based version increment if specified
+# =============================================================================
+# DATE-BASED VERSIONING FUNCTIONS
+# Version format: Major.Minor.YY.MMDD[-suffix]
+# =============================================================================
+
+function Get-DateVersionParts {
+    $now = Get-Date
+    return @{
+        YY = $now.ToString("yy")
+        MMDD = $now.ToString("MMdd")
+        DatePart = "$($now.ToString('yy')).$($now.ToString('MMdd'))"
+    }
+}
+
+function Parse-Version {
+    param([string]$VersionString)
+
+    # Pattern: Major.Minor.YY.MMDD[-suffix]
+    $pattern = "^(\d+)\.(\d+)\.(\d+)\.(\d+)(?:-([a-z]+))?$"
+    if ($VersionString -match $pattern) {
+        return @{
+            Major = [int]$Matches[1]
+            Minor = [int]$Matches[2]
+            YY = $Matches[3]
+            MMDD = $Matches[4]
+            Suffix = $Matches[5]
+            IsDateBased = $true
+        }
+    }
+
+    # Fallback: traditional Major.Minor.Patch
+    $pattern = "^(\d+)\.(\d+)\.(\d+)$"
+    if ($VersionString -match $pattern) {
+        return @{
+            Major = [int]$Matches[1]
+            Minor = [int]$Matches[2]
+            Patch = [int]$Matches[3]
+            IsDateBased = $false
+        }
+    }
+
+    return $null
+}
+
+function Get-NextSuffix {
+    param([string]$CurrentSuffix)
+
+    if ([string]::IsNullOrEmpty($CurrentSuffix)) {
+        return "a"
+    }
+
+    # Increment the last character: a -> b, b -> c, etc.
+    $lastChar = $CurrentSuffix[-1]
+    $nextChar = [char]([int]$lastChar + 1)
+
+    if ($CurrentSuffix.Length -eq 1) {
+        return [string]$nextChar
+    }
+
+    return $CurrentSuffix.Substring(0, $CurrentSuffix.Length - 1) + $nextChar
+}
+
+function Build-NewVersion {
+    param(
+        [hashtable]$CurrentVersion,
+        [string]$Increment
+    )
+
+    $dateParts = Get-DateVersionParts
+    $maj = $CurrentVersion.Major
+    $min = $CurrentVersion.Minor
+
+    # Handle Major/Minor increment
+    if ($Increment -eq "Major") {
+        $maj++
+        $min = 0
+        return "$maj.$min.$($dateParts.YY).$($dateParts.MMDD)"
+    }
+    elseif ($Increment -eq "Minor") {
+        $min++
+        return "$maj.$min.$($dateParts.YY).$($dateParts.MMDD)"
+    }
+
+    # No Major/Minor change - check if we need a same-day suffix
+    if ($CurrentVersion.IsDateBased) {
+        $currentDatePart = "$($CurrentVersion.YY).$($CurrentVersion.MMDD)"
+
+        if ($currentDatePart -eq $dateParts.DatePart) {
+            # Same day release - add/increment suffix
+            $newSuffix = Get-NextSuffix -CurrentSuffix $CurrentVersion.Suffix
+            return "$maj.$min.$($dateParts.YY).$($dateParts.MMDD)-$newSuffix"
+        }
+    }
+
+    # Different day - new date, no suffix
+    return "$maj.$min.$($dateParts.YY).$($dateParts.MMDD)"
+}
+
+# Determine version increment type
+$VersionIncrement = $null
 if ($Major) {
     $VersionIncrement = "Major"
-    Write-Host "Using switch parameter: Major version increment" -ForegroundColor Cyan
+    Write-Host "Version increment: Major" -ForegroundColor Cyan
 }
 elseif ($Minor) {
-    $VersionIncrement = "Minor" 
-    Write-Host "Using switch parameter: Minor version increment" -ForegroundColor Cyan
-}
-elseif ($Patch) {
-    $VersionIncrement = "Patch"
-    Write-Host "Using switch parameter: Patch version increment" -ForegroundColor Cyan
+    $VersionIncrement = "Minor"
+    Write-Host "Version increment: Minor" -ForegroundColor Cyan
 }
 
 # Ensure output directory exists
@@ -141,29 +233,21 @@ if ($null -eq $VersionNode) {
 
 Write-Host "Current package version: $CurrentVersion" -ForegroundColor Cyan
 
-# Parse the version
-$VersionParts = $CurrentVersion.Split('.')
-$Maj = [int]$VersionParts[0]
-$Min = [int]$VersionParts[1]
-$Pat = [int]$VersionParts[2]
+# Parse the version using date-based versioning
+$ParsedVersion = Parse-Version -VersionString $CurrentVersion
 
-# Increment version based on parameter
-switch ($VersionIncrement) {
-    "Major" {
-        $Maj++
-        $Min = 0
-        $Pat = 0
-    }
-    "Minor" {
-        $Min++
-        $Pat = 0
-    }
-    "Patch" {
-        $Pat++
+if ($null -eq $ParsedVersion) {
+    # Fallback for unparseable versions - treat as 1.0.0
+    Write-Host "Could not parse version, using defaults" -ForegroundColor Yellow
+    $ParsedVersion = @{
+        Major = 1
+        Minor = 0
+        IsDateBased = $false
     }
 }
 
-$NewVersion = "$Maj.$Min.$Pat"
+# Build new version with date-based format
+$NewVersion = Build-NewVersion -CurrentVersion $ParsedVersion -Increment $VersionIncrement
 Write-Host "New version will be: $NewVersion" -ForegroundColor Cyan
 
 # Update version in project file

@@ -1,0 +1,78 @@
+name: Publish VS Code Extension
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'FIGLet.VSCodeExtension/**'
+      - '.github/workflows/publish-vscode-extension.yml'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: FIGLet.VSCodeExtension
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for tags
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: FIGLet.VSCodeExtension/package-lock.json
+
+      - name: Extract version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+
+      - name: Check if tag exists
+        id: check_tag
+        working-directory: .
+        run: |
+          TAG_NAME="vscode-v${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME already exists, skipping publish"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME does not exist, will publish"
+          fi
+
+      - name: Install dependencies
+        if: steps.check_tag.outputs.exists == 'false'
+        run: npm ci
+
+      - name: Run linter
+        if: steps.check_tag.outputs.exists == 'false'
+        run: npm run lint
+
+      - name: Compile
+        if: steps.check_tag.outputs.exists == 'false'
+        run: npm run compile
+
+      - name: Install vsce
+        if: steps.check_tag.outputs.exists == 'false'
+        run: npm install -g @vscode/vsce
+
+      - name: Publish to VS Code Marketplace
+        if: steps.check_tag.outputs.exists == 'false'
+        run: vsce publish -p ${{ secrets.VSCE_PAT }}
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "vscode-v${{ steps.version.outputs.version }}" -m "VS Code Extension v${{ steps.version.outputs.version }}"
+          git push origin "vscode-v${{ steps.version.outputs.version }}"

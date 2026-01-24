@@ -61,81 +61,81 @@ Output (using "small" font):
 ### C-style Block Comments
 ```
 +-------------+-------------+-------------+-------------+
-| C#          | C/C++       | C++         | Java        |
-| JavaScript  | TypeScript  | CSS         | Rust        |
-| Go          | Swift       | PHP         | Kotlin      |
-| Scala       | D           | Objective-C |             |
+| C#         | C/C++      | C++         | Java   |
+|------------|------------|-------------|--------|
+| Go         | Swift      | PHP         | Kotlin |
+| Scala      | D          | Objective-C |        |
 +-------------+-------------+-------------+-------------+
 ```
 
 ### Single Line Comments
 ```
 +-------------+-------------+-------------+-------------+
-| Python      | Ruby        | Perl        | R           |
-| YAML        | Shell       | BASIC       | Visual Basic| 
-| FORTRAN     | Lisp        | Scheme      | F#          |
+| Python  | Ruby  | Perl   | R            |
+|---------|-------|--------|--------------|
+| FORTRAN | Lisp  | Scheme | F#           |
 +-------------+-------------+-------------+-------------+
 ```
 
 ### HTML-style Comments
 ```
 +-------------+-------------+-------------+-------------+
-| HTML        | XML         | XAML        | SVG         |
-| ASP.NET     |             |             |             |
+| HTML    | XML | XAML | SVG |
+|---------|-----|------|-----|
 +-------------+-------------+-------------+-------------+
 ```
 
 ### SQL Variants
 ```
 +-------------+-------------+-------------+-------------+
-| SQL         | T-SQL       | MySQL       | PostgreSQL  |
-| PL/SQL      | SQLite      |             |             |
+| SQL    | T-SQL  | MySQL | PostgreSQL |
+|--------|--------|-------|------------|
 +-------------+-------------+-------------+-------------+
 ```
 
 ### Pascal-style Comments
 ```
 +-------------+-------------+-------------+-------------+
-| Pascal      |             |             |             |
+| Pascal |  |  |  |
 +-------------+-------------+-------------+-------------+
 ```
 
 ### PowerShell
 ```
 +-------------+-------------+-------------+-------------+
-| PowerShell  |             |             |             |
+| PowerShell |  |  |  |
 +-------------+-------------+-------------+-------------+
 ```
 
 ### Bash
 ```
 +-------------+-------------+-------------+-------------+
-| Shell Script| Z Shell     | Bash        | Fish Shell  |
+| Shell Script | Z Shell | Bash | Fish Shell |
 +-------------+-------------+-------------+-------------+
 ```
 
 ### Batch Files
 ```
 +-------------+-------------+-------------+-------------+
-| DOS Batch   | Batch File  |             |             |
+| DOS Batch | Batch File |  |  |
 +-------------+-------------+-------------+-------------+
 ```
 
 ### Unique Comment Styles
 ```
 +-------------+-------------+-------------+-------------+
-| Lua         | MATLAB      | Octave      | Haskell     |
-| Handlebars  | Razor       | Twig        |             |
+| Lua        | MATLAB | Octave | Haskell |
+|------------|--------|--------|---------|
 +-------------+-------------+-------------+-------------+
 ```
 
 ### Using Existing Comment Styles
 ```
 +-------------+-------------+-------------+-------------+
-| Dart        | Julia       | Erlang      | Elixir      |
-| Groovy      | INI         | TOML        | Dockerfile  |
-| Makefile    | CMake       | Gradle      | AutoHotkey  |
-| Power Query |             |             |             |
+| Dart        | Julia | Erlang | Elixir     |
+|-------------|-------|--------|------------|
+| Makefile    | CMake | Gradle | AutoHotkey |
+| Power Query |       |        |            |
 +-------------+-------------+-------------+-------------+
 ```
 

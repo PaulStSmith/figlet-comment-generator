@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		CLAUDE.md = CLAUDE.md
 		LICENSE.txt = LICENSE.txt
 		readme.md = readme.md
 	EndProjectSection
@@ -18,6 +19,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIGPrint", "FIGPrint\FIGPrint.csproj", "{8A01FC0B-7CC9-47CD-80D3-D93E563E3995}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontGenerator", "FontGenerator\FontGenerator.csproj", "{517617B6-58D2-4AB7-84A1-2DF467C087E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIGLet.Tests", "FIGLet.Tests\FIGLet.Tests.csproj", "{1E80FC0B-C03C-4DF3-965E-919A76412D1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +80,18 @@ Global
 		{517617B6-58D2-4AB7-84A1-2DF467C087E3}.Release|arm64.Build.0 = Release|Any CPU
 		{517617B6-58D2-4AB7-84A1-2DF467C087E3}.Release|x86.ActiveCfg = Release|Any CPU
 		{517617B6-58D2-4AB7-84A1-2DF467C087E3}.Release|x86.Build.0 = Release|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Debug|arm64.Build.0 = Debug|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Debug|x86.Build.0 = Debug|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Release|arm64.ActiveCfg = Release|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Release|arm64.Build.0 = Release|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Release|x86.ActiveCfg = Release|Any CPU
+		{1E80FC0B-C03C-4DF3-965E-919A76412D1D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

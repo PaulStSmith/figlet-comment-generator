@@ -5,9 +5,21 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PublishSingleFile>true</PublishSingleFile>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>ByteForge.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+
+    <!-- Version and Metadata -->
+    <Version>1.1.0</Version>
+    <Authors>Paulo Santos</Authors>
+    <Description>A command-line utility for rendering text using FIGlet fonts</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) Paulo Santos</Copyright>
+    <RepositoryUrl>https://github.com/PaulStSmith/figlet-comment-generator</RepositoryUrl>
+
+    <!-- Publishing Configuration -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <ItemGroup>

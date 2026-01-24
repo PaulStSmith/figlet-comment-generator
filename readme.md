@@ -145,3 +145,4 @@ If you encounter any issues or have feature requests, please:
 ---
 
 Made with ❤️ by Paulo Santos
+
