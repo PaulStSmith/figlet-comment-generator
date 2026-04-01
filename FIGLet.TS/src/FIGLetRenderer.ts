@@ -333,8 +333,15 @@ export class FIGLetRenderer {
 
     /**
      * Smushes two characters together.
+     * Font-agnostic: takes hardBlank and rules explicitly rather than reading from this.font,
+     * matching the C# SmushCharacters(char c1, char c2, char hardBlank, LayoutMode mode, SmushingRules rules) signature.
+     * @param c1 The left character.
+     * @param c2 The right character.
+     * @param hardBlank The hard blank character defined in the FIGFont.
+     * @param mode The layout mode to use for smushing.
+     * @param rules The smushing rules defined in the FIGFont.
      */
-    private smushCharacters(c1: string, c2: string, mode: LayoutMode): string {
+    private smushCharacters(c1: string, c2: string, hardBlank: string, mode: LayoutMode, rules: SmushingRules): string {
         // Kerning: just pick the first character
         if (mode === LayoutMode.Kerning) {
             return c1;
@@ -346,26 +353,26 @@ export class FIGLetRenderer {
         if (c2 === ' ') return c1;
 
         // Handle hardblanks
-        if (c1 === this.font.hardBlank || c2 === this.font.hardBlank) {
-            if (this.font.hasSmushingRule(SmushingRules.HardBlank)) {
-                return this.font.hardBlank;
+        if (c1 === hardBlank || c2 === hardBlank) {
+            if ((rules & SmushingRules.HardBlank) === SmushingRules.HardBlank) {
+                return hardBlank;
             }
             return c1;
         }
 
         // Rule 1: Equal Character Smushing
-        if (this.font.hasSmushingRule(SmushingRules.EqualCharacter) && c1 === c2) {
+        if ((rules & SmushingRules.EqualCharacter) === SmushingRules.EqualCharacter && c1 === c2) {
             return c1;
         }
 
         // Rule 2: Underscore Smushing
-        if (this.font.hasSmushingRule(SmushingRules.Underscore)) {
+        if ((rules & SmushingRules.Underscore) === SmushingRules.Underscore) {
             if (c1 === '_' && FIGLetRenderer.HIERARCHY_CHARACTERS.includes(c2)) return c2;
             if (c2 === '_' && FIGLetRenderer.HIERARCHY_CHARACTERS.includes(c1)) return c1;
         }
 
         // Rule 3: Hierarchy Smushing
-        if (this.font.hasSmushingRule(SmushingRules.Hierarchy)) {
+        if ((rules & SmushingRules.Hierarchy) === SmushingRules.Hierarchy) {
             const hierarchy = FIGLetRenderer.HIERARCHY_CHARACTERS;
             const rank1 = hierarchy.indexOf(c1);
             const rank2 = hierarchy.indexOf(c2);
@@ -376,23 +383,23 @@ export class FIGLetRenderer {
         }
 
         // Rule 4: Opposite Pair Smushing
-        if (this.font.hasSmushingRule(SmushingRules.OppositePair)) {
+        if ((rules & SmushingRules.OppositePair) === SmushingRules.OppositePair) {
             if (FIGLetRenderer.oppositePairs.get(c1) === c2) {
                 return '|';
             }
         }
 
         // Rule 5: Big X Smushing
-        if (this.font.hasSmushingRule(SmushingRules.BigX)) {
+        if ((rules & SmushingRules.BigX) === SmushingRules.BigX) {
             if (c1 === '/' && c2 === '\\') return '|';
             if (c1 === '\\' && c2 === '/') return 'Y';
             if (c1 === '>' && c2 === '<') return 'X';
         }
 
         // Rule 6: Hardblank Smushing
-        if (this.font.hasSmushingRule(SmushingRules.HardBlank)) {
-            if (c1 === this.font.hardBlank && c2 === this.font.hardBlank) {
-                return this.font.hardBlank;
+        if ((rules & SmushingRules.HardBlank) === SmushingRules.HardBlank) {
+            if (c1 === hardBlank && c2 === hardBlank) {
+                return hardBlank;
             }
         }
 
@@ -415,7 +422,7 @@ export class FIGLetRenderer {
 
         let smushedPart = '';
         for (let i = 0; i < overlap; i++) {
-            smushedPart += this.smushCharacters(lineEnd[i], character[i], mode);
+            smushedPart += this.smushCharacters(lineEnd[i], character[i], this.font.hardBlank, mode, this.font.smushingRules);
         }
 
         return lineWithoutEnd + smushedPart + colorCode + character.slice(overlap);
