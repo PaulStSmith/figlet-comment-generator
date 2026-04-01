@@ -26,7 +26,7 @@
   </ItemGroup>
   <PropertyGroup>
     <PackageId>FIGLet</PackageId>
-    <Version>1.1.0</Version>
+    <Version>2.0.0</Version>
     <Authors>Paulo Santos</Authors>
     <Description>A C# implementation of FIGLet (Frank, Ian &amp; Glenn's letters) - a program for making large letters out of ordinary text.</Description>
     <PackageTags>figlet;ascii-art;text-formatting</PackageTags>

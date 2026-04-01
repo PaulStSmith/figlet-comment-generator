@@ -139,18 +139,20 @@ export class FIGLetRenderer {
         {
             const processor = new ANSIProcessor();
             let plainText = '';
+            let plainIndex = 0;
 
             for (const c of text) {
                 const isAnsi = processor.processCharacter(c);
                 if (!isAnsi) {
                     if (this.useANSIColors && processor.currentColorSequence) {
                         // Map the color to the position of the next rendered character
-                        colorDict.set([...plainText].length, processor.currentColorSequence);
+                        colorDict.set(plainIndex, processor.currentColorSequence);
                         processor.resetColorState();
                     }
                     // Only include characters the font can render
                     if (this.font.characters.has(c)) {
                         plainText += c;
+                        plainIndex++;
                     }
                 }
             }
@@ -243,22 +245,23 @@ export class FIGLetRenderer {
             : line.slice(line.length - character.length);
 
         const m1 = eol.match(/\S(?=\s*$)/);
-        const m2 = character.match(/(?<=^\s*)\S/);
+        const m2Index = character.search(/\S/);
+        const m2Char = m2Index >= 0 ? character[m2Index] : undefined;
 
-        if (!m1 || !m2) {
+        if (!m1 || m2Index === -1) {
             return character.length;
         }
 
-        const canSmush = this.canSmush(m1[0], m2[0], this.font.hardBlank, mode, this.font.smushingRules);
+        const canSmush = this.canSmush(m1[0], m2Char!, this.font.hardBlank, mode, this.font.smushingRules);
         let overlapLength = canSmush
-            ? Math.max(eol.length - m1.index!, m2.index!) + 1
+            ? Math.max(eol.length - m1.index!, m2Index) + 1
             : 0;
 
         overlapLength = Math.min(overlapLength, character.length);
 
         // Special case when we have opposing slashes
-        if ((canSmush && m1[0] === '/' && m2[0] === '\\') ||
-            (canSmush && m1[0] === '\\' && m2[0] === '/')) {
+        if ((canSmush && m1[0] === '/' && m2Char === '\\') ||
+            (canSmush && m1[0] === '\\' && m2Char === '/')) {
             overlapLength = Math.max(overlapLength - 1, 0);
         }
 

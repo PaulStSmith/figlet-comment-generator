@@ -16,7 +16,6 @@
                 "${workspaceFolder}/FIGLet.TS/**",
                 "!**/node_modules/**"
             ],
-            "runtimeExecutable": "C:\\Users\\pauls\\AppData\\Roaming\\fnm\\node-versions\\v22.11.0\\installation\\node.exe",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/FIGLet.TS"
         },

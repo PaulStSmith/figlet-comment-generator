@@ -371,7 +371,7 @@ public class FIGFontTests
 
     [TestMethod]
     [ExpectedException(typeof(FormatException))]
-    public void FontStream_WithInvalidZip_ShoulThrowFormatException()
+    public void FontStream_WithInvalidZip_ShouldThrowFormatException()
     {
         // Arrange - Create a stream that starts with "PK" but isn't actually a valid ZIP
         var fakeZipContent = "PK" + TestUtilities.CreateMinimalValidFontContent(2);
