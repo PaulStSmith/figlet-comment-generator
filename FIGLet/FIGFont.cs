@@ -39,7 +39,16 @@ public class FIGFont
     /// <summary>
     /// Gets the hard blank character used in the FIGfont.
     /// </summary>
+    /// <remarks>
+    /// Changed from <c>string</c> to <c>char</c> in v2.0.0 (breaking change).
+    /// Use <see cref="HardBlankString"/> for a string representation.
+    /// </remarks>
     public char HardBlank { get; private set; } = '#';
+
+    /// <summary>
+    /// Gets the hard blank character as a string.
+    /// </summary>
+    public string HardBlankString => HardBlank.ToString();
 
     /// <summary>
     /// Gets the height of the FIGfont characters.

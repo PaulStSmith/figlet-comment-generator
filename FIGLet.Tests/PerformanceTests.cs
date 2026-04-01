@@ -171,8 +171,8 @@ public class PerformanceTests
         // Measure both modes
         var smushingTime = MeasureRenderingTime(smushingRenderer, text, 100);
         
-        // Assert - Smushing shouldn't be more than 5x slower than full size
-        Assert.IsTrue(smushingTime.TotalMilliseconds > 100, 
+        // Assert - Smushing should complete in reasonable time (upper bound)
+        Assert.IsTrue(smushingTime.TotalMilliseconds < 5000,
             $"Smushing too slow. Time: {smushingTime.TotalMilliseconds}ms");
     }
 
