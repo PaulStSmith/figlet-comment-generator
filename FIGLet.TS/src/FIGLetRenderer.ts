@@ -137,7 +137,7 @@ export class FIGLetRenderer {
 
         // First pass: always strip ANSI sequences; record color map only when useANSIColors is true
         {
-            const processor = new ANSIProcessor();
+            const processor = new ANSIProcessor(this.useANSIColors);
             let plainText = '';
             let plainIndex = 0;
 
@@ -443,8 +443,15 @@ export class FIGLetRenderer {
 // ---------------------------------------------------------------------------
 
 class ANSIProcessor {
+    /** Whether to accumulate color sequences (only needed when useANSIColors is true). */
+    private readonly preserveColors: boolean;
+
     private inEscapeSequence = false;
     private escapeBuffer = '';
+
+    constructor(preserveColors = false) {
+        this.preserveColors = preserveColors;
+    }
 
     /**
      * Terminal control characters that end an ANSI sequence but are NOT color
@@ -498,8 +505,8 @@ class ANSIProcessor {
                 const sequence = this.escapeBuffer;
                 this.escapeBuffer = '';
 
-                // Only preserve color sequences (those ending with 'm')
-                if (c === 'm') {
+                // Only preserve color sequences (those ending with 'm') when enabled
+                if (c === 'm' && this.preserveColors) {
                     this.currentColorSequence += sequence;
                 }
 

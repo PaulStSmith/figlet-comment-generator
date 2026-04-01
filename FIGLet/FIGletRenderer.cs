@@ -156,7 +156,7 @@ public partial class FIGLetRenderer(FIGFont? font)
         var charIndex = 0;
         var plainText = new StringBuilder();
         var colorDict = new Dictionary<int, string>();
-        var ansiProcessor = new ANSIProcessor();
+        var ansiProcessor = new ANSIProcessor(preserveColors: useANSIColors);
 
         // First pass: Extract ANSI sequences and build plain text
         for (charIndex = 0; charIndex < text.Length; charIndex++)
@@ -476,18 +476,26 @@ public partial class FIGLetRenderer(FIGFont? font)
     /// A regex to match the first non-whitespace character in a string.
     /// </summary>
     /// <returns>A regex pattern to match the first non-whitespace character.</returns>
-    private static Regex FirstNonWhitespaceRegex() => new(@"(?<=^|\s*)\S");
+    private static Regex FirstNonWhitespaceRegex() => new(@"\S");
 
     /// <summary>
     /// Detects and processes ANSI escape sequences during rendering.
     /// </summary>
     private class ANSIProcessor
     {
+        // Whether to accumulate color sequences (only needed when UseANSIColors is true)
+        private readonly bool _preserveColors;
+
         // Track if we're currently inside an escape sequence
         private bool _inEscapeSequence = false;
 
         // Buffer to store the current escape sequence
         private readonly StringBuilder _escapeBuffer = new();
+
+        public ANSIProcessor(bool preserveColors = false)
+        {
+            _preserveColors = preserveColors;
+        }
 
         // List of ANSI sequence terminators that are NOT color-related
         private static readonly HashSet<char> NonColorTerminators =
@@ -540,8 +548,8 @@ public partial class FIGLetRenderer(FIGFont? font)
                     var sequence = _escapeBuffer.ToString();
                     _escapeBuffer.Clear();
 
-                    // If color sequence (ends with 'm'), keep it
-                    if (c == 'm')
+                    // If color sequence (ends with 'm'), keep it (only when preserving colors)
+                    if (c == 'm' && _preserveColors)
                         CurrentColorSequence += sequence;
 
                     return true;
