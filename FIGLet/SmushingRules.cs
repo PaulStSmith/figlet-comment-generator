@@ -49,3 +49,20 @@ public enum SmushingRules
     /// </summary>
     HardBlank = 32
 }
+
+/// <summary>
+/// Provides extension methods for working with smushing rules.
+/// </summary>
+public static class SmushingRulesExtensions
+{
+    /// <summary>
+    /// Determines if a specific smushing rule is applied.
+    /// </summary>
+    /// <param name="rules">The combined smushing rules.</param>
+    /// <param name="rule">The specific smushing rule to check.</param>
+    /// <returns>True if the specified rule is applied; otherwise, false.</returns>
+    public static bool HasRule(this SmushingRules rules, SmushingRules rule)
+    {
+        return (rules & rule) == rule;
+    }
+}
