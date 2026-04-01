@@ -335,7 +335,7 @@ public class FIGLetRendererTests
         // Assert
         Assert.IsNotNull(result);
         // Should render A and B, emoji might be skipped if not in font
-        var processedResult = result.Replace(FIGFont.Default.HardBlank, ' ');
+        var processedResult = result.Replace(_testFont.HardBlank, ' ');
         Assert.IsTrue(processedResult.Contains("A"));
         Assert.IsTrue(processedResult.Contains("B"));
     }
