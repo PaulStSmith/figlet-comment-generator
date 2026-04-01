@@ -128,7 +128,7 @@ public class FIGFontTests
         // Assert
         Assert.IsNotNull(font);
         Assert.AreEqual("flf2a$", font.Signature);
-        Assert.AreEqual("$", font.HardBlank);
+        Assert.AreEqual('$', font.HardBlank);
         Assert.AreEqual(5, font.Height);
         Assert.AreEqual(4, font.Baseline);
         Assert.AreEqual(10, font.MaxLength);
@@ -148,7 +148,7 @@ public class FIGFontTests
         
         // Assert
         Assert.IsNotNull(font);
-        Assert.AreEqual("#", font.HardBlank);
+        Assert.AreEqual('#', font.HardBlank);
         Assert.AreEqual(3, font.Height);
     }
 
@@ -393,7 +393,7 @@ public class FIGFontTests
         
         // Assert
         Assert.IsNotNull(font);
-        Assert.AreEqual("@", font.HardBlank);
+        Assert.AreEqual('@', font.HardBlank);
     }
 
     [TestMethod] 
