@@ -6,6 +6,12 @@ namespace FIGLet.Tests;
 
 public static class TestUtilities
 {
+    /// <summary>
+    /// Retrieves an embedded resource stream by name from the executing assembly.
+    /// </summary>
+    /// <param name="resourceName">The name of the resource to retrieve.</param>
+    /// <returns>A <see cref="Stream"/> to the embedded resource.</returns>
+    /// <exception cref="FileNotFoundException">Thrown if the resource is not found.</exception>
     public static Stream GetEmbeddedResourceStream(string resourceName)
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -22,6 +28,11 @@ public static class TestUtilities
                throw new FileNotFoundException($"Resource '{resourceName}' not found.");
     }
 
+    /// <summary>
+    /// Retrieves the text content of an embedded resource.
+    /// </summary>
+    /// <param name="resourceName">The name of the resource to retrieve.</param>
+    /// <returns>The text content of the embedded resource.</returns>
     public static string GetEmbeddedResourceText(string resourceName)
     {
         using var stream = GetEmbeddedResourceStream(resourceName);
@@ -29,6 +40,12 @@ public static class TestUtilities
         return reader.ReadToEnd();
     }
 
+    /// <summary>
+    /// Loads a test FIGFont from an embedded resource.
+    /// </summary>
+    /// <param name="fontName">The name of the font file (without extension).</param>
+    /// <returns>A <see cref="FIGFont"/> instance loaded from the resource.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the font cannot be loaded.</exception>
     public static FIGFont LoadTestFont(string fontName)
     {
         try
@@ -48,6 +65,13 @@ public static class TestUtilities
         }
     }
 
+    /// <summary>
+    /// Creates minimal valid font content for testing purposes.
+    /// </summary>
+    /// <param name="height">The height of the font.</param>
+    /// <param name="hardBlank">The hard blank character.</param>
+    /// <param name="printDirection">The print direction.</param>
+    /// <returns>A string containing the font content.</returns>
     public static string CreateMinimalValidFontContent(int height = 5, char hardBlank = '$', int printDirection = 0)
     {
         var sb = new StringBuilder();
@@ -82,6 +106,12 @@ public static class TestUtilities
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Creates invalid font content for testing error handling.
+    /// </summary>
+    /// <param name="issue">The type of issue to simulate.</param>
+    /// <returns>A string containing invalid font content.</returns>
+    /// <exception cref="ArgumentException">Thrown if the issue type is unknown.</exception>
     public static string CreateInvalidFontContent(string issue)
     {
         return issue switch
@@ -94,6 +124,11 @@ public static class TestUtilities
         };
     }
 
+    /// <summary>
+    /// Asserts that the actual string contains all specified expected lines.
+    /// </summary>
+    /// <param name="actual">The actual string to check.</param>
+    /// <param name="expectedLines">The expected lines that should be present.</param>
     public static void AssertStringContainsLines(string actual, params string[] expectedLines)
     {
         var actualLines = actual.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
@@ -105,10 +140,18 @@ public static class TestUtilities
         }
     }
 
+    /// <summary>
+    /// Asserts that two multi-line strings are equal, ignoring carriage return differences.
+    /// </summary>
+    /// <param name="expected">The expected string.</param>
+    /// <param name="actual">The actual string.</param>
+    /// <param name="message">Optional message to include in assertion failures.</param>
     public static void AssertMultiLineEqual(string expected, string actual, string message = "")
     {
-        var expectedLines = expected.Split(['\r', '\n'], StringSplitOptions.None);
-        var actualLines = actual.Split(['\r', '\n'], StringSplitOptions.None);
+        actual = actual.Replace("\r", "");
+        expected = expected.Replace("\r", "");
+        var expectedLines = expected.Split('\n', StringSplitOptions.None);
+        var actualLines = actual.Split('\n', StringSplitOptions.None);
         
         Assert.AreEqual(expectedLines.Length, actualLines.Length, 
             $"{message}Line count mismatch. Expected: {expectedLines.Length}, Actual: {actualLines.Length}");
@@ -120,16 +163,22 @@ public static class TestUtilities
         }
     }
 
-    public static string NormalizeLineEndings(string text)
-    {
-        return text.Replace("\r\n", "\n").Replace("\r", "\n");
-    }
-
+    /// <summary>
+    /// Strips ANSI color codes from the given text.
+    /// </summary>
+    /// <param name="text">The text to strip colors from.</param>
+    /// <returns>The text without ANSI color codes.</returns>
     public static string StripANSIColors(string text)
     {
         return System.Text.RegularExpressions.Regex.Replace(text, @"\x1B\[[0-?]*[ -/]*[@-~]", "");
     }
 
+    /// <summary>
+    /// Asserts whether a FIGFont has a specific smushing rule.
+    /// </summary>
+    /// <param name="font">The FIGFont to check.</param>
+    /// <param name="expectedRule">The smushing rule to check for.</param>
+    /// <param name="shouldHave">Whether the font should have the rule.</param>
     public static void AssertSmushingRule(FIGFont font, SmushingRules expectedRule, bool shouldHave = true)
     {
         var hasRule = font.HasSmushingRule(expectedRule);
@@ -143,12 +192,23 @@ public static class TestUtilities
         }
     }
 
+    /// <summary>
+    /// Creates a MemoryStream from a string content.
+    /// </summary>
+    /// <param name="content">The string content.</param>
+    /// <returns>A <see cref="MemoryStream"/> containing the content.</returns>
     public static MemoryStream CreateStreamFromString(string content)
     {
         var bytes = Encoding.UTF8.GetBytes(content);
         return new MemoryStream(bytes);
     }
 
+    /// <summary>
+    /// Asserts that the specified action throws an exception of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of exception expected.</typeparam>
+    /// <param name="action">The action to execute.</param>
+    /// <param name="expectedMessage">Optional substring that should be in the exception message.</param>
     public static void AssertThrows<T>(Action action, string expectedMessage = "") where T : Exception
     {
         try
@@ -170,6 +230,12 @@ public static class TestUtilities
         }
     }
 
+    /// <summary>
+    /// Asserts that an action completes within a specified time limit.
+    /// </summary>
+    /// <param name="action">The action to time.</param>
+    /// <param name="maxExpectedDuration">The maximum allowed duration.</param>
+    /// <param name="operationName">Name of the operation for error messages.</param>
     public static void AssertPerformance(Action action, TimeSpan maxExpectedDuration, string operationName = "Operation")
     {
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -180,6 +246,11 @@ public static class TestUtilities
             $"{operationName} took {stopwatch.Elapsed}, but should complete within {maxExpectedDuration}");
     }
 
+    /// <summary>
+    /// Generates a large random text string of specified length.
+    /// </summary>
+    /// <param name="length">The length of the text to generate.</param>
+    /// <returns>A random text string.</returns>
     public static string GenerateLargeText(int length)
     {
         var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
@@ -194,6 +265,13 @@ public static class TestUtilities
         return result.ToString();
     }
 
+    /// <summary>
+    /// Creates a ZIP archive containing a font file.
+    /// </summary>
+    /// <param name="fontContent">The content of the font file.</param>
+    /// <param name="fileName">The name of the file in the archive.</param>
+    /// <param name="compressionLevel">The compression level to use.</param>
+    /// <returns>A byte array containing the ZIP archive.</returns>
     public static byte[] CreateZipWithFontFile(
         string fontContent,
         string fileName = "test.flf",
@@ -210,6 +288,9 @@ public static class TestUtilities
         return memoryStream.ToArray();
     }
 
+    /// <summary>
+    /// Dictionary containing test texts and their expected rendered outputs.
+    /// </summary>
     public static readonly Dictionary<string, string> TestTexts = new() 
     {
         ["Hello"] = "Helo\r\nHelo\r\nHelo\r\n",
@@ -229,6 +310,9 @@ public static class TestUtilities
         ["🚀🎉✨"] = "\r\n\r\n\r\n"
     };
 
+    /// <summary>
+    /// Dictionary containing ANSI colored test texts and their expected outputs.
+    /// </summary>
     public static readonly Dictionary<string, string> ANSIColoredTexts = new()
     {
         ["\x1b[31mRed\x1b[0m"] = "\x1b[31mRed\x1b[0m\r\n\x1b[31mRed\x1b[0m\r\n\x1b[31mRed\x1b[0m\r\n",
