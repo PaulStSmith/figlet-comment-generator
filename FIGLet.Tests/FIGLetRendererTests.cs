@@ -248,9 +248,8 @@ public class FIGLetRendererTests
     [TestMethod]
     public void Render_WithRTLFont_ShouldReverseText()
     {
-        // Arrange - Create RTL font
-        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
-        content = content.Replace("flf2a$ 2 1 5 0 0", "flf2a$ 2 1 5 0 0 1"); // Set print direction to 1 (RTL)
+        // Arrange - Create RTL font (printDirection = 1)
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$', printDirection: 1);
         using var stream = TestUtilities.CreateStreamFromString(content);
         var rtlFont = FIGFont.FromStream(stream);
         var renderer = new FIGLetRenderer(rtlFont, useANSIColors: true);
@@ -265,6 +264,61 @@ public class FIGLetRendererTests
         // Note: This is hard to test exactly without knowing the exact font rendering,
         // but we can ensure the RTL font property is set
         Assert.AreEqual(1, rtlFont.PrintDirection);
+    }
+
+    [TestMethod]
+    public void Render_WithRTLFontAndANSIColors_ShouldPreserveBothReverseAndColors()
+    {
+        // Arrange — build matching LTR and RTL fonts from the same glyph data so we
+        // can compare their output directly after stripping ANSI sequences.
+        var ltrContent = TestUtilities.CreateMinimalValidFontContent(2, '$', printDirection: 0);
+        var rtlContent = TestUtilities.CreateMinimalValidFontContent(2, '$', printDirection: 1);
+
+        using var ltrStream = TestUtilities.CreateStreamFromString(ltrContent);
+        using var rtlStream = TestUtilities.CreateStreamFromString(rtlContent);
+
+        var ltrFont = FIGFont.FromStream(ltrStream)!;
+        var rtlFont = FIGFont.FromStream(rtlStream)!;
+
+        var ltrRenderer = new FIGLetRenderer(ltrFont, lineSeparator: "\n");
+        var rtlRenderer = new FIGLetRenderer(rtlFont, lineSeparator: "\n", useANSIColors: true);
+
+        // Act
+        var result = rtlRenderer.Render("\x1b[31mAB\x1b[0m");
+
+        // Assert: ANSI sequences are preserved
+        Assert.IsTrue(result.Contains("\x1b[31m"), "Red color sequence should be preserved");
+        Assert.IsTrue(result.Contains("\x1b[0m"),  "ANSI reset code should be present");
+
+        // Assert: text is reversed — RTL("AB") stripped of color should equal LTR("BA")
+        var stripped = TestUtilities.StripANSIColors(result);
+        var ltrBA    = ltrRenderer.Render("BA");
+        Assert.AreEqual(ltrBA, stripped,
+            "RTL render of 'AB' (colors stripped) should equal LTR render of 'BA'");
+    }
+
+    [TestMethod]
+    public void Render_WithParagraphMode_ConsecutiveParagraphs_ShouldConcatenateWithoutBlankSeparation()
+    {
+        // Arrange
+        var renderer = new FIGLetRenderer(_testFont) { ParagraphMode = true, LineSeparator = "\n" };
+
+        // Act
+        var consecutive = renderer.Render("A\nB");   // No blank line between paragraphs
+        var separated   = renderer.Render("A\n\nB"); // Explicit blank line between paragraphs
+
+        // Assert: both A and B are rendered in the consecutive case
+        var stripped = consecutive.Replace(_testFont.HardBlank[0], ' ');
+        Assert.IsTrue(stripped.Contains("A"), "First paragraph 'A' should be rendered");
+        Assert.IsTrue(stripped.Contains("B"), "Second paragraph 'B' should be rendered");
+
+        // Assert: the blank-line separator injects exactly font.Height extra newlines.
+        // Consecutive paragraphs are simply concatenated (no blank lines between them).
+        var consecutiveNewlines = consecutive.Count(c => c == '\n');
+        var separatedNewlines   = separated.Count(c => c == '\n');
+        Assert.AreEqual(_testFont.Height, separatedNewlines - consecutiveNewlines,
+            $"Blank-line separated output should have exactly {_testFont.Height} more newlines " +
+            $"than consecutive (got {separatedNewlines} vs {consecutiveNewlines})");
     }
 
     [TestMethod]
