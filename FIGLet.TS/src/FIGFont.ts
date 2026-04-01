@@ -2,6 +2,10 @@ import { SmushingRules } from './SmushingRules.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { promises as fs } from 'fs';
+import { inflateRaw } from 'zlib';
+import { promisify } from 'util';
+
+const inflateRawAsync = promisify(inflateRaw);
 
 /**
  * Represents a FIGfont used for rendering text in FIGLet style.
@@ -79,6 +83,8 @@ export class FIGFont {
 
     /**
      * Creates a FIGFont from a file.
+     * Automatically detects ZIP archives by checking for the PK magic bytes
+     * and extracts the first entry, matching the C# FIGFontStream behaviour.
      */
     public static async fromFile(path: string | null): Promise<FIGFont | null> {
         if (!path) {
@@ -86,11 +92,61 @@ export class FIGFont {
         }
 
         try {
-            const text = await fs.readFile(path, 'utf-8');
-            return FIGFont.fromText(text);
+            const buffer = await fs.readFile(path);
+
+            // Detect ZIP by magic bytes 'PK' (0x50 0x4B)
+            if (buffer.length >= 2 && buffer[0] === 0x50 && buffer[1] === 0x4B) {
+                const text = await FIGFont.extractFirstZipEntry(buffer);
+                return FIGFont.fromText(text);
+            }
+
+            return FIGFont.fromText(buffer.toString('utf-8'));
         } catch {
             return null;
         }
+    }
+
+    /**
+     * Extracts and decodes the first entry from a ZIP archive buffer.
+     * Supports Store (method 0) and Deflate (method 8) compression.
+     * Throws if the buffer is not a valid local-file ZIP entry.
+     */
+    private static async extractFirstZipEntry(buffer: Buffer): Promise<string> {
+        // Full local file header signature: PK\x03\x04
+        if (buffer.length < 30 || buffer[2] !== 0x03 || buffer[3] !== 0x04) {
+            throw new Error('Invalid ZIP format: missing local file header');
+        }
+
+        // ZIP local file header layout (all values little-endian):
+        //   offset  2 — version needed        (2 bytes)
+        //   offset  6 — general purpose flags (2 bytes)
+        //   offset  8 — compression method    (2 bytes)  0=store, 8=deflate
+        //   offset 14 — CRC-32               (4 bytes)
+        //   offset 18 — compressed size       (4 bytes)
+        //   offset 22 — uncompressed size     (4 bytes)
+        //   offset 26 — filename length       (2 bytes)
+        //   offset 28 — extra field length    (2 bytes)
+        //   offset 30 — filename + extra + data
+        const compressionMethod = buffer.readUInt16LE(8);
+        const compressedSize    = buffer.readUInt32LE(18);
+        const filenameLen       = buffer.readUInt16LE(26);
+        const extraLen          = buffer.readUInt16LE(28);
+        const dataOffset        = 30 + filenameLen + extraLen;
+
+        const compressedData = buffer.subarray(dataOffset, dataOffset + compressedSize);
+
+        if (compressionMethod === 0) {
+            // Store — data is uncompressed
+            return compressedData.toString('latin1');
+        }
+
+        if (compressionMethod === 8) {
+            // Deflate
+            const decompressed = await inflateRawAsync(compressedData);
+            return decompressed.toString('latin1');
+        }
+
+        throw new Error(`Unsupported ZIP compression method: ${compressionMethod}`);
     }
 
     /**
