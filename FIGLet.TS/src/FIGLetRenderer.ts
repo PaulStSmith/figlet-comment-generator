@@ -27,34 +27,116 @@ export class FIGLetRenderer {
     public readonly font: FIGFont;
 
     /**
-     * Static method to render text with a given font and layout mode.
+     * Gets or sets the layout mode for rendering.
+     */
+    public layoutMode: LayoutMode;
+
+    /**
+     * Gets or sets the line separator used for rendering.
+     */
+    public lineSeparator: string;
+
+    /**
+     * Gets or sets a value indicating whether to use ANSI colors during rendering.
+     */
+    public useANSIColors: boolean;
+
+    /**
+     * Gets or sets a value indicating whether to use paragraph mode for rendering.
+     */
+    public paragraphMode: boolean;
+
+    /**
+     * Renders the specified text using the given FIGFont and settings.
+     * @param text The text to render.
+     * @param font The FIGFont to use for rendering.
+     * @param mode The layout mode to use for rendering.
+     * @param lineSeparator The line separator to use.
+     * @param useANSIColors Whether to process and preserve ANSI color codes.
+     * @param paragraphMode Whether to use paragraph mode for rendering.
+     * @returns The rendered text as a string.
      */
     public static render(
-        text: string, 
-        font: FIGFont, 
+        text: string,
+        font: FIGFont,
         mode: LayoutMode = LayoutMode.Default,
-        lineSeparator: string = "\n"
+        lineSeparator: string = "\n",
+        useANSIColors: boolean = false,
+        paragraphMode: boolean = true
     ): string {
-        const renderer = new FIGLetRenderer(font);
-        return renderer.render(text, mode, lineSeparator);
+        if (!text) return "";
+        const renderer = new FIGLetRenderer(font, mode, lineSeparator, useANSIColors, paragraphMode);
+        return renderer.render(text);
     }
 
     /**
-     * Renders the specified text using the FIGFont and layout mode.
+     * Initializes a new instance of the FIGLetRenderer class with the specified FIGFont and optional settings.
+     * @param font The FIGFont to use for rendering.
+     * @param mode The layout mode to use for rendering.
+     * @param lineSeparator The line separator to use.
+     * @param useANSIColors Whether to process and preserve ANSI color codes.
+     * @param paragraphMode Whether to use paragraph mode for rendering.
      */
-    public render(
-        text: string, 
+    constructor(
+        font: FIGFont,
         mode: LayoutMode = LayoutMode.Default,
-        lineSeparator: string = "\n"
-    ): string {
-        if (!text) {
-            return "";
+        lineSeparator: string = "\n",
+        useANSIColors: boolean = false,
+        paragraphMode: boolean = true
+    ) {
+        this.font = font;
+        this.layoutMode = mode;
+        this.lineSeparator = lineSeparator;
+        this.useANSIColors = useANSIColors;
+        this.paragraphMode = paragraphMode;
+    }
+
+    /**
+     * Renders the specified text using the current FIGFont and settings.
+     * @param text The text to render.
+     * @returns The rendered text as a string.
+     */
+    public render(text: string): string {
+        if (!text) return "";
+
+        if (this.paragraphMode) {
+            // Split on \r\n or \n; empty/whitespace-only segments produce blank rendered lines
+            const emptyLine = this.lineSeparator.repeat(this.font.height);
+            const paragraphs = text.split(/\r?\n/);
+            const parts: string[] = [];
+            for (const paragraph of paragraphs) {
+                if (!paragraph.trim()) {
+                    parts.push(emptyLine);
+                } else {
+                    parts.push(this.renderLine(paragraph));
+                }
+            }
+            return parts.join('');
         }
 
-        // Initialize array of strings (similar to StringBuilder array in C#)
-        const outputLines: string[] = Array(this.font.height).fill('');
-        mode = mode === LayoutMode.Default ? LayoutMode.Smushing : mode;
+        // Non-paragraph mode: collapse newlines to spaces
+        const singleLine = text.replace(/\r/g, '').replace(/\n/g, ' ');
+        return this.renderLine(singleLine);
+    }
 
+    /**
+     * Renders a single line of text using the current FIGFont and settings.
+     * @param text The text to render.
+     * @returns The rendered line as a string.
+     */
+    private renderLine(text: string): string {
+        const mode = this.layoutMode === LayoutMode.Default ? LayoutMode.Smushing : this.layoutMode;
+
+        // Reverse text for RTL fonts.
+        // JavaScript's spread operator correctly handles Unicode surrogate pairs,
+        // so no explicit surrogate pair handling is needed here.
+        if (this.font.printDirection === 1) {
+            text = [...text].reverse().join('');
+        }
+
+        const outputLines: string[] = Array(this.font.height).fill('');
+
+        // JavaScript's for...of correctly iterates Unicode code points (handles surrogates)
         for (const c of text) {
             if (!this.font.characters.has(c)) {
                 continue;
@@ -62,20 +144,20 @@ export class FIGLetRenderer {
 
             const charLines = this.font.characters.get(c)!;
             if (outputLines[0].length === 0) {
-                // First character, just append
+                // First character — just copy its lines
                 for (let i = 0; i < this.font.height; i++) {
                     outputLines[i] = charLines[i];
                 }
                 continue;
             }
 
-            // Calculate overlap with previous character
+            // Calculate minimum overlap across all lines
             let overlap = Number.MAX_SAFE_INTEGER;
             for (let i = 0; i < this.font.height; i++) {
                 overlap = Math.min(overlap, this.calculateOverlap(outputLines[i], charLines[i], mode));
             }
 
-            // Apply smushing rules
+            // Apply smushing/kerning/full-size rules
             for (let i = 0; i < this.font.height; i++) {
                 if (overlap === 0) {
                     outputLines[i] += charLines[i];
@@ -85,17 +167,17 @@ export class FIGLetRenderer {
             }
         }
 
-        // Replace hard blanks with spaces and join lines
+        const hardBlankRegex = new RegExp(this.escapeRegex(this.font.hardBlank), 'g');
         return outputLines
-            .map(line => line.replace(new RegExp(this.font.hardBlank, 'g'), ' '))
-            .join(lineSeparator);
+            .map(line => line.replace(hardBlankRegex, ' '))
+            .join(this.lineSeparator);
     }
 
     /**
-     * Constructor that takes a FIGFont.
+     * Escapes special regex characters in a string.
      */
-    constructor(font: FIGFont) {
-        this.font = font;
+    private escapeRegex(s: string): string {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     /**
@@ -106,8 +188,8 @@ export class FIGLetRenderer {
             return 0;
         }
 
-        const eol = line.length < character.length 
-            ? line 
+        const eol = line.length < character.length
+            ? line
             : line.slice(line.length - character.length);
 
         const m1 = eol.match(/\S(?=\s*$)/);
@@ -118,14 +200,14 @@ export class FIGLetRenderer {
         }
 
         const canSmush = this.canSmush(m1[0], m2[0], mode);
-        let overlapLength = canSmush 
-            ? Math.max(eol.length - m1.index!, m2.index!) + 1 
+        let overlapLength = canSmush
+            ? Math.max(eol.length - m1.index!, m2.index!) + 1
             : 0;
-        
+
         overlapLength = Math.min(overlapLength, character.length);
-        
+
         // Special case when we have opposing slashes
-        if ((canSmush && m1[0] === '/' && m2[0] === '\\') || 
+        if ((canSmush && m1[0] === '/' && m2[0] === '\\') ||
             (canSmush && m1[0] === '\\' && m2[0] === '/')) {
             overlapLength = Math.max(overlapLength - 1, 0);
         }
@@ -189,7 +271,7 @@ export class FIGLetRenderer {
 
         // Rule 5: Big X Smushing
         if (this.font.hasSmushingRule(SmushingRules.BigX)) {
-            if ((c1 === '/' && c2 === '\\') || 
+            if ((c1 === '/' && c2 === '\\') ||
                 (c1 === '\\' && c2 === '/') ||
                 (c1 === '>' && c2 === '<')) {
                 return true;
@@ -203,7 +285,7 @@ export class FIGLetRenderer {
      * Smushes two characters together.
      */
     private smushCharacters(c1: string, c2: string, mode: LayoutMode): string {
-        // Rule 0: Universal smushing just picks the first character
+        // Kerning: just pick the first character
         if (mode === LayoutMode.Kerning) {
             return c1;
         }
@@ -213,7 +295,7 @@ export class FIGLetRenderer {
         if (c1 === ' ') return c2;
         if (c2 === ' ') return c1;
 
-        // Handle hardblanks first
+        // Handle hardblanks
         if (c1 === this.font.hardBlank || c2 === this.font.hardBlank) {
             if (this.font.hasSmushingRule(SmushingRules.HardBlank)) {
                 return this.font.hardBlank;
@@ -260,7 +342,14 @@ export class FIGLetRenderer {
             }
         }
 
-        // If no smushing rules apply or are enabled, return the first character
+        // Rule 6: Hardblank Smushing
+        if (this.font.hasSmushingRule(SmushingRules.HardBlank)) {
+            if (c1 === this.font.hardBlank && c2 === this.font.hardBlank) {
+                return this.font.hardBlank;
+            }
+        }
+
+        // No rule matched — keep the left character
         return c1;
     }
 
@@ -270,7 +359,7 @@ export class FIGLetRenderer {
     private smushLines(line: string, character: string, overlap: number, mode: LayoutMode): string {
         const lineEnd = line.slice(-overlap);
         const lineWithoutEnd = line.slice(0, -overlap);
-        
+
         if (mode === LayoutMode.Kerning) {
             return line + character;
         }
