@@ -244,7 +244,7 @@ export class FIGFont {
             const currentDir = dirname(fileURLToPath(currentFileUrl));
             
             // Construct path to the font file relative to the current module
-            const fontPath = join(currentDir, '..', 'assets', 'fonts', 'small.flf');
+            const fontPath = join(currentDir, 'assets', 'fonts', 'small.flf');
             
             // Read the font file directly using fs
             const fontContent = await fs.readFile(fontPath, 'utf-8');

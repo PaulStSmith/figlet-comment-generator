@@ -7,7 +7,9 @@
     "copy-assets": "copyfiles -u 1 src/assets/**/* dist/",
     "build": "tsc && npm run copy-assets",
     "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +18,10 @@
   "devDependencies": {
     "@types/node": "^22.9.0",
     "copyfiles": "^2.4.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.60.1"
   }
 }
