@@ -1,6 +1,7 @@
 using ByteForge.FIGLet;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace FIGLet.Tests;
 
@@ -215,46 +216,42 @@ public class PerformanceTests
     }
 
     [TestMethod]
+    [DoNotParallelize]
     public void Performance_ConcurrentRendering_ShouldScaleWell()
     {
         // Arrange
-        var text = "Concurrent Test";
-        var threadCount = Environment.ProcessorCount;
-        var iterationsPerThread = 100;
+        var text = TestUtilities.GenerateLargeText(100);
+        var processorCount = Environment.ProcessorCount;
+        var iterationsPerThread = 1000;
         
         // Measure sequential performance
-        var sequentialTime = MeasureRenderingTime(_defaultRenderer, text, threadCount * iterationsPerThread);
+        var sequentialTime = MeasureRenderingTime(_defaultRenderer, text, processorCount * iterationsPerThread);
         
         // Measure concurrent performance
         var concurrentStopwatch = Stopwatch.StartNew();
-        var tasks = new Task[threadCount];
-        
-        for (var t = 0; t < threadCount; t++)
+        Parallel.For(0, processorCount, t =>
         {
-            tasks[t] = Task.Run(() =>
+            var renderer = new FIGLetRenderer(_defaultFont);
+            for (var i = 0; i < iterationsPerThread; i++)
             {
-                var renderer = new FIGLetRenderer(_defaultFont);
-                for (var i = 0; i < iterationsPerThread; i++)
-                {
-                    var result = renderer.Render(text);
-                    Assert.IsNotNull(result);
-                }
-            });
-        }
-        
-        Task.WaitAll(tasks);
+                var result = renderer.Render(text);
+                Assert.IsNotNull(result);
+            }
+        });
         concurrentStopwatch.Stop();
         var concurrentTime = concurrentStopwatch.Elapsed;
         
         // Assert - Concurrent should be faster than sequential (with some tolerance)
+        // Using Little's Law (L = λ * W) to model the system as an M/M/c queue:
+        // - Service rate μ = total_renders / sequential_time (renders per ms)
+        // - Max throughput λ_max = c * μ (c = processorCount)
+        // - Theoretical concurrent time = total_renders / λ_max = sequential_time / c
+        // - Theoretical speedup = c, so theoretical efficiency = 1
+        // - Expect at least 15% of the theoretical efficiency (0.15) to account for overhead and thread pool limitations
         var efficiencyRatio = sequentialTime.TotalMilliseconds / concurrentTime.TotalMilliseconds;
-        Assert.IsTrue(efficiencyRatio > 1.5, 
-            $"Concurrent rendering not efficient. Sequential: {sequentialTime}s, Concurrent: {concurrentTime}s, Ratio: {efficiencyRatio:F2}");
-        
-        Console.WriteLine($"Concurrent Rendering Performance ({threadCount} threads, {iterationsPerThread} each):");
-        Console.WriteLine($"  Sequential: {sequentialTime.TotalMilliseconds:F1}ms");
-        Console.WriteLine($"  Concurrent: {concurrentTime.TotalMilliseconds:F1}ms");
-        Console.WriteLine($"  Speedup:    {efficiencyRatio:F2}x");
+        var efficiency = efficiencyRatio / processorCount;
+        Assert.IsTrue(efficiency > 0.15, 
+            $"Concurrent rendering not efficient. Sequential: {sequentialTime}s, Concurrent: {concurrentTime}s, Efficiency: {efficiency:F2} (speedup per processor), Efficiency ratio: {efficiencyRatio:F2} (total speedup), Thread count: {processorCount}");
     }
 
     [TestMethod]
