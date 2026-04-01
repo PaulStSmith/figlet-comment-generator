@@ -14,6 +14,9 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: windows-latest
 
+    permissions:
+      contents: write   # push version tag
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -73,14 +76,6 @@ jobs:
             Write-Error "No VSIX file found"
             exit 1
           }
-
-      - name: Download VsixPublisher
-        if: steps.check_tag.outputs.exists == 'false'
-        shell: pwsh
-        run: |
-          # VsixPublisher is included in VS Build Tools, but we can use the marketplace API directly
-          # or download the VSCE tool. For VS Marketplace, we'll use the REST API approach.
-          Invoke-WebRequest -Uri "https://marketplace.visualstudio.com/_apis/public/gallery/publisher/Paulo%20Santos%20-%20Paul.St.Smith" -Method Head -ErrorAction SilentlyContinue
 
       - name: Publish to VS Marketplace
         if: steps.check_tag.outputs.exists == 'false'
