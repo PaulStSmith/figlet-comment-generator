@@ -8,7 +8,7 @@ FIGLet Comment Generator creates ASCII art comments using FIGLet fonts for Visua
 
 **Components:**
 - **FIGLet**: Core .NET library (NuGet: `ByteForge.FIGLet`)
-- **TS.FIGLet**: TypeScript library for browser/Node.js
+- **FIGLet.TS**: TypeScript library for browser/Node.js
 - **FIGLet.VSCodeExtension**: VS Code extension with embedded TypeScript engine
 - **FIGLet.VisualStudioExtension**: Visual Studio 2022+ extension (WPF)
 - **FIGPrint**: .NET CLI tool
@@ -41,7 +41,7 @@ npm run lint       # ESLint
 npm run test       # Tests
 
 # TypeScript library
-cd TS.FIGLet
+cd FIGLet.TS
 npm install
 npm run build      # Build to dist/
 npm run dev        # Watch mode
@@ -53,8 +53,8 @@ npm run dev        # Watch mode
 
 The FIGLet engine exists in two languages with identical APIs:
 
-| C# (`FIGLet/`) | TypeScript (`TS.FIGLet/src/FIGLet/`) |
-|----------------|--------------------------------------|
+| C# (`FIGLet/`) | TypeScript (`FIGLet.TS/src/`) |
+|----------------|-------------------------------|
 | `FIGFont.cs` | `FIGFont.ts` |
 | `FIGLetRenderer.cs` | `FIGLetRenderer.ts` |
 | `LayoutMode.cs` | `LayoutMode.ts` |
@@ -92,10 +92,10 @@ FIGLet.Tests/              # MSTest suite with embedded TestFonts/ and ExpectedO
 FIGLet.VisualStudioExtension/  # VS2022+ extension (WPF, VSSDK)
 FIGLet.VSCodeExtension/    # VS Code extension
   ├── src/extension.ts     # Entry point, command handlers
-  ├── src/FIGLet/          # Embedded TypeScript engine (copy of TS.FIGLet)
+  ├── src/FIGLet/          # Embedded TypeScript engine (copy of FIGLet.TS)
   ├── src/BannerUtils.ts   # Comment insertion logic
   └── webpack.config.js    # Bundles webview React components
-TS.FIGLet/                 # Standalone TypeScript library
+FIGLet.TS/                 # Standalone TypeScript library
 FIGPrint/                  # CLI tool (System.CommandLine)
 FontGenerator/             # Bitmap-to-FIGLet font converter
 ```
@@ -105,7 +105,7 @@ FontGenerator/             # Bitmap-to-FIGLet font converter
 ### When Modifying Rendering Logic
 
 1. Update the C# version in `FIGLet/`
-2. Port changes to TypeScript in `TS.FIGLet/src/FIGLet/`
+2. Port changes to TypeScript in `FIGLet.TS/src/`
 3. Copy updated TypeScript files to `FIGLet.VSCodeExtension/src/FIGLet/`
 4. Run tests: `dotnet test` and `npm run test` in VSCodeExtension
 

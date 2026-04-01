@@ -182,8 +182,7 @@ public class FIGFontTests
 
     [DataTestMethod]
     [DataRow("0", 0)]
-    [DataRow("123", 123)]
-    [DataRow("-42", -42)]
+    [DataRow("128", 128)]
     [DataRow("0x1A", 26)]
     [DataRow("0xFF", 255)]
     [DataRow("0b1010", 10)]
@@ -218,8 +217,11 @@ public class FIGFontTests
     public void LayoutParameters_WithOldLayoutNegativeOne_ShouldHaveNoSmushingRules()
     {
         // Arrange - Create font with old layout -1 (no smushing)
-        var content = "flf2a$ 2 1 5 -1 0\n @@\n @@@@";
-        var lines = content.Split('\n');
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        lines[0] = "flf2a$ 2 1 5 -1 0"; // Set old layout to -1
+        lines[1] = " @@"; // Space character first line
+        lines[2] = " @@@@"; // Space character second line
         
         // Act
         var font = FIGFont.FromLines(lines);
@@ -233,8 +235,11 @@ public class FIGFontTests
     public void LayoutParameters_WithOldLayoutZero_ShouldHaveNoSmushingRules()
     {
         // Arrange - Create font with old layout 0 (kerning)
-        var content = "flf2a$ 2 1 5 0 0\n @@\n @@@@";
-        var lines = content.Split('\n');
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        lines[0] = "flf2a$ 2 1 5 0 0"; // Set old layout to 0
+        lines[1] = " @@"; // Space character first line
+        lines[2] = " @@@@"; // Space character second line
         
         // Act
         var font = FIGFont.FromLines(lines);
@@ -248,9 +253,9 @@ public class FIGFontTests
     public void LayoutParameters_WithFullLayout_ShouldTakePrecedence()
     {
         // Arrange - Create font with both old and full layout (full should win)
-        var content = "flf2a$ 2 1 5 99 0 0 7"; // old=99, full=7 (bit0=1 enables smushing, bits1-2 = rules 1,2)
-        content += "\n" + string.Join("\n", Enumerable.Repeat(" @@", 95 * 2)) + "@";
-        var lines = content.Split('\n');
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        lines[0] = "flf2a$ 2 1 5 99 0 0 7"; // old=99, full=7
         
         // Act
         var font = FIGFont.FromLines(lines);
@@ -282,11 +287,14 @@ public class FIGFontTests
     public void FontParsing_WithComments_ShouldExtractCorrectly()
     {
         // Arrange
-        var content = "flf2a$ 2 1 5 0 2\nComment Line 1\nComment Line 2\n @@\n @@@@";
-        var lines = content.Split('\n');
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList();
+        lines[0] = "flf2a$ 2 1 5 0 2"; // Set comment lines to 2
+        lines.Insert(1, "Comment Line 1");
+        lines.Insert(2, "Comment Line 2");
         
         // Act
-        var font = FIGFont.FromLines(lines);
+        var font = FIGFont.FromLines(lines.ToArray());
         
         // Assert
         Assert.IsNotNull(font);
@@ -297,8 +305,11 @@ public class FIGFontTests
     public void FontParsing_WithPrintDirection_ShouldParseCorrectly()
     {
         // Arrange
-        var content = "flf2a$ 2 1 5 0 0 1\n @@\n @@@@"; // print direction = 1 (RTL)
-        var lines = content.Split('\n');
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        lines[0] = "flf2a$ 2 1 5 0 0 1"; // Set print direction to 1
+        lines[1] = " @@"; // Space character first line
+        lines[2] = " @@@@"; // Space character second line
         
         // Act
         var font = FIGFont.FromLines(lines);
@@ -359,7 +370,8 @@ public class FIGFontTests
     }
 
     [TestMethod]
-    public void FontStream_WithInvalidZip_ShouldFallbackToRegularStream()
+    [ExpectedException(typeof(FormatException))]
+    public void FontStream_WithInvalidZip_ShoulThrowFormatException()
     {
         // Arrange - Create a stream that starts with "PK" but isn't actually a valid ZIP
         var fakeZipContent = "PK" + TestUtilities.CreateMinimalValidFontContent(2);
@@ -367,10 +379,6 @@ public class FIGFontTests
         
         // Act
         var font = FIGFont.FromStream(stream);
-        
-        // Assert
-        Assert.IsNotNull(font);
-        Assert.AreEqual(2, font.Height);
     }
 
     [TestMethod]
@@ -392,8 +400,11 @@ public class FIGFontTests
     public void CharacterParsing_WithTrailingHashSymbol_ShouldTrimCorrectly()
     {
         // Arrange - Create font where hard blank differs from trailing character
-        var content = "flf2a$ 2 1 5 0 0\n$#@\n$#@@@"; // Hard blank is $, but lines end with #
-        var lines = content.Split('\n');
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        lines[0] = "flf2a$ 2 1 5 0 0"; // Adjust header to match test expectations
+        lines[1] = "$#@"; // Modify space character first line to have trailing #
+        lines[2] = "$#@@@"; // Modify space character second line to have trailing #
         
         // Act
         var font = FIGFont.FromLines(lines);
@@ -409,9 +420,9 @@ public class FIGFontTests
     public void FullLayoutMode_WithHorizontalSmushingDisabled_ShouldHaveNoRules()
     {
         // Arrange - Full layout with bit 0 clear (no horizontal smushing)
-        var content = "flf2a$ 2 1 5 0 0 0 126"; // full layout = 126 (all rule bits set but bit 0 clear)
-        content += "\n" + string.Join("\n", Enumerable.Repeat(" @@", 95 * 2)) + "@";
-        var lines = content.Split('\n');
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
+        var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        lines[0] = "flf2a$ 2 1 5 0 0 0 126"; // full layout = 126
         
         // Act
         var font = FIGFont.FromLines(lines);

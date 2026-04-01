@@ -1,5 +1,5 @@
-import { FIGFont } from "./FIGLet/FIGFont.js";
-import { FIGLetRenderer } from "./FIGLet/FIGLetRenderer.js";
+import { FIGFont } from "./FIGFont.js";
+import { FIGLetRenderer } from "./FIGLetRenderer.js";
 
 async function main() {
     const fnt = await FIGFont.getDefault();
