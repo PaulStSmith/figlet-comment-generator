@@ -135,15 +135,15 @@ export class FIGLetRenderer {
         // colorDict maps code-point position in plain text → accumulated ANSI color sequence
         const colorDict = new Map<number, string>();
 
-        // First pass: strip ANSI sequences and build plain text + color map
-        if (this.useANSIColors) {
+        // First pass: always strip ANSI sequences; record color map only when useANSIColors is true
+        {
             const processor = new ANSIProcessor();
             let plainText = '';
 
             for (const c of text) {
                 const isAnsi = processor.processCharacter(c);
                 if (!isAnsi) {
-                    if (processor.currentColorSequence) {
+                    if (this.useANSIColors && processor.currentColorSequence) {
                         // Map the color to the position of the next rendered character
                         colorDict.set([...plainText].length, processor.currentColorSequence);
                         processor.resetColorState();
@@ -220,7 +220,7 @@ export class FIGLetRenderer {
         const resetCode = this.useANSIColors ? FIGLetRenderer.ANSI_RESET : '';
         return outputLines
             .map(line => line.replace(hardBlankRegex, ' ') + resetCode)
-            .join(this.lineSeparator);
+            .join(this.lineSeparator) + this.lineSeparator;
     }
 
     /**
@@ -384,12 +384,9 @@ export class FIGLetRenderer {
 
         // Rule 5: Big X Smushing
         if (this.font.hasSmushingRule(SmushingRules.BigX)) {
-            if ((c1 === '/' && c2 === '\\') || (c1 === '\\' && c2 === '/')) {
-                return '|';
-            }
-            if (c1 === '>' && c2 === '<') {
-                return 'X';
-            }
+            if (c1 === '/' && c2 === '\\') return '|';
+            if (c1 === '\\' && c2 === '/') return 'Y';
+            if (c1 === '>' && c2 === '<') return 'X';
         }
 
         // Rule 6: Hardblank Smushing
