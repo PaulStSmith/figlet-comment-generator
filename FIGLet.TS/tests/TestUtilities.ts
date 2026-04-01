@@ -139,6 +139,45 @@ export function stripANSIColors(text: string): string {
     return text.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '');
 }
 
+/**
+ * Asserts that two multi-line strings are equal, ignoring carriage-return
+ * differences (\r\n vs \n). Mirrors C# TestUtilities.AssertMultiLineEqual.
+ */
+export function assertMultiLineEqual(expected: string, actual: string, message = ''): void {
+    actual   = actual.replace(/\r/g, '');
+    expected = expected.replace(/\r/g, '');
+    const expectedLines = expected.split('\n');
+    const actualLines   = actual.split('\n');
+    expect(
+        actualLines.length,
+        `${message}Line count mismatch. Expected: ${expectedLines.length}, Actual: ${actualLines.length}`
+    ).toBe(expectedLines.length);
+    for (let i = 0; i < expectedLines.length; i++) {
+        expect(
+            actualLines[i],
+            `${message}Line ${i + 1} mismatch. Expected: '${expectedLines[i]}', Actual: '${actualLines[i]}'`
+        ).toBe(expectedLines[i]);
+    }
+}
+
+/**
+ * Asserts that an action completes within a given time budget (milliseconds).
+ * Mirrors C# TestUtilities.AssertPerformance.
+ */
+export function assertPerformance(
+    action: () => void,
+    maxMs: number,
+    operationName = 'Operation'
+): void {
+    const start = Date.now();
+    action();
+    const elapsed = Date.now() - start;
+    expect(
+        elapsed,
+        `${operationName} took ${elapsed}ms, but should complete within ${maxMs}ms`
+    ).toBeLessThanOrEqual(maxMs);
+}
+
 // ---------------------------------------------------------------------------
 // Random text generator (fixed seed for reproducibility)
 // ---------------------------------------------------------------------------
