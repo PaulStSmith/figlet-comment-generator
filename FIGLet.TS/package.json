@@ -1,20 +1,53 @@
 {
-  "name": "figlet.ts",
+  "name": "@byteforge/figlet",
   "version": "1.0.0",
+  "description": "FIGLet ASCII art text renderer for Node.js and browsers",
+  "keywords": [
+    "figlet",
+    "ascii",
+    "ascii-art",
+    "art",
+    "banner",
+    "font",
+    "terminal",
+    "cli",
+    "text-art"
+  ],
+  "author": "Paulo Santos",
+  "license": "MIT",
+  "homepage": "https://github.com/PaulStSmith/figlet-comment-generator#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PaulStSmith/figlet-comment-generator.git",
+    "directory": "FIGLet.TS"
+  },
+  "bugs": {
+    "url": "https://github.com/PaulStSmith/figlet-comment-generator/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "copy-assets": "copyfiles -u 1 src/assets/**/* dist/",
     "build": "tsc && npm run copy-assets",
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm test && npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@types/node": "^22.9.0",
     "copyfiles": "^2.4.1",
