@@ -108,7 +108,7 @@ jobs:
             "overview": "Marketplace Overview.md",
             "publisher": "Paulo Santos - Paul.St.Smith",
             "assetFiles": [
-              { "pathOnDisk": "FIGLet.VisualStudioExtension/bin/Release/preview.png", "targetPath": "preview.png" }
+              { "pathOnDisk": "FIGLet.VisualStudioExtension/bin/Release/Resources/preview.png", "targetPath": "preview.png" }
             ]
           }
           "@
