@@ -472,7 +472,7 @@ public class FIGLetRendererTests
             
             // Assert
             Assert.IsNotNull(result, $"Failed to render: '{testText.Key}'");
-            Assert.IsTrue(result.Contains(testText.Value), $"Rendered output does not contain expected text for: '{testText.Key}'");
+            TestUtilities.AssertMultiLineEqual(testText.Value, result, $"Rendered output does not match expected for: '{testText.Key}'");
         }
     }
 
