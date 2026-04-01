@@ -384,6 +384,68 @@ public class IntegrationTests
         }
     }
 
+    [TestMethod]
+    public void EndToEnd_ZipFont_DeflateCompression_ShouldLoadCorrectly()
+    {
+        // Arrange — ZIP with Deflate (Optimal) compression, the default
+        var fontContent = TestUtilities.CreateMinimalValidFontContent(3, '@');
+        var zipBytes    = TestUtilities.CreateZipWithFontFile(fontContent, "test.flf",
+                              System.IO.Compression.CompressionLevel.Optimal);
+        var tempFile = Path.GetTempFileName() + ".zip";
+
+        try
+        {
+            File.WriteAllBytes(tempFile, zipBytes);
+
+            // Act
+            var font   = FIGFont.FromFile(tempFile);
+            var result = FIGLetRenderer.Render("Hi", font);
+
+            // Assert
+            Assert.IsNotNull(font,   "Font should load from Deflate-compressed ZIP");
+            Assert.AreEqual("@", font.HardBlank);
+            Assert.AreEqual(3, font.Height);
+            Assert.IsNotNull(result);
+            var lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(3, lines.Length);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [TestMethod]
+    public void EndToEnd_ZipFont_StoreCompression_ShouldLoadCorrectly()
+    {
+        // Arrange — ZIP with Store (NoCompression / method 0) — no deflate applied
+        var fontContent = TestUtilities.CreateMinimalValidFontContent(4, '%');
+        var zipBytes    = TestUtilities.CreateZipWithFontFile(fontContent, "test.flf",
+                              System.IO.Compression.CompressionLevel.NoCompression);
+        var tempFile = Path.GetTempFileName() + ".zip";
+
+        try
+        {
+            File.WriteAllBytes(tempFile, zipBytes);
+
+            // Act
+            var font   = FIGFont.FromFile(tempFile);
+            var result = FIGLetRenderer.Render("Hi", font);
+
+            // Assert
+            Assert.IsNotNull(font,   "Font should load from Store-compressed (uncompressed) ZIP");
+            Assert.AreEqual("%", font.HardBlank);
+            Assert.AreEqual(4, font.Height);
+            Assert.IsNotNull(result);
+            var lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+            Assert.AreEqual(4, lines.Length);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
     private static string ConvertToCodeComment(string banner, string commentPrefix)
     {
         var lines = banner.Split('\n', StringSplitOptions.RemoveEmptyEntries);

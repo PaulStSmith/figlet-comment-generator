@@ -48,12 +48,13 @@ public static class TestUtilities
         }
     }
 
-    public static string CreateMinimalValidFontContent(int height = 5, char hardBlank = '$')
+    public static string CreateMinimalValidFontContent(int height = 5, char hardBlank = '$', int printDirection = 0)
     {
         var sb = new StringBuilder();
-        
-        // Header: signature + hardblank, height, baseline, maxlength, oldlayout, commentlines
-        sb.AppendLine($"flf2a{hardBlank} {height} 4 10 15 0");
+
+        // Header: signature + hardblank, height, baseline, maxlength, oldlayout, commentlines[, printDirection]
+        var directionSuffix = printDirection != 0 ? $" {printDirection}" : "";
+        sb.AppendLine($"flf2a{hardBlank} {height} 4 10 15 0{directionSuffix}");
         
         // Required ASCII characters 32-126 (95 total characters)
         for (var charCode = 32; charCode <= 126; charCode++)
@@ -193,12 +194,15 @@ public static class TestUtilities
         return result.ToString();
     }
 
-    public static byte[] CreateZipWithFontFile(string fontContent, string fileName = "test.flf")
+    public static byte[] CreateZipWithFontFile(
+        string fontContent,
+        string fileName = "test.flf",
+        System.IO.Compression.CompressionLevel compressionLevel = System.IO.Compression.CompressionLevel.Optimal)
     {
         using var memoryStream = new MemoryStream();
         using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
         {
-            var entry = archive.CreateEntry(fileName);
+            var entry = archive.CreateEntry(fileName, compressionLevel);
             using var entryStream = entry.Open();
             using var writer = new StreamWriter(entryStream);
             writer.Write(fontContent);
