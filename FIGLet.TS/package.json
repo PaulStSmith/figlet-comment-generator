@@ -1,5 +1,5 @@
 {
-  "name": "@byteforge/figlet",
+  "name": "@byte-forge/figlet",
   "version": "1.0.0",
   "description": "FIGLet ASCII art text renderer for Node.js and browsers",
   "keywords": [
