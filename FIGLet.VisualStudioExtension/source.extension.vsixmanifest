@@ -11,7 +11,7 @@ FIGLet Comment Generator provides a powerful and intuitive way to create eye-cat
         <License>LICENSE.txt</License>
         <GettingStartedGuide>GettingStarted.html</GettingStartedGuide>
         <ReleaseNotes>ReleaseNotes.html</ReleaseNotes>
-        <Icon>Resources\icon-90.png</Icon>
+        <Icon>Resources\Icon-90.png</Icon>
         <PreviewImage>Resources\preview.png</PreviewImage>
         <Tags>figlet, ascii art, banner, comments</Tags>
         <Preview>true</Preview>
