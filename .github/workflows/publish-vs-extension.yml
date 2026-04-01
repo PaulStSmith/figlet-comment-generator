@@ -106,7 +106,7 @@ jobs:
               "internalName": "FIGLet-Comment-Generator"
             },
             "overview": "Marketplace Overview.md",
-            "publisher": "Paulo Santos - Paul.St.Smith",
+            "publisher": "PaulStSmith",
             "assetFiles": [
               { "pathOnDisk": "FIGLet.VisualStudioExtension/bin/Release/Resources/preview.png", "targetPath": "preview.png" }
             ]
