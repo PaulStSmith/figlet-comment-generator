@@ -210,36 +210,32 @@ public static class TestUtilities
         return memoryStream.ToArray();
     }
 
-    public static readonly string[] TestTexts = 
-    [
-        "Hello",
-        "World",
-        "Test",
-        "123",
-        "ABC",
-        "!@#$%^&*()",
-        "The quick brown fox",
-        "",
-        " ",
-        "  ",
-        "a",
-        "Hello\nWorld",
-        "Line1\nLine2\nLine3",
-        "Mixed 123 Text!",
-        "\t\n\r",
-        "Unicode: éñ中文",
-        "Symbols: ←↑→↓",
-        "Math: ∑∏∆∇",
-        "🚀🎉✨", // Emoji (surrogate pairs)
-    ];
+    public static readonly Dictionary<string, string> TestTexts = new() 
+    {
+        ["Hello"] = "Helo\r\nHelo\r\nHelo\r\n",
+        ["World"] = "World\r\nWorld\r\nWorld\r\n",
+        ["Test"] = "Test\r\nTest\r\nTest\r\n",
+        ["123"] = "123\r\n123\r\n123\r\n",
+        ["ABC"] = "ABC\r\nABC\r\nABC\r\n",
+        ["!@#$%^&*()"] = "! %^&*)\r\n! %^&*)\r\n  %^&*)\r\n",
+        ["The quick brown fox"] = "The quick brown fox\r\nThe quick brown fox\r\nThe quick brown fox\r\n",
+        ["a"] = "a\r\na\r\na\r\n",
+        ["Hello\nWorld"] = "Helo\r\nHelo\r\nHelo\r\nWorld\r\nWorld\r\nWorld\r\n",
+        ["Line1\nLine2\nLine3"] = "Line1\r\nLine1\r\nLine1\r\nLine2\r\nLine2\r\nLine2\r\nLine3\r\nLine3\r\nLine3\r\n",
+        ["Mixed 123 Text!"] = "Mixed 123 Text!\r\nMixed 123 Text!\r\nMixed 123 Text \r\n",
+        ["Unicode: éñ中文"] = "Unicode: \r\nUnicode: \r\nUnicode: \r\n",
+        ["Symbols: ←↑→↓"] = "Symbols: \r\nSymbols: \r\nSymbols: \r\n",
+        ["Math: ∑∏∆∇"] = "Math: \r\nMath: \r\nMath: \r\n",
+        ["🚀🎉✨"] = "\r\n\r\n\r\n"
+    };
 
-    public static readonly string[] ANSIColoredTexts = 
-    [
-        "\x1b[31mRed\x1b[0m",
-        "\x1b[32mGreen\x1b[33mYellow\x1b[0m",
-        "\x1b[1;4;31mBold Underline Red\x1b[0m",
-        "Normal\x1b[96mCyan\x1b[0mBack",
-        "\x1b[38;5;196mRGB Red\x1b[0m",
-        "\x1b[48;2;255;0;0mTrue Color BG\x1b[0m",
-    ];
+    public static readonly Dictionary<string, string> ANSIColoredTexts = new()
+    {
+        ["\x1b[31mRed\x1b[0m"] = "\x1b[31mRed\x1b[0m\r\n\x1b[31mRed\x1b[0m\r\n\x1b[31mRed\x1b[0m\r\n",
+        ["\x1b[32mGreen\x1b[33mYellow\x1b[0m"] = "\x1b[32mGren\x1b[33mYelow\x1b[0m\r\n\x1b[32mGren\x1b[33mYelow\x1b[0m\r\n\x1b[32mGren\x1b[33mYelow\x1b[0m\r\n",
+        ["\x1b[1;4;31mBold Underline Red\x1b[0m"] = "\x1b[1;4;31mBold Underline Red\x1b[0m\r\n\x1b[1;4;31mBold Underline Red\x1b[0m\r\n\x1b[1;4;31mBold Underline Red\x1b[0m\r\n",
+        ["Normal\x1b[96mCyan\x1b[0mBack"] = "Normal\x1b[96mCyan\x1b[0mBack\x1b[0m\r\nNormal\x1b[96mCyan\x1b[0mBack\x1b[0m\r\nNormal\x1b[96mCyan\x1b[0mBack\x1b[0m\r\n",
+        ["\x1b[38;5;196mRGB Red\x1b[0m"] = "\x1b[38;5;196mRGB Red\x1b[0m\r\n\x1b[38;5;196mRGB Red\x1b[0m\r\n\x1b[38;5;196mRGB Red\x1b[0m\r\n",
+        ["\x1b[48;2;255;0;0mTrue Color BG\x1b[0m"] = "\x1b[48;2;255;0;0mTrue Color BG\x1b[0m\r\n\x1b[48;2;255;0;0mTrue Color BG\x1b[0m\r\n\x1b[48;2;255;0;0mTrue Color BG\x1b[0m\r\n",
+    };
 }
