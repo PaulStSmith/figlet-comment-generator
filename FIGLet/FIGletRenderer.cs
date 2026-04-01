@@ -321,7 +321,7 @@ public partial class FIGLetRenderer(FIGFont? font)
         if (!m1.Success || !m2.Success)
             return character.Length;
 
-        var canSmush = CanSmush(m1.Value[0], m2.Value[0], mode);
+        var canSmush = CanSmush(m1.Value[0], m2.Value[0], Font.HardBlank, mode, Font.SmushingRules);
         var overlapLength = canSmush ? Math.Max(eol.Length - m1.Index, m2.Index) + 1 : 0;
         overlapLength = Math.Min(overlapLength, character.Length);
         // Special case when we have opposing slashes
@@ -337,9 +337,11 @@ public partial class FIGLetRenderer(FIGFont? font)
     /// </summary>
     /// <param name="c1">The first character.</param>
     /// <param name="c2">The second character.</param>
+    /// <param name="hardBlank">The hard blank character defined in the FIGFont.</param>
     /// <param name="mode">The layout mode to use for smushing.</param>
+    /// <param name="rules">The smushing rules defined in the FIGFont.</param>
     /// <returns>True if the characters can be smushed together; otherwise, false.</returns>
-    private bool CanSmush(char c1, char c2, LayoutMode mode)
+    internal bool CanSmush(char c1, char c2, char hardBlank, LayoutMode mode, SmushingRules rules)
     {
         // Early return for kerning mode
         if (mode == LayoutMode.Kerning)
@@ -350,40 +352,39 @@ public partial class FIGLetRenderer(FIGFont? font)
             return false;
 
         // Handle hardblanks first
-        if (c1 == Font.HardBlank || c2 == Font.HardBlank)
-            return Font.HasSmushingRule(SmushingRules.HardBlank);
+        if (c1 == hardBlank || c2 == hardBlank)
+            return rules.HasRule(SmushingRules.HardBlank);
 
         // Handle spaces
         if (c1 == ' ' && c2 == ' ') return true;
         if (c1 == ' ' || c2 == ' ') return true;
 
         // Rule 1: Equal Character Smushing
-        if (Font.HasSmushingRule(SmushingRules.EqualCharacter) && c1 == c2)
+        if (rules.HasRule(SmushingRules.EqualCharacter) && c1 == c2)
             return true;
 
         // Rule 2: Underscore Smushing
-        if (Font.HasSmushingRule(SmushingRules.Underscore))
+        if (rules.HasRule(SmushingRules.Underscore))
             if ((c1 == '_' && HierarchyCharacters.Contains(c2)) || (c2 == '_' && HierarchyCharacters.Contains(c1)))
                 return true;
 
         // Rule 3: Hierarchy Smushing
-        if (Font.HasSmushingRule(SmushingRules.Hierarchy))
+        if (rules.HasRule(SmushingRules.Hierarchy))
         {
-            var hierarchy = HierarchyCharacters;
-            var rank1 = hierarchy.IndexOf(c1);
-            var rank2 = hierarchy.IndexOf(c2);
+            var rank1 = HierarchyCharacters.IndexOf(c1);
+            var rank2 = HierarchyCharacters.IndexOf(c2);
 
             if (rank1 >= 0 && rank2 >= 0)
                 return true;
         }
 
         // Rule 4: Opposite Pair Smushing
-        if (Font.HasSmushingRule(SmushingRules.OppositePair))
+        if (rules.HasRule(SmushingRules.OppositePair))
             if (oppositePairs.TryGetValue(c1, out var opposite) && opposite == c2)
                 return true;
 
         // Rule 5: Big X Smushing
-        if (Font.HasSmushingRule(SmushingRules.BigX))
+        if (rules.HasRule(SmushingRules.BigX))
             if (c1 == '>' && c2 == '<' || (c1 == '/' && c2 == '\\') || (c1 == '\\' && c2 == '/'))
                 return true;
 
