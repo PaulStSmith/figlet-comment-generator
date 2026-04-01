@@ -70,7 +70,7 @@ public class FIGLetRendererTests
         
         // Assert
         Assert.IsNotNull(result);
-        Assert.AreEqual("Hi\r\nHi\r\nHi\r\n", result);
+        TestUtilities.AssertMultiLineEqual("Hi\r\nHi\r\nHi\r\n", result, "Static Render should produce expected output for 'Hi'");
 
         var lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
         Assert.AreEqual(_testFont.Height, lines.Length);
@@ -490,7 +490,7 @@ public class FIGLetRendererTests
             // Assert
             // Debug.WriteLine(@$"[""{coloredText.Replace("\x1b", "\\x1b").Replace("\n", "\\n").Replace("\r", "\\r")}""] = ""{result.Replace("\x1b", "\\x1b").Replace("\n", "\\n").Replace("\r", "\\r")}"",");
             Assert.IsNotNull(result, $"Failed to render: '{coloredText.Key}'");
-            Assert.IsTrue(result.Contains(coloredText.Value), $"Rendered output does not contain expected text for: '{coloredText.Key}'");
+            TestUtilities.AssertMultiLineEqual(coloredText.Value, result, $"Rendered output does not match expected for: '{coloredText.Key}'");
         }
     }
 

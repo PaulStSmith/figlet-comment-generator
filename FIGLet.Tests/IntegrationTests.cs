@@ -352,7 +352,7 @@ public class IntegrationTests
              * Because the static Render method uses the default font and settings, 
              * we can compare the output to expected results.
              */
-            Assert.AreEqual(scenario.Result, result, $"Banner output doesn't match expected for: {scenario.Context}");
+            TestUtilities.AssertMultiLineEqual(scenario.Result, result, $"Banner output doesn't match expected for: {scenario.Context}");
         }
     }
 
