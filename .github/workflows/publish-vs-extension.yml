@@ -1,7 +1,8 @@
 name: Publish Visual Studio Extension
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: [master, main]
     paths:
       - 'FIGLet.VisualStudioExtension/**'
@@ -10,6 +11,7 @@ on:
 
 jobs:
   publish:
+    if: github.event.pull_request.merged == true
     runs-on: windows-latest
 
     steps:
