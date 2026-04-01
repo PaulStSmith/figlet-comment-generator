@@ -12,6 +12,11 @@ export class FIGLetRenderer {
     private static readonly HIERARCHY_CHARACTERS = "|/\\[]{}()<>";
 
     /**
+     * ANSI color reset sequence appended to each output line when ANSI is enabled.
+     */
+    private static readonly ANSI_RESET = "\u001b[0m";
+
+    /**
      * Dictionary of opposite character pairs for smushing.
      */
     private static readonly oppositePairs = new Map<string, string>([
@@ -37,7 +42,7 @@ export class FIGLetRenderer {
     public lineSeparator: string;
 
     /**
-     * Gets or sets a value indicating whether to use ANSI colors during rendering.
+     * Gets or sets a value indicating whether to process and preserve ANSI color codes.
      */
     public useANSIColors: boolean;
 
@@ -127,26 +132,70 @@ export class FIGLetRenderer {
     private renderLine(text: string): string {
         const mode = this.layoutMode === LayoutMode.Default ? LayoutMode.Smushing : this.layoutMode;
 
+        // colorDict maps code-point position in plain text → accumulated ANSI color sequence
+        const colorDict = new Map<number, string>();
+
+        // First pass: strip ANSI sequences and build plain text + color map
+        if (this.useANSIColors) {
+            const processor = new ANSIProcessor();
+            let plainText = '';
+
+            for (const c of text) {
+                const isAnsi = processor.processCharacter(c);
+                if (!isAnsi) {
+                    if (processor.currentColorSequence) {
+                        // Map the color to the position of the next rendered character
+                        colorDict.set([...plainText].length, processor.currentColorSequence);
+                        processor.resetColorState();
+                    }
+                    // Only include characters the font can render
+                    if (this.font.characters.has(c)) {
+                        plainText += c;
+                    }
+                }
+            }
+
+            text = plainText;
+        }
+
         // Reverse text for RTL fonts.
-        // JavaScript's spread operator correctly handles Unicode surrogate pairs,
-        // so no explicit surrogate pair handling is needed here.
+        // JavaScript's spread operator correctly handles Unicode surrogate pairs.
         if (this.font.printDirection === 1) {
-            text = [...text].reverse().join('');
+            const codePoints = [...text];
+            text = codePoints.reverse().join('');
+
+            // Mirror color positions around the reversed text length
+            if (this.useANSIColors && colorDict.size > 0) {
+                const len = codePoints.length;
+                const reversed = new Map<number, string>();
+                for (const [pos, color] of colorDict) {
+                    reversed.set(len - pos - 1, color);
+                }
+                colorDict.clear();
+                for (const [pos, color] of reversed) {
+                    colorDict.set(pos, color);
+                }
+            }
         }
 
         const outputLines: string[] = Array(this.font.height).fill('');
+        let charIndex = 0;
 
         // JavaScript's for...of correctly iterates Unicode code points (handles surrogates)
         for (const c of text) {
             if (!this.font.characters.has(c)) {
+                charIndex++;
                 continue;
             }
 
             const charLines = this.font.characters.get(c)!;
+            const colorCode = colorDict.get(charIndex) ?? '';
+            charIndex++;
+
             if (outputLines[0].length === 0) {
-                // First character — just copy its lines
+                // First character — just copy its lines, prepending any color code
                 for (let i = 0; i < this.font.height; i++) {
-                    outputLines[i] = charLines[i];
+                    outputLines[i] = colorCode + charLines[i];
                 }
                 continue;
             }
@@ -160,16 +209,17 @@ export class FIGLetRenderer {
             // Apply smushing/kerning/full-size rules
             for (let i = 0; i < this.font.height; i++) {
                 if (overlap === 0) {
-                    outputLines[i] += charLines[i];
+                    outputLines[i] += colorCode + charLines[i];
                 } else {
-                    outputLines[i] = this.smushLines(outputLines[i], charLines[i], overlap, mode);
+                    outputLines[i] = this.smushLines(outputLines[i], charLines[i], overlap, mode, colorCode);
                 }
             }
         }
 
         const hardBlankRegex = new RegExp(this.escapeRegex(this.font.hardBlank), 'g');
+        const resetCode = this.useANSIColors ? FIGLetRenderer.ANSI_RESET : '';
         return outputLines
-            .map(line => line.replace(hardBlankRegex, ' '))
+            .map(line => line.replace(hardBlankRegex, ' ') + resetCode)
             .join(this.lineSeparator);
     }
 
@@ -355,13 +405,15 @@ export class FIGLetRenderer {
 
     /**
      * Smushes a character line into another line at a specific overlap point.
+     * The colorCode, if provided, is inserted after the smushed overlap and before
+     * the remaining tail of the incoming character — matching C# behaviour.
      */
-    private smushLines(line: string, character: string, overlap: number, mode: LayoutMode): string {
+    private smushLines(line: string, character: string, overlap: number, mode: LayoutMode, colorCode: string = ''): string {
         const lineEnd = line.slice(-overlap);
         const lineWithoutEnd = line.slice(0, -overlap);
 
         if (mode === LayoutMode.Kerning) {
-            return line + character;
+            return line + colorCode + character;
         }
 
         let smushedPart = '';
@@ -369,6 +421,90 @@ export class FIGLetRenderer {
             smushedPart += this.smushCharacters(lineEnd[i], character[i], mode);
         }
 
-        return lineWithoutEnd + smushedPart + character.slice(overlap);
+        return lineWithoutEnd + smushedPart + colorCode + character.slice(overlap);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// ANSIProcessor — detects and buffers ANSI escape sequences during rendering.
+// Ported from the C# inner class of the same name in FIGLetRenderer.cs.
+// ---------------------------------------------------------------------------
+
+class ANSIProcessor {
+    private inEscapeSequence = false;
+    private escapeBuffer = '';
+
+    /**
+     * Terminal control characters that end an ANSI sequence but are NOT color
+     * codes (i.e. the sequence should be dropped rather than preserved).
+     */
+    private static readonly NON_COLOR_TERMINATORS = new Set([
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'f',   // cursor movement
+        'J', 'K',                                         // screen clearing
+        'S', 'T',                                         // scrolling
+        's', 'u',                                         // cursor save/restore
+        'n', 'h', 'l', 'i', 'r', 't', '@',               // misc controls
+        'P', 'X', 'L', 'M'                                // more controls
+    ]);
+
+    /**
+     * The accumulated color sequence for the current run of color codes.
+     * Resets after each non-ANSI character is processed.
+     */
+    public currentColorSequence = '';
+
+    /**
+     * Processes a single character.
+     * @returns true if the character was part of an escape sequence (caller should skip it);
+     *          false if it is a regular printable character.
+     */
+    public processCharacter(c: string): boolean {
+        // Start of a new escape sequence
+        if (c === '\u001b') {
+            this.inEscapeSequence = true;
+            this.escapeBuffer = c;
+            return true;
+        }
+
+        if (this.inEscapeSequence) {
+            this.escapeBuffer += c;
+
+            // Must be a CSI sequence (ESC + '['); anything else is discarded
+            if (this.escapeBuffer.length === 2 && c !== '[') {
+                this.inEscapeSequence = false;
+                this.escapeBuffer = '';
+                return true;
+            }
+
+            // Sequence is complete when a final byte in range 0x40–0x7E is seen
+            if (this.escapeBuffer.length >= 3 &&
+                ((c >= '\x40' && c <= '\x7e') ||
+                 ANSIProcessor.NON_COLOR_TERMINATORS.has(c) ||
+                 c === 'm')) {
+
+                this.inEscapeSequence = false;
+                const sequence = this.escapeBuffer;
+                this.escapeBuffer = '';
+
+                // Only preserve color sequences (those ending with 'm')
+                if (c === 'm') {
+                    this.currentColorSequence += sequence;
+                }
+
+                return true;
+            }
+
+            // Still inside the sequence
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Clears the accumulated color state after it has been recorded in the color map.
+     */
+    public resetColorState(): void {
+        this.currentColorSequence = '';
     }
 }
