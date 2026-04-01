@@ -1,7 +1,8 @@
 name: Publish FIGPrint
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: [master, main]
     paths:
       - 'FIGPrint/**'
@@ -9,6 +10,7 @@ on:
 
 jobs:
   publish:
+    if: github.event.pull_request.merged == true
     runs-on: windows-latest
 
     steps:
