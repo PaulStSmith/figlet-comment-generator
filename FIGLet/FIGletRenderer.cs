@@ -520,7 +520,6 @@ public partial class FIGLetRenderer(FIGFont? font)
             if (c == '\u001b') // ESC character (27)
             {
                 _inEscapeSequence = true;
-                _escapeBuffer.Clear();
                 _escapeBuffer.Append(c);
                 return true;
             }
@@ -545,10 +544,11 @@ public partial class FIGLetRenderer(FIGFont? font)
                     // Sequence is complete
                     _inEscapeSequence = false;
                     var sequence = _escapeBuffer.ToString();
+                    _escapeBuffer.Clear();
 
                     // If color sequence (ends with 'm'), keep it
                     if (c == 'm')
-                        CurrentColorSequence = sequence;
+                        CurrentColorSequence += sequence;
 
                     return true;
                 }

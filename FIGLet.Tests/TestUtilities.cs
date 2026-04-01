@@ -56,9 +56,9 @@ public static class TestUtilities
         sb.AppendLine($"flf2a{hardBlank} {height} 4 10 15 0");
         
         // Required ASCII characters 32-126 (95 total characters)
-        for (int charCode = 32; charCode <= 126; charCode++)
+        for (var charCode = 32; charCode <= 126; charCode++)
         {
-            for (int line = 0; line < height; line++)
+            for (var line = 0; line < height; line++)
             {
                 if (charCode == 32) // Space character - use hard blank
                 {
@@ -112,7 +112,7 @@ public static class TestUtilities
         Assert.AreEqual(expectedLines.Length, actualLines.Length, 
             $"{message}Line count mismatch. Expected: {expectedLines.Length}, Actual: {actualLines.Length}");
         
-        for (int i = 0; i < expectedLines.Length; i++)
+        for (var i = 0; i < expectedLines.Length; i++)
         {
             Assert.AreEqual(expectedLines[i], actualLines[i], 
                 $"{message}Line {i + 1} mismatch. Expected: '{expectedLines[i]}', Actual: '{actualLines[i]}'");
@@ -176,7 +176,7 @@ public static class TestUtilities
         stopwatch.Stop();
         
         Assert.IsTrue(stopwatch.Elapsed <= maxExpectedDuration, 
-            $"{operationName} took {stopwatch.Elapsed:F3}, but should complete within {maxExpectedDuration:F3}");
+            $"{operationName} took {stopwatch.Elapsed}, but should complete within {maxExpectedDuration}");
     }
 
     public static string GenerateLargeText(int length)
@@ -185,7 +185,7 @@ public static class TestUtilities
         var random = new Random(42); // Fixed seed for reproducible tests
         var result = new StringBuilder(length);
         
-        for (int i = 0; i < length; i++)
+        for (var i = 0; i < length; i++)
         {
             result.Append(chars[random.Next(chars.Length)]);
         }
