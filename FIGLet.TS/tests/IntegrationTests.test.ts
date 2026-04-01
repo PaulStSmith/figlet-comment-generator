@@ -6,6 +6,7 @@ import { FIGFont } from '../src/FIGFont.js';
 import { FIGLetRenderer } from '../src/FIGLetRenderer.js';
 import { LayoutMode } from '../src/LayoutMode.js';
 import {
+    assertMultiLineEqual,
     createMinimalValidFontContent,
     createZipWithFontFile,
     loadTestFont,
@@ -180,7 +181,7 @@ describe('Integration', () => {
 
         for (const { text, result: expected } of scenarios) {
             const result = FIGLetRenderer.render(text, font, LayoutMode.Default, '\n');
-            expect(result, `Banner mismatch for "${text}"`).toBe(expected);
+            assertMultiLineEqual(expected, result, `Banner mismatch for "${text}": `);
         }
     });
 

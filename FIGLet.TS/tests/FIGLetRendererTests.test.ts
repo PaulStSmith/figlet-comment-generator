@@ -4,6 +4,7 @@ import { FIGLetRenderer } from '../src/FIGLetRenderer.js';
 import { LayoutMode } from '../src/LayoutMode.js';
 import { SmushingRules } from '../src/SmushingRules.js';
 import {
+    assertMultiLineEqual,
     createMinimalValidFontContent,
     loadTestFont,
     generateLargeText,
@@ -61,7 +62,7 @@ describe('FIGLetRenderer', () => {
         it('should render text correctly', () => {
             const result = FIGLetRenderer.render('Hi', testFont, LayoutMode.Default, '\n');
             expect(result).not.toBeNull();
-            expect(result).toBe('Hi\nHi\nHi\n');
+            assertMultiLineEqual('Hi\nHi\nHi\n', result);
             const lines = result.split('\n').filter(l => l.length > 0);
             expect(lines.length).toBe(testFont.height);
         });
