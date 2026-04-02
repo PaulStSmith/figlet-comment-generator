@@ -21,8 +21,9 @@ package-lock.json
 .gitignore
 .gitattributes
 
-# Documentation & misc
-*.md
+# Documentation & misc (README.md is intentionally kept — Marketplace requires it)
+CONTRIBUTING.md
+CHANGELOG.md
 vsc-extension-quickstart.md
 
 # Type-only files already compiled into out/
