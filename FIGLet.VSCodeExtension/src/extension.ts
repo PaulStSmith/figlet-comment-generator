@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { FIGLetFontManager } from './FIGLetFontManager.js';
 import { FigletPanel } from './FigletPanel';
 import { FigletSettingsPanel } from './FigletSettingsPanel';
+import { WelcomePanel } from './WelcomePanel';
 
 export async function activate(context: vscode.ExtensionContext) {
     let insertBannerCommand = vscode.commands.registerCommand('figlet.insertBanner', async () => {
@@ -116,6 +117,10 @@ export async function activate(context: vscode.ExtensionContext) {
         await FigletSettingsPanel.createOrShow(context);
     });
 
+    let showWelcomeCommand = vscode.commands.registerCommand('figlet.showWelcome', () => {
+        WelcomePanel.createOrShow();
+    });
+
     // Debug command for inspecting configuration (useful during development)
     let inspectConfigCommand = vscode.commands.registerCommand('figlet.inspectConfig', () => {
         const config = vscode.workspace.getConfiguration('figlet');
@@ -141,8 +146,16 @@ export async function activate(context: vscode.ExtensionContext) {
         selectFontDirCommand,
         selectFontCommand,
         inspectConfigCommand,
-        openSettingsCommand
+        openSettingsCommand,
+        showWelcomeCommand
     );
+
+    // Show the welcome page on first install (not on every update)
+    const welcomed = context.globalState.get<boolean>('figlet.welcomed');
+    if (!welcomed) {
+        await context.globalState.update('figlet.welcomed', true);
+        WelcomePanel.createOrShow();
+    }
 
     // Optional: Set up configuration change listener
     context.subscriptions.push(

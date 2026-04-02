@@ -39,6 +39,12 @@
         "title": "FIGlet Settings",
         "category": "FIGlet Comments",
         "icon": "$(settings-gear)"
+      },
+      {
+        "command": "figlet.showWelcome",
+        "title": "Getting Started",
+        "category": "FIGlet Comments",
+        "icon": "$(info)"
       }
     ],
     "submenus": [
@@ -63,6 +69,10 @@
         {
           "command": "figlet.openSettings",
           "group": "2_settings@1"
+        },
+        {
+          "command": "figlet.showWelcome",
+          "group": "2_settings@2"
         }
       ],
       "editor/title": [
