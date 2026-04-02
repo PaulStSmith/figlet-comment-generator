@@ -2,19 +2,38 @@
     "version": "0.2.0",
     "configurations": [
         // ---------------------------------------------------------------
-        // FIGLet.TS — run / debug
+        // VS Code Extension — launch Extension Development Host
         // ---------------------------------------------------------------
         {
             "type": "extensionHost",
             "request": "launch",
-            "name": "FIGLet.TS: Run",
-            "extensionDevelopmentPath": "${workspaceFolder}/FIGLet.VSCodeExtension",
+            "name": "VS Code Extension: Run",
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}/FIGLet.VSCodeExtension"],
             "outFiles": ["${workspaceFolder}/FIGLet.VSCodeExtension/out/**/*.js"],
+            "preLaunchTask": "extension: build",
             "sourceMaps": true,
             "resolveSourceMapLocations": [
                 "${workspaceFolder}/FIGLet.VSCodeExtension/**",
                 "!**/node_modules/**"
             ]
+        },
+        // ---------------------------------------------------------------
+        // FIGLet.TS — run / debug
+        // ---------------------------------------------------------------
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "FIGLet.TS: Run",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/FIGLet.TS/dist/index.js",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/FIGLet.TS/dist/**/*.js"],
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/FIGLet.TS/**",
+                "!**/node_modules/**"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/FIGLet.TS"
         },
         // ---------------------------------------------------------------
         // FIGLet.TS — Vitest (run all tests once)
