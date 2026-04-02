@@ -31,6 +31,11 @@
       {
         "command": "figlet.inspectConfig",
         "title": "Inspect FIGlet Configuration"
+      },
+      {
+        "command": "figlet.openSettings",
+        "title": "FIGlet Settings",
+        "category": "FIGlet Comments"
       }
     ],
     "keybindings": [
@@ -63,8 +68,13 @@
             "kerning",
             "smush"
           ],
+          "enumDescriptions": [
+            "Full Size: characters are placed side-by-side with no overlap",
+            "Kerning: characters are moved together until they touch",
+            "Smushing: characters are merged using font smushing rules"
+          ],
           "default": "smush",
-          "description": "Layout mode for FIGlet text"
+          "description": "Layout mode for FIGlet text rendering"
         }
       }
     }
@@ -74,9 +84,11 @@
     "resources/**/*"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run build:webview",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "build:webview": "webpack --config webpack.config.js",
+    "watch:webview": "webpack --config webpack.config.js --watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test"

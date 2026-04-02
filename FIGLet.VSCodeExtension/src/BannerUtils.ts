@@ -49,12 +49,12 @@ export class BannerUtils {
      * @param editor The active text editor
      * @param figletText The FIGlet banner text
      */
-    static async insertBanner(editor: vscode.TextEditor, figletText: string): Promise<void> {
+    static async insertBanner(editor: vscode.TextEditor, figletText: string, languageId?: string): Promise<void> {
         const position = editor.selection.active;
         const indentation = this.getIndentation(editor, position);
-        
+
         // Wrap the banner with appropriate comments
-        const commentedBanner = this.wrapWithComments(figletText, editor.document.languageId);
+        const commentedBanner = this.wrapWithComments(figletText, languageId ?? editor.document.languageId);
         
         // Apply indentation to each line
         const indentedBanner = commentedBanner
