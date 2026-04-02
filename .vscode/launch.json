@@ -5,7 +5,7 @@
         // FIGLet.TS — run / debug
         // ---------------------------------------------------------------
         {
-            "type": "node",
+            "type": "extensionHost",
             "request": "launch",
             "name": "FIGLet.TS: Run",
             "skipFiles": ["<node_internals>/**"],
