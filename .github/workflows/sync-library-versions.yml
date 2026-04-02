@@ -1,0 +1,76 @@
+name: Sync Library Versions
+
+on:
+  pull_request:
+    branches: [master, main, Development]
+    paths:
+      - 'FIGLet/FIGLet.csproj'
+      - 'FIGLet.TS/package.json'
+
+jobs:
+  sync:
+    name: Sync Library Versions
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Read versions
+        id: versions
+        run: |
+          CS_VER=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj)
+          TS_VER=$(node -p "require('./FIGLet.TS/package.json').version")
+          echo "cs=$CS_VER" >> $GITHUB_OUTPUT
+          echo "ts=$TS_VER" >> $GITHUB_OUTPUT
+          echo "C# version:  $CS_VER"
+          echo "TS  version: $TS_VER"
+
+      - name: Determine target version
+        id: target
+        run: |
+          CS_VER="${{ steps.versions.outputs.cs }}"
+          TS_VER="${{ steps.versions.outputs.ts }}"
+          if [ "$CS_VER" = "$TS_VER" ]; then
+            echo "in_sync=true" >> $GITHUB_OUTPUT
+            echo "Versions already in sync: $CS_VER"
+          else
+            GREATER=$(printf '%s\n' "$CS_VER" "$TS_VER" | sort -V | tail -1)
+            echo "in_sync=false" >> $GITHUB_OUTPUT
+            echo "version=$GREATER" >> $GITHUB_OUTPUT
+            echo "Versions differ — will sync both to $GREATER"
+          fi
+
+      - name: Update C# version
+        if: steps.target.outputs.in_sync == 'false' && steps.versions.outputs.cs != steps.target.outputs.version
+        run: |
+          TARGET="${{ steps.target.outputs.version }}"
+          sed -i "s|<Version>[^<]*</Version>|<Version>$TARGET</Version>|" FIGLet/FIGLet.csproj
+          echo "Updated FIGLet.csproj to $TARGET"
+
+      - name: Update TS version
+        if: steps.target.outputs.in_sync == 'false' && steps.versions.outputs.ts != steps.target.outputs.version
+        run: |
+          TARGET="${{ steps.target.outputs.version }}"
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('FIGLet.TS/package.json', 'utf8'));
+            pkg.version = process.argv[1];
+            fs.writeFileSync('FIGLet.TS/package.json', JSON.stringify(pkg, null, 2) + '\n');
+          " "$TARGET"
+          echo "Updated package.json to $TARGET"
+
+      - name: Commit and push sync
+        if: steps.target.outputs.in_sync == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add FIGLet/FIGLet.csproj FIGLet.TS/package.json
+          git commit -m "chore: sync library versions to ${{ steps.target.outputs.version }} [skip ci]"
+          git push origin HEAD:${{ github.head_ref }}
