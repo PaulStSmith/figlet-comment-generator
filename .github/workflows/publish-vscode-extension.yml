@@ -14,6 +14,9 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write   # required to create GitHub releases
+
     defaults:
       run:
         working-directory: FIGLet.VSCodeExtension
@@ -71,6 +74,10 @@ jobs:
           vsce package --out "$VSIX_NAME"
           echo "vsix_name=$VSIX_NAME" >> $GITHUB_OUTPUT
 
+      - name: Publish to VS Code Marketplace
+        if: steps.check_tag.outputs.exists == 'false'
+        run: vsce publish --packagePath "${{ steps.package.outputs.vsix_name }}" -p ${{ secrets.VSCE_PAT }}
+
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         working-directory: .
@@ -90,8 +97,4 @@ jobs:
           | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
           | **Commit** | \`${{ github.sha }}\` |" \
             "FIGLet.VSCodeExtension/${{ steps.package.outputs.vsix_name }}"
-
-      - name: Publish to VS Code Marketplace
-        if: steps.check_tag.outputs.exists == 'false'
-        run: vsce publish --packagePath "${{ steps.package.outputs.vsix_name }}" -p ${{ secrets.VSCE_PAT }}
 
