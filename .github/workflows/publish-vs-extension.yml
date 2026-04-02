@@ -8,10 +8,11 @@ on:
       - 'FIGLet.VisualStudioExtension/**'
       - 'FIGLet/**'  # VS Extension depends on FIGLet library
       - '.github/workflows/publish-vs-extension.yml'
+  workflow_dispatch:
 
 jobs:
   publish:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: windows-latest
 
     permissions:

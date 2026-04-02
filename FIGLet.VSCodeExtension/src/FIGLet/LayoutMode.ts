@@ -20,5 +20,5 @@ export enum LayoutMode {
     /**
      * The default layout mode, which is smushing.
      */
-    Default = -2
+    Default = Smushing
 }

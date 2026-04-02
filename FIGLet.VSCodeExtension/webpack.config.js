@@ -4,18 +4,21 @@
 const path = require('path');
 
 /** @type {import('webpack').Configuration} */
-const config = {
+const sharedConfig = {
     target: 'web',
-    mode: 'development',
-
-    entry: './src/webview/index.tsx',
-    output: {
-        path: path.resolve(__dirname, 'media'),
-        filename: 'webview.js'
-    },
+    mode: process.env.NODE_ENV ?? 'production',
 
     resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.jsx']
+        extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        extensionAlias: {
+            '.js': ['.ts', '.js']
+        },
+        fallback: {
+            'fs': false,
+            'fs/promises': false,
+            'path': false,
+            'util': false
+        }
     },
 
     module: {
@@ -27,7 +30,6 @@ const config = {
                     loader: 'ts-loader',
                     options: {
                         configFile: path.resolve(__dirname, 'tsconfig.json'),
-                        // Important: use a separate tsconfig for the webview
                         compilerOptions: {
                             module: 'esnext',
                             moduleResolution: 'node',
@@ -41,7 +43,6 @@ const config = {
 
     devtool: 'source-map',
 
-    // These dependencies are provided by VS Code's webview
     externals: {
         vscode: 'commonjs vscode'
     },
@@ -51,4 +52,21 @@ const config = {
     }
 };
 
-module.exports = config;
+module.exports = [
+    {
+        ...sharedConfig,
+        entry: './src/webview/index.tsx',
+        output: {
+            path: path.resolve(__dirname, 'media'),
+            filename: 'webview.js'
+        },
+    },
+    {
+        ...sharedConfig,
+        entry: './src/webview/settings-index.tsx',
+        output: {
+            path: path.resolve(__dirname, 'media'),
+            filename: 'settings-webview.js'
+        },
+    },
+];

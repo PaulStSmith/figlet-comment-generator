@@ -11,6 +11,94 @@
             "problemMatcher": ["$tsc"],
             "label": "npm: build",
             "detail": "tsc && npm run copy-assets"
+        },
+        // ---------------------------------------------------------------
+        // VS Code Extension — compile extension host TypeScript
+        // ---------------------------------------------------------------
+        {
+            "type": "shell",
+            "command": "npm run compile",
+            "options": {
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
+            },
+            "problemMatcher": ["$tsc"],
+            "label": "extension: compile"
+        },
+        // ---------------------------------------------------------------
+        // VS Code Extension — bundle webview (React) with webpack
+        // ---------------------------------------------------------------
+        {
+            "type": "shell",
+            "command": "npm run build:webview",
+            "options": {
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
+            },
+            "problemMatcher": [],
+            "label": "extension: build webview"
+        },
+        // ---------------------------------------------------------------
+        // VS Code Extension — full build (compile + webview)
+        // ---------------------------------------------------------------
+        {
+            "label": "extension: build",
+            "dependsOn": ["extension: compile", "extension: build webview"],
+            "dependsOrder": "parallel",
+            "group": "build",
+            "problemMatcher": []
+        },
+        // ---------------------------------------------------------------
+        // VS Code Extension — watch mode (compile + webpack --watch)
+        // ---------------------------------------------------------------
+        {
+            "label": "extension: watch",
+            "dependsOn": ["extension: watch tsc", "extension: watch webview"],
+            "dependsOrder": "parallel",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "command": "npm run watch",
+            "options": {
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
+            },
+            "problemMatcher": ["$tsc-watch"],
+            "label": "extension: watch tsc",
+            "isBackground": true
+        },
+        {
+            "type": "shell",
+            "command": "npm run watch:webview",
+            "options": {
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
+            },
+            "problemMatcher": [],
+            "label": "extension: watch webview",
+            "isBackground": true
         }
     ]
 }

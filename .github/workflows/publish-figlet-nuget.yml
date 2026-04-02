@@ -7,10 +7,11 @@ on:
     paths:
       - 'FIGLet/**'
       - '.github/workflows/publish-figlet-nuget.yml'
+  workflow_dispatch:
 
 jobs:
   publish:
-    if: github.event.pull_request.merged == true
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     permissions:

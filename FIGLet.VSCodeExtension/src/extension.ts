@@ -1,45 +1,21 @@
 import * as vscode from 'vscode';
-import { BannerUtils } from './BannerUtils';
-import { LayoutMode } from './FIGLet/LayoutMode.js';
-import { FIGFont } from './FIGLet/FIGFont.js';
-import { FIGLetRenderer } from './FIGLet/FIGLetRenderer.js';
 import { FIGLetFontManager } from './FIGLetFontManager.js';
+import { FigletPanel } from './FigletPanel';
+import { FigletSettingsPanel } from './FigletSettingsPanel';
+import { WelcomePanel } from './WelcomePanel';
 
 export async function activate(context: vscode.ExtensionContext) {
-    // Original banner insertion command
     let insertBannerCommand = vscode.commands.registerCommand('figlet.insertBanner', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage('No active text editor found');
             return;
         }
-
         try {
-            const text = await vscode.window.showInputBox({
-                prompt: 'Enter text for the banner',
-                placeHolder: 'Your banner text here',
-                validateInput: (value) => {
-                    return value && value.trim().length > 0 ? null : 'Please enter some text';
-                }
-            });
-
-            if (!text) {
-                return; // User cancelled the input
-            }
-
-            const font = await FIGFont.getDefault();
-            if (!font) {
-                throw new Error('Failed to load default FIGlet font');
-            }
-
-            const renderer = new FIGLetRenderer(font);
-            const figletText = renderer.render(text.trim(), LayoutMode.Smushing);
-
-            await BannerUtils.insertBanner(editor, figletText);
-
+            await FigletPanel.createOrShow(context, editor);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            vscode.window.showErrorMessage(`Error generating FIGlet: ${errorMessage}`);
+            vscode.window.showErrorMessage(`Error opening FIGLet panel: ${errorMessage}`);
         }
     });
 
@@ -137,6 +113,14 @@ export async function activate(context: vscode.ExtensionContext) {
         }
     });
 
+    let openSettingsCommand = vscode.commands.registerCommand('figlet.openSettings', async () => {
+        await FigletSettingsPanel.createOrShow(context);
+    });
+
+    let showWelcomeCommand = vscode.commands.registerCommand('figlet.showWelcome', () => {
+        WelcomePanel.createOrShow();
+    });
+
     // Debug command for inspecting configuration (useful during development)
     let inspectConfigCommand = vscode.commands.registerCommand('figlet.inspectConfig', () => {
         const config = vscode.workspace.getConfiguration('figlet');
@@ -161,8 +145,17 @@ export async function activate(context: vscode.ExtensionContext) {
         insertBannerCommand,
         selectFontDirCommand,
         selectFontCommand,
-        inspectConfigCommand
+        inspectConfigCommand,
+        openSettingsCommand,
+        showWelcomeCommand
     );
+
+    // Show the welcome page on first install (not on every update)
+    const welcomed = context.globalState.get<boolean>('figlet.welcomed');
+    if (!welcomed) {
+        await context.globalState.update('figlet.welcomed', true);
+        WelcomePanel.createOrShow();
+    }
 
     // Optional: Set up configuration change listener
     context.subscriptions.push(

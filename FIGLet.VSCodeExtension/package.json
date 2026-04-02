@@ -15,13 +15,15 @@
     "commands": [
       {
         "command": "figlet.insertBanner",
-        "title": "Generate FIGlet Banner"
+        "title": "Generate FIGlet Banner",
+        "category": "FIGlet Comments",
+        "icon": "$(symbol-string)"
       },
       {
         "command": "figlet.selectFontDirectory",
         "title": "Select Font Directory",
         "category": "FIGlet Comments",
-        "icon": "${folder}"
+        "icon": "$(folder)"
       },
       {
         "command": "figlet.selectDefaultFont",
@@ -31,13 +33,61 @@
       {
         "command": "figlet.inspectConfig",
         "title": "Inspect FIGlet Configuration"
+      },
+      {
+        "command": "figlet.openSettings",
+        "title": "FIGlet Settings",
+        "category": "FIGlet Comments",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "figlet.showWelcome",
+        "title": "Getting Started",
+        "category": "FIGlet Comments",
+        "icon": "$(info)"
       }
     ],
+    "submenus": [
+      {
+        "id": "figlet.submenu",
+        "label": "FIGlet Comments"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "figlet.submenu",
+          "group": "z_commands@1",
+          "when": "editorTextFocus"
+        }
+      ],
+      "figlet.submenu": [
+        {
+          "command": "figlet.insertBanner",
+          "group": "1_insert@1"
+        },
+        {
+          "command": "figlet.openSettings",
+          "group": "2_settings@1"
+        },
+        {
+          "command": "figlet.showWelcome",
+          "group": "2_settings@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "figlet.insertBanner",
+          "group": "navigation",
+          "when": "editorTextFocus"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "figlet.insertBanner",
-        "key": "ctrl+shift+f",
-        "mac": "cmd+shift+f",
+        "key": "ctrl+alt+b",
+        "mac": "cmd+alt+b",
         "when": "editorTextFocus"
       }
     ],
@@ -63,20 +113,28 @@
             "kerning",
             "smush"
           ],
+          "enumDescriptions": [
+            "Full Size: characters are placed side-by-side with no overlap",
+            "Kerning: characters are moved together until they touch",
+            "Smushing: characters are merged using font smushing rules"
+          ],
           "default": "smush",
-          "description": "Layout mode for FIGlet text"
+          "description": "Layout mode for FIGlet text rendering"
         }
       }
     }
   },
   "files": [
     "out/**/*",
+    "media/**/*",
     "resources/**/*"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run build:webview",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "build:webview": "webpack --config webpack.config.js",
+    "watch:webview": "webpack --config webpack.config.js --watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
     "test": "vscode-test"
