@@ -1,0 +1,82 @@
+name: Sync Extension Versions
+
+on:
+  pull_request:
+    branches: [master, main, Development]
+    paths:
+      - 'FIGLet.VisualStudioExtension/source.extension.vsixmanifest'
+      - 'FIGLet.VSCodeExtension/package.json'
+
+jobs:
+  sync:
+    name: Sync Extension Versions
+    runs-on: ubuntu-latest
+    # Skip fork PRs — we can't push back to a fork's branch
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+
+      - name: Read versions
+        id: versions
+        run: |
+          VS_VER=$(grep -m1 '<Identity' FIGLet.VisualStudioExtension/source.extension.vsixmanifest \
+            | grep -o 'Version="[^"]*"' | cut -d'"' -f2)
+          VSCODE_VER=$(node -p "require('./FIGLet.VSCodeExtension/package.json').version")
+          echo "vs=$VS_VER"           >> $GITHUB_OUTPUT
+          echo "vscode=$VSCODE_VER"   >> $GITHUB_OUTPUT
+          echo "VS extension version:      $VS_VER"
+          echo "VS Code extension version: $VSCODE_VER"
+
+      - name: Determine target version
+        id: target
+        run: |
+          VS_VER="${{ steps.versions.outputs.vs }}"
+          VSCODE_VER="${{ steps.versions.outputs.vscode }}"
+          if [ "$VS_VER" = "$VSCODE_VER" ]; then
+            echo "in_sync=true" >> $GITHUB_OUTPUT
+            echo "Versions already in sync: $VS_VER"
+          else
+            GREATER=$(printf '%s\n' "$VS_VER" "$VSCODE_VER" | sort -V | tail -1)
+            echo "in_sync=false"      >> $GITHUB_OUTPUT
+            echo "version=$GREATER"   >> $GITHUB_OUTPUT
+            echo "Versions differ — will sync both to $GREATER"
+          fi
+
+      - name: Update VS extension version
+        if: steps.target.outputs.in_sync == 'false' && steps.versions.outputs.vs != steps.target.outputs.version
+        run: |
+          TARGET="${{ steps.target.outputs.version }}"
+          sed -i "s/\(Identity[^>]*Version=\"\)[^\"]*/\1$TARGET/" \
+            FIGLet.VisualStudioExtension/source.extension.vsixmanifest
+          echo "Updated source.extension.vsixmanifest to $TARGET"
+
+      - name: Update VS Code extension version
+        if: steps.target.outputs.in_sync == 'false' && steps.versions.outputs.vscode != steps.target.outputs.version
+        run: |
+          TARGET="${{ steps.target.outputs.version }}"
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('FIGLet.VSCodeExtension/package.json', 'utf8'));
+            pkg.version = process.argv[1];
+            fs.writeFileSync('FIGLet.VSCodeExtension/package.json', JSON.stringify(pkg, null, 2) + '\n');
+          " "$TARGET"
+          echo "Updated FIGLet.VSCodeExtension/package.json to $TARGET"
+
+      - name: Commit and push sync
+        if: steps.target.outputs.in_sync == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add FIGLet.VisualStudioExtension/source.extension.vsixmanifest \
+                  FIGLet.VSCodeExtension/package.json
+          git commit -m "chore: sync extension versions to ${{ steps.target.outputs.version }} [skip ci]"
+          git push origin HEAD:${{ github.head_ref }}
