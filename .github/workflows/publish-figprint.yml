@@ -126,16 +126,40 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         shell: pwsh
         run: |
-          $version = "${{ steps.version.outputs.version }}"
-          $x64Url = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
-          $arm64Url = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
+          $version   = "${{ steps.version.outputs.version }}"
+          $x64Url    = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
+          $arm64Url  = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
+          $token     = "${{ secrets.WINGET_GITHUB_TOKEN }}"
 
           # Install wingetcreate
           Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
 
-          # Create and submit manifest
-          ./wingetcreate.exe update ByteForge.FIGPrint `
-            --version $version `
-            --urls "$x64Url|x64" "$arm64Url|arm64" `
-            --submit `
-            --token ${{ secrets.WINGET_GITHUB_TOKEN }}
+          # Detect whether ByteForge.FIGPrint already exists in winget-pkgs.
+          # 'update' only works for existing packages; first-time submissions need 'new'.
+          $apiUrl  = "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/b/ByteForge/FIGPrint"
+          $headers = @{ Authorization = "Bearer $token"; "User-Agent" = "GitHub-Actions" }
+          $exists  = $false
+          try {
+            $null  = Invoke-WebRequest -Uri $apiUrl -Headers $headers -Method Head -ErrorAction Stop
+            $exists = $true
+          } catch { }
+
+          if ($exists) {
+            Write-Host "Package exists — submitting update for v$version"
+            ./wingetcreate.exe update ByteForge.FIGPrint `
+              --version $version `
+              --urls "$x64Url|x64" "$arm64Url|arm64" `
+              --submit `
+              --token $token
+          } else {
+            Write-Host "Package not found — submitting new manifest for v$version"
+            ./wingetcreate.exe new "$x64Url" "$arm64Url" `
+              --id          ByteForge.FIGPrint `
+              --name        FIGPrint `
+              --publisher   ByteForge `
+              --version     $version `
+              --license     MIT `
+              --short-description "Command-line utility for rendering text using FIGlet fonts" `
+              --submit `
+              --token $token
+          }
