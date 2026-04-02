@@ -143,7 +143,7 @@ export class FIGFont {
                     // Special case for different hard blank character
                     .replace(/#$/, font.hardBlank === "#" ? "#" : "");
             }
-            font.characters.set(String.fromCharCode(charCode), charLines);
+            font.characters.set(String.fromCodePoint(charCode), charLines);
             currentLine += font.height;
         }
 
@@ -162,7 +162,7 @@ export class FIGFont {
                 if (currentLine + i >= lines.length) { break; }
                 charLines[i] = lines[currentLine + i].replace(/[@\n\r]+$/, '');
             }
-            font.characters.set(String.fromCharCode(codePoint), charLines);
+            font.characters.set(String.fromCodePoint(codePoint), charLines);
             currentLine += font.height;
         }
 

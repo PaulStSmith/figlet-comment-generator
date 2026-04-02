@@ -86,8 +86,9 @@ export class FIGLetRenderer {
         }
 
         // Replace hard blanks with spaces and join lines
+        const hardBlankRegex = new RegExp(this.escapeRegex(this.font.hardBlank), 'g');
         return outputLines
-            .map(line => line.replace(new RegExp(this.font.hardBlank, 'g'), ' '))
+            .map(line => line.replace(hardBlankRegex, ' '))
             .join(lineSeparator);
     }
 
@@ -96,6 +97,13 @@ export class FIGLetRenderer {
      */
     constructor(font: FIGFont) {
         this.font = font;
+    }
+
+    /**
+     * Escapes special regex characters in a string.
+     */
+    private escapeRegex(s: string): string {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     /**
@@ -252,12 +260,9 @@ export class FIGLetRenderer {
 
         // Rule 5: Big X Smushing
         if (this.font.hasSmushingRule(SmushingRules.BigX)) {
-            if ((c1 === '/' && c2 === '\\') || (c1 === '\\' && c2 === '/')) {
-                return '|';
-            }
-            if (c1 === '>' && c2 === '<') {
-                return 'X';
-            }
+            if (c1 === '/' && c2 === '\\') { return '|'; }
+            if (c1 === '\\' && c2 === '/') { return 'Y'; }
+            if (c1 === '>' && c2 === '<') { return 'X'; }
         }
 
         // If no smushing rules apply or are enabled, return the first character
