@@ -144,4 +144,5 @@ jobs:
           | **Published version** | \`${{ steps.version.outputs.version }}\` |
           | **Manifest base** | \`${{ steps.version.outputs.base }}\` |
           | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
-          | **Commit** | \`${{ github.sha }}\` |"
+          | **Commit** | \`${{ github.sha }}\` |" \
+            "${{ steps.find_vsix.outputs.vsix_path }}"

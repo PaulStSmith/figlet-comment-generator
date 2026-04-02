@@ -74,11 +74,29 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --provenance
 
-      - name: Create and push tag
+      - name: Pack npm tarball
+        if: steps.check_tag.outputs.exists == 'false'
+        id: pack
+        run: |
+          TARBALL=$(npm pack 2>&1 | tail -1)
+          echo "tarball=$TARBALL" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "figlet-ts-v${{ steps.version.outputs.version }}" -m "FIGLet.TS v${{ steps.version.outputs.version }}"
-          git push origin "figlet-ts-v${{ steps.version.outputs.version }}"
+          gh release create "figlet-ts-v${{ steps.version.outputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "@byte-forge/figlet v${{ steps.version.outputs.version }}" \
+            --notes "## @byte-forge/figlet v${{ steps.version.outputs.version }}
+
+          Published to [npm](https://www.npmjs.com/package/@byte-forge/figlet/v/${{ steps.version.outputs.version }}).
+
+          | | |
+          |---|---|
+          | **Version** | \`${{ steps.version.outputs.version }}\` |
+          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+          | **Commit** | \`${{ github.sha }}\` |" \
+            "FIGLet.TS/${{ steps.pack.outputs.tarball }}"

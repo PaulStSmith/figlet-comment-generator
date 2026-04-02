@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { FIGLetFontManager } from './FIGLetFontManager';
+import { FIGLetFontManager } from './FIGLetFontManager.js';
 
 type LayoutKey = 'full' | 'kerning' | 'smush';
 
@@ -56,7 +56,9 @@ export class FigletSettingsPanel {
         const config = vscode.workspace.getConfiguration('figlet');
         const fontDirectory = config.get<string>('fontDirectory') || '';
         const defaultFont   = config.get<string>('defaultFont')   || 'small';
-        const layoutMode    = (config.get<string>('layoutMode')   || 'smush') as LayoutKey;
+        const VALID_LAYOUT_KEYS = new Set<string>(['full', 'kerning', 'smush']);
+        const rawLayout  = config.get<string>('layoutMode') ?? 'smush';
+        const layoutMode = (VALID_LAYOUT_KEYS.has(rawLayout) ? rawLayout : 'smush') as LayoutKey;
 
         await FIGLetFontManager.setFontDirectory(fontDirectory || null);
 
@@ -120,7 +122,10 @@ export class FigletSettingsPanel {
             }
 
             case 'saveSettings': {
-                const { fontDirectory, defaultFont, layoutMode } = msg.settings;
+                const { fontDirectory, defaultFont } = msg.settings;
+                const VALID_LAYOUT_KEYS = new Set<string>(['full', 'kerning', 'smush']);
+                const layoutMode = (VALID_LAYOUT_KEYS.has(msg.settings.layoutMode)
+                    ? msg.settings.layoutMode : 'smush') as LayoutKey;
                 const config = vscode.workspace.getConfiguration('figlet');
                 await config.update('fontDirectory', fontDirectory, vscode.ConfigurationTarget.Global);
                 await config.update('defaultFont',   defaultFont,   vscode.ConfigurationTarget.Global);

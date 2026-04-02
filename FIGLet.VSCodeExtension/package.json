@@ -1,5 +1,6 @@
 {
   "name": "figlet",
+  "publisher": "PaulStSmith",
   "displayName": "FIGlet Comment Generator",
   "description": "Create beautiful ASCII art comments in your code using FIGlet fonts",
   "version": "0.0.1",

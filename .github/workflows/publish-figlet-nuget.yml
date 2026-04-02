@@ -67,10 +67,21 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
-      - name: Create and push tag
+      - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "figlet-v${{ steps.version.outputs.version }}" -m "FIGLet v${{ steps.version.outputs.version }}"
-          git push origin "figlet-v${{ steps.version.outputs.version }}"
+          gh release create "figlet-v${{ steps.version.outputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "ByteForge.FIGLet v${{ steps.version.outputs.version }}" \
+            --notes "## ByteForge.FIGLet v${{ steps.version.outputs.version }}
+
+          Published to [NuGet](https://www.nuget.org/packages/ByteForge.FIGLet/${{ steps.version.outputs.version }}).
+
+          | | |
+          |---|---|
+          | **Version** | \`${{ steps.version.outputs.version }}\` |
+          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+          | **Commit** | \`${{ github.sha }}\` |" \
+            ./nupkg/*.nupkg

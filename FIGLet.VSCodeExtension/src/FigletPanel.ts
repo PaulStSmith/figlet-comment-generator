@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { FIGLetFontManager } from './FIGLetFontManager';
-import { FIGFont } from './FIGLet/FIGFont';
-import { FIGLetRenderer } from './FIGLet/FIGLetRenderer';
-import { LayoutMode } from './FIGLet/LayoutMode';
-import { BannerUtils } from './BannerUtils';
+import { FIGLetFontManager } from './FIGLetFontManager.js';
+import { FIGFont } from './FIGLet/FIGFont.js';
+import { FIGLetRenderer } from './FIGLet/FIGLetRenderer.js';
+import { LayoutMode } from './FIGLet/LayoutMode.js';
+import { BannerUtils } from './BannerUtils.js';
 
 type LayoutKey = 'full' | 'kerning' | 'smush';
 
@@ -68,7 +68,9 @@ export class FigletPanel {
         const config = vscode.workspace.getConfiguration('figlet');
         const fontDir       = config.get<string>('fontDirectory') || null;
         const defaultFont   = config.get<string>('defaultFont')   || 'small';
-        const defaultLayout = (config.get<string>('layoutMode')   || 'smush') as LayoutKey;
+        const VALID_LAYOUT_KEYS = new Set<string>(['full', 'kerning', 'smush']);
+        const rawLayout    = config.get<string>('layoutMode') ?? 'smush';
+        const defaultLayout = (VALID_LAYOUT_KEYS.has(rawLayout) ? rawLayout : 'smush') as LayoutKey;
         const language      = this._editor.document.languageId;
 
         await FIGLetFontManager.setFontDirectory(fontDir);
@@ -108,8 +110,12 @@ export class FigletPanel {
                 this.dispose();
                 break;
             case 'openExternal': {
+                const ALLOWED_EXTERNAL_HOSTS = new Set([
+                    'marketplace.visualstudio.com',
+                    'code.visualstudio.com',
+                ]);
                 const uri = vscode.Uri.parse(msg.url);
-                if (uri.scheme === 'https' && uri.authority.endsWith('visualstudio.com')) {
+                if (uri.scheme === 'https' && ALLOWED_EXTERNAL_HOSTS.has(uri.authority)) {
                     await vscode.env.openExternal(uri);
                 }
                 break;
