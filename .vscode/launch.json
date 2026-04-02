@@ -10,7 +10,6 @@
             "name": "FIGLet.TS: Run",
             "extensionDevelopmentPath": "${workspaceFolder}/FIGLet.VSCodeExtension",
             "outFiles": ["${workspaceFolder}/FIGLet.VSCodeExtension/out/**/*.js"],
-            "preLaunchTask": "extension: build",
             "sourceMaps": true,
             "resolveSourceMapLocations": [
                 "${workspaceFolder}/FIGLet.VSCodeExtension/**",
