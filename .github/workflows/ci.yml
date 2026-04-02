@@ -41,6 +41,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
       - name: Check versions match
         run: |
           CS_VER=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj)
