@@ -59,17 +59,41 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: npm run lint
 
-      - name: Compile
-        if: steps.check_tag.outputs.exists == 'false'
-        run: npm run compile
-
       - name: Install vsce
         if: steps.check_tag.outputs.exists == 'false'
         run: npm install -g @vscode/vsce
 
+      - name: Package extension
+        if: steps.check_tag.outputs.exists == 'false'
+        id: package
+        run: |
+          VSIX_NAME="figlet-${{ steps.version.outputs.version }}.vsix"
+          vsce package --out "$VSIX_NAME"
+          echo "vsix_name=$VSIX_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "vscode-v${{ steps.version.outputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "VS Code Extension v${{ steps.version.outputs.version }}" \
+            --notes "## VS Code Extension v${{ steps.version.outputs.version }}
+
+          Published to the VS Code Marketplace.
+
+          | | |
+          |---|---|
+          | **Version** | \`${{ steps.version.outputs.version }}\` |
+          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+          | **Commit** | \`${{ github.sha }}\` |" \
+            "FIGLet.VSCodeExtension/${{ steps.package.outputs.vsix_name }}"
+
       - name: Publish to VS Code Marketplace
         if: steps.check_tag.outputs.exists == 'false'
-        run: vsce publish -p ${{ secrets.VSCE_PAT }}
+        run: vsce publish --packagePath "${{ steps.package.outputs.vsix_name }}" -p ${{ secrets.VSCE_PAT }}
 
       - name: Create and push tag
         if: steps.check_tag.outputs.exists == 'false'
