@@ -220,9 +220,10 @@ export class FIGLetRenderer {
 
         const hardBlankRegex = new RegExp(this.escapeRegex(this.font.hardBlank), 'g');
         const resetCode = this.useANSIColors ? FIGLetRenderer.ANSI_RESET : '';
-        return outputLines
+        const result = outputLines
             .map(line => line.replace(hardBlankRegex, ' ') + resetCode)
             .join(this.lineSeparator) + this.lineSeparator;
+        return result;
     }
 
     /**
