@@ -2,10 +2,26 @@
     "version": "0.2.0",
     "configurations": [
         // ---------------------------------------------------------------
-        // FIGLet.TS — run / debug
+        // VS Code Extension — launch Extension Development Host
         // ---------------------------------------------------------------
         {
             "type": "extensionHost",
+            "request": "launch",
+            "name": "VS Code Extension: Run",
+            "args": ["--extensionDevelopmentPath=${workspaceFolder}/FIGLet.VSCodeExtension"],
+            "outFiles": ["${workspaceFolder}/FIGLet.VSCodeExtension/out/**/*.js"],
+            "preLaunchTask": "extension: build",
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/FIGLet.VSCodeExtension/**",
+                "!**/node_modules/**"
+            ]
+        },
+        // ---------------------------------------------------------------
+        // FIGLet.TS — run / debug
+        // ---------------------------------------------------------------
+        {
+            "type": "node",
             "request": "launch",
             "name": "FIGLet.TS: Run",
             "skipFiles": ["<node_internals>/**"],
