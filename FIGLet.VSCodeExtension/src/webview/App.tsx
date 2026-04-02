@@ -66,6 +66,40 @@ function toLayoutMode(key: LayoutKey): LayoutMode {
 
 const PREVIEW_PLACEHOLDER = 'Hello, World!';
 
+/**
+ * Maps VS Code languageId values that don't have a 1:1 entry in the LANGUAGES
+ * list to the closest supported id.
+ */
+const LANGUAGE_ALIASES: Record<string, string> = {
+    'shellscript':    'sh',
+    'javascriptreact':'javascript',
+    'typescriptreact':'typescript',
+    'c':              'cpp',
+    'cuda-cpp':       'cpp',
+    'objective-cpp':  'objective-c',
+    'vue':            'javascript',
+    'svelte':         'javascript',
+    'astro':          'javascript',
+    'ps1':            'powershell',
+    'cmd':            'bat',
+    'dos':            'bat',
+    'batch':          'bat',
+    'zsh':            'sh',
+    'fish':           'sh',
+    'pgsql':          'sql',
+    'plsql':          'sql',
+    'mysql':          'sql',
+    'tsql':           'sql',
+};
+
+/** Resolves a raw VS Code languageId to an id present in the LANGUAGES list. */
+function resolveLanguage(id: string): string {
+    if (LANGUAGES.some(l => l.id === id)) { return id; }
+    const alias = LANGUAGE_ALIASES[id];
+    if (alias && LANGUAGES.some(l => l.id === alias)) { return alias; }
+    return 'csharp'; // safe default
+}
+
 function buildPreview(text: string, font: FIGFont | undefined, layout: LayoutKey, language: string): string {
     if (!font) { return '(font not loaded)'; }
     const renderText = text.trim() || PREVIEW_PLACEHOLDER;
@@ -191,7 +225,7 @@ export function App() {
                 const def: string = msg.defaultFont && map.has(msg.defaultFont) ? msg.defaultFont : (names[0] ?? 'small');
                 setSelectedFont(def);
                 if (msg.defaultLayout) { setLayout(msg.defaultLayout as LayoutKey); }
-                if (msg.language)      { setLanguage(msg.language); }
+                if (msg.language)      { setLanguage(resolveLanguage(msg.language as string)); }
             } else if (msg.type === 'fontLoaded') {
                 try {
                     const font = FIGFont.fromText(msg.content as string);
