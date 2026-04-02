@@ -64,11 +64,13 @@ function toLayoutMode(key: LayoutKey): LayoutMode {
     }
 }
 
+const PREVIEW_PLACEHOLDER = 'Hello, World!';
+
 function buildPreview(text: string, font: FIGFont | undefined, layout: LayoutKey, language: string): string {
-    if (!font)        { return '(font not loaded)'; }
-    if (!text.trim()) { return ''; }
+    if (!font) { return '(font not loaded)'; }
+    const renderText = text.trim() || PREVIEW_PLACEHOLDER;
     try {
-        const rendered = new FIGLetRenderer(font).render(text.trim(), toLayoutMode(layout));
+        const rendered = new FIGLetRenderer(font).render(renderText, toLayoutMode(layout));
         return LanguageCommentStyles.wrapInComments(rendered, language);
     } catch (e) {
         return `Render error: ${e}`;
