@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { FIGLetFontManager } from './FIGLetFontManager.js';
-import { FigletPanel } from './FigletPanel';
-import { FigletSettingsPanel } from './FigletSettingsPanel';
-import { WelcomePanel } from './WelcomePanel';
+import { FigletPanel } from './FigletPanel.js';
+import { FigletSettingsPanel } from './FigletSettingsPanel.js';
+import { WelcomePanel } from './WelcomePanel.js';
 
 export async function activate(context: vscode.ExtensionContext) {
     let insertBannerCommand = vscode.commands.registerCommand('figlet.insertBanner', async () => {

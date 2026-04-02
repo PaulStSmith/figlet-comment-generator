@@ -6,7 +6,7 @@ const path = require('path');
 /** @type {import('webpack').Configuration} */
 const sharedConfig = {
     target: 'web',
-    mode: process.env.NODE_ENV ?? 'production',
+    mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
 
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
