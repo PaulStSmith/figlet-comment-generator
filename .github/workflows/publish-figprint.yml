@@ -142,7 +142,20 @@ jobs:
           try {
             $null  = Invoke-WebRequest -Uri $apiUrl -Headers $headers -Method Head -ErrorAction Stop
             $exists = $true
-          } catch { }
+          } catch {
+            $statusCode = $null
+            if ($_.Exception -and $_.Exception.Response -and $_.Exception.Response.StatusCode) {
+              $statusCode = [int]$_.Exception.Response.StatusCode
+            }
+
+            if ($statusCode -eq 404) {
+              Write-Host "Package not found in winget-pkgs (HTTP 404). Treating as first-time submission."
+              $exists = $false
+            } else {
+              Write-Error ("Failed to query winget-pkgs GitHub API. HTTP status: {0}" -f ($statusCode ?? "unknown"))
+              throw
+            }
+          }
 
           if ($exists) {
             Write-Host "Package exists — submitting update for v$version"
