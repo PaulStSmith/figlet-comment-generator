@@ -103,7 +103,7 @@ jobs:
           {
             "categories": ["Other"],
             "identity": {
-              "internalName": "FIGLet-Comment-Generator"
+              "internalName": "FIGLetCommentGenerator"
             },
             "overview": "Marketplace Overview.md",
             "publisher": "PaulStSmith",
