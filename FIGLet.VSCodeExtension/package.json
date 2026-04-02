@@ -4,6 +4,10 @@
   "displayName": "FIGlet Comment Generator",
   "description": "Create beautiful ASCII art comments in your code using FIGlet fonts",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PaulStSmith/figlet-comment-generator.git"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -125,11 +129,6 @@
       }
     }
   },
-  "files": [
-    "out/**/*",
-    "media/**/*",
-    "resources/**/*"
-  ],
   "scripts": {
     "vscode:prepublish": "npm run compile && npm run build:webview",
     "compile": "tsc -p ./",

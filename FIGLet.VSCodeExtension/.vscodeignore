@@ -1,11 +1,32 @@
-.vscode/**
-.vscode-test/**
+# Source & build inputs — not needed at runtime
 src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
 **/tsconfig.json
 **/eslint.config.mjs
-**/*.map
-**/*.ts
+**/eslint.config.js
+webpack.config.js
+
+# Test infrastructure
+.vscode-test/**
 **/.vscode-test.*
+
+# Editor / IDE
+.vscode/**
+
+# Package management
+node_modules/**
+package-lock.json
+.yarnrc
+
+# VCS
+.gitignore
+.gitattributes
+
+# Documentation & misc
+*.md
+vsc-extension-quickstart.md
+
+# Type-only files already compiled into out/
+**/*.ts
+
+# Source maps (optional: remove this line to include them for debugging)
+**/*.map
