@@ -19,8 +19,13 @@
             "type": "shell",
             "command": "npm run compile",
             "options": {
-                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
-                "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
             },
             "problemMatcher": ["$tsc"],
             "label": "extension: compile"
@@ -32,8 +37,13 @@
             "type": "shell",
             "command": "npm run build:webview",
             "options": {
-                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
-                "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
             },
             "problemMatcher": [],
             "label": "extension: build webview"
@@ -62,8 +72,13 @@
             "type": "shell",
             "command": "npm run watch",
             "options": {
-                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
-                "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
             },
             "problemMatcher": ["$tsc-watch"],
             "label": "extension: watch tsc",
@@ -73,8 +88,13 @@
             "type": "shell",
             "command": "npm run watch:webview",
             "options": {
-                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
-                "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension"
+            },
+            "windows": {
+                "options": {
+                    "cwd": "${workspaceFolder}/FIGLet.VSCodeExtension",
+                    "shell": { "executable": "cmd.exe", "args": ["/d", "/c"] }
+                }
             },
             "problemMatcher": [],
             "label": "extension: watch webview",

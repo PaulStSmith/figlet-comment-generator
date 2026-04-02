@@ -275,7 +275,13 @@ export function App() {
 
             {/* Footer */}
             <div style={S.footer}>
-                <span style={S.link} onClick={handleLinkClick} role="link" tabIndex={0}>
+                <span
+                    style={S.link}
+                    onClick={handleLinkClick}
+                    role="link"
+                    tabIndex={0}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleLinkClick(); } }}
+                >
                     FIGLet Comment Generator
                 </span>
                 <div style={S.spacer} />

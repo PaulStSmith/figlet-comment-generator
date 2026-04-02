@@ -26,6 +26,7 @@ export class FigletPanel {
 
     public static async createOrShow(context: vscode.ExtensionContext, editor: vscode.TextEditor): Promise<void> {
         if (FigletPanel._instance) {
+            FigletPanel._instance._editor = editor;
             FigletPanel._instance._panel.reveal(vscode.ViewColumn.Beside);
             return;
         }
@@ -106,9 +107,13 @@ export class FigletPanel {
             case 'cancel':
                 this.dispose();
                 break;
-            case 'openExternal':
-                await vscode.env.openExternal(vscode.Uri.parse(msg.url));
+            case 'openExternal': {
+                const uri = vscode.Uri.parse(msg.url);
+                if (uri.scheme === 'https' && uri.authority.endsWith('visualstudio.com')) {
+                    await vscode.env.openExternal(uri);
+                }
                 break;
+            }
             case 'requestFont': {
                 // Fonts are all sent eagerly in _init; handle late requests just in case
                 const info = FIGLetFontManager.availableFonts.find(f => f.name === msg.name);

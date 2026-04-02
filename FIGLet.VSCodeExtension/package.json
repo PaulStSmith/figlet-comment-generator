@@ -81,6 +81,7 @@
   },
   "files": [
     "out/**/*",
+    "media/**/*",
     "resources/**/*"
   ],
   "scripts": {
