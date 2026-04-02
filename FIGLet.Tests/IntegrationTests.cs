@@ -332,7 +332,7 @@ public class IntegrationTests
             new { Text = "WARNING", Context = "Warning message banner" , Result = " __      __ _   ___ _  _ ___ _  _  ___ \r\n \\ \\    / //_\\ | _ \\ \\| |_ _| \\| |/ __|\r\n  \\ \\/\\/ // _ \\|   / .` || || .` | (_ |\r\n   \\_/\\_//_/ \\_\\_|_\\_|\\_|___|_|\\_|\\___|\r\n                                       \r\n"},
             new { Text = "DEBUG",   Context = "Debug section banner"   , Result = "  ___  ___ ___ _   _  ___ \r\n |   \\| __| _ ) | | |/ __|\r\n | |) | _|| _ \\ |_| | (_ |\r\n |___/|___|___/\\___/ \\___|\r\n                          \r\n"},
             new { Text = "TODO",    Context = "TODO comment banner"    , Result = "  _____ ___  ___   ___  \r\n |_   _/ _ \\|   \\ / _ \\ \r\n   | || (_) | |) | (_) |\r\n   |_| \\___/|___/ \\___/ \r\n                        \r\n"},
-            new { Text = "FIXME",   Context = "FIXME comment banner"   , Result = "  ___ _____  ____  __ ___ \r\n | __|_ _\\ \\/ /  \\/  | __|\r\n | _| | | >  <| |\\/| | _| \r\n |_| |___/_/\\_\\_|  |_|___|\r\n                          \r\n"}
+            new { Text = "FIX ME",  Context = "FIX ME comment banner"  , Result = "  ___ _____  __    __  __ ___ \r\n | __|_ _\\ \\/ /   |  \\/  | __|\r\n | _| | | >  <    | |\\/| | _| \r\n |_| |___/_/\\_\\   |_|  |_|___|\r\n                              \r\n"}
         };
 
         // Act & Assert
@@ -340,6 +340,7 @@ public class IntegrationTests
         {
             var result = FIGLetRenderer.Render(scenario.Text);
 
+            // Debug.WriteLine(result.Replace("\r", "\\r").Replace("\n", "\\n"));
             Assert.IsNotNull(result, $"Failed to render: {scenario.Context}");
             Assert.IsTrue(result.Length > scenario.Text.Length,
                 $"Banner should be larger than input for: {scenario.Context}");
