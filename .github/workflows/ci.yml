@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [Development]
+
+jobs:
+  # -------------------------------------------------------------------------
+  # C# — build and run MSTest suite
+  # -------------------------------------------------------------------------
+  test-csharp:
+    name: .NET Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore FIGLet.Tests/FIGLet.Tests.csproj
+
+      - name: Build
+        run: dotnet build FIGLet.Tests/FIGLet.Tests.csproj --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test FIGLet.Tests/FIGLet.Tests.csproj --no-build --configuration Release --verbosity normal
+
+  # -------------------------------------------------------------------------
+  # Version sync — C# and TS library versions must match
+  # -------------------------------------------------------------------------
+  version-sync:
+    name: Version Sync Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Check versions match
+        run: |
+          CS_VER=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj)
+          TS_VER=$(node -p "require('./FIGLet.TS/package.json').version")
+          echo "C# version:  $CS_VER"
+          echo "TS  version: $TS_VER"
+          if [ "$CS_VER" != "$TS_VER" ]; then
+            echo "::error::Version mismatch — FIGLet.csproj ($CS_VER) and FIGLet.TS/package.json ($TS_VER) must be the same."
+            exit 1
+          fi
+          echo "Versions match: $CS_VER"
+
+  # -------------------------------------------------------------------------
+  # TypeScript — build and run Vitest suite
+  # -------------------------------------------------------------------------
+  test-typescript:
+    name: TypeScript Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: FIGLet.TS/package-lock.json
+
+      - name: Install dependencies
+        working-directory: FIGLet.TS
+        run: npm ci
+
+      - name: Test
+        working-directory: FIGLet.TS
+        run: npm test

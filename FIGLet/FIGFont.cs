@@ -39,7 +39,16 @@ public class FIGFont
     /// <summary>
     /// Gets the hard blank character used in the FIGfont.
     /// </summary>
-    public string HardBlank { get; private set; } = "#";
+    /// <remarks>
+    /// Changed from <c>string</c> to <c>char</c> in v2.0.0 (breaking change).
+    /// Use <see cref="HardBlankString"/> for a string representation.
+    /// </remarks>
+    public char HardBlank { get; private set; } = '#';
+
+    /// <summary>
+    /// Gets the hard blank character as a string.
+    /// </summary>
+    public string HardBlankString => HardBlank.ToString();
 
     /// <summary>
     /// Gets the height of the FIGfont characters.
@@ -148,7 +157,7 @@ public class FIGFont
 
         var headerParts = header.Split(' ');
         font.Signature = headerParts[0];
-        font.HardBlank = headerParts[0].Substring(5, 1);
+        font.HardBlank = headerParts[0].Substring(5, 1)[0];
         font.Height = int.Parse(headerParts[1]);
         font.Baseline = int.Parse(headerParts[2]);
         font.MaxLength = int.Parse(headerParts[3]);
@@ -220,7 +229,7 @@ public class FIGFont
          * than the one specified in the header. In this case, the "hard blank" character
          * will not be honored. This is a workaround to handle such cases.
          */
-        if (charLines[i].EndsWith("#") && font.HardBlank != "#")
+        if (charLines[i].EndsWith("#") && font.HardBlank != '#')
             charLines[i] = charLines[i].TrimEnd('#');
     }
 

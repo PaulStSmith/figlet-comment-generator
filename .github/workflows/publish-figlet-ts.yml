@@ -1,12 +1,12 @@
-name: Publish FIGLet to NuGet
+name: Publish FIGLet.TS to npm
 
 on:
   pull_request:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet/**'
-      - '.github/workflows/publish-figlet-nuget.yml'
+      - 'FIGLet.TS/**'
+      - '.github/workflows/publish-figlet-ts.yml'
 
 jobs:
   publish:
@@ -15,6 +15,11 @@ jobs:
 
     permissions:
       contents: write   # push version tag
+      id-token: write   # OIDC token for npm trusted publishing
+
+    defaults:
+      run:
+        working-directory: FIGLet.TS
 
     steps:
       - name: Checkout
@@ -22,22 +27,26 @@ jobs:
         with:
           fetch-depth: 0  # Need full history for tags
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          dotnet-version: '10.0.x'
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: FIGLet.TS/package-lock.json
 
-      - name: Extract version from csproj
+      - name: Extract version from package.json
         id: version
         run: |
-          VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj)
+          VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION"
 
       - name: Check if tag exists
         id: check_tag
+        working-directory: .
         run: |
-          TAG_NAME="figlet-v${{ steps.version.outputs.version }}"
+          TAG_NAME="figlet-ts-v${{ steps.version.outputs.version }}"
           if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "Tag $TAG_NAME already exists, skipping publish"
@@ -46,30 +55,29 @@ jobs:
             echo "Tag $TAG_NAME does not exist, will publish"
           fi
 
-      - name: Restore dependencies
+      - name: Install dependencies
         if: steps.check_tag.outputs.exists == 'false'
-        run: dotnet restore FIGLet/FIGLet.csproj
-
-      - name: Build
-        if: steps.check_tag.outputs.exists == 'false'
-        run: dotnet build FIGLet/FIGLet.csproj --configuration Release --no-restore
+        run: npm ci
 
       - name: Run tests
         if: steps.check_tag.outputs.exists == 'false'
-        run: dotnet test FIGLet.Tests/FIGLet.Tests.csproj --configuration Release --verbosity normal
+        run: npm test
 
-      - name: Pack
+      - name: Build
         if: steps.check_tag.outputs.exists == 'false'
-        run: dotnet pack FIGLet/FIGLet.csproj --configuration Release --no-build --output ./nupkg
+        run: npm run build
 
-      - name: Push to NuGet
+      - name: Publish to npm
         if: steps.check_tag.outputs.exists == 'false'
-        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
 
       - name: Create and push tag
         if: steps.check_tag.outputs.exists == 'false'
+        working-directory: .
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "figlet-v${{ steps.version.outputs.version }}" -m "FIGLet v${{ steps.version.outputs.version }}"
-          git push origin "figlet-v${{ steps.version.outputs.version }}"
+          git tag -a "figlet-ts-v${{ steps.version.outputs.version }}" -m "FIGLet.TS v${{ steps.version.outputs.version }}"
+          git push origin "figlet-ts-v${{ steps.version.outputs.version }}"

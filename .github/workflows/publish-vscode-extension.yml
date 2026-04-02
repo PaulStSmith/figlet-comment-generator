@@ -1,7 +1,8 @@
 name: Publish VS Code Extension
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: [master, main]
     paths:
       - 'FIGLet.VSCodeExtension/**'
@@ -9,6 +10,7 @@ on:
 
 jobs:
   publish:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     defaults:
@@ -24,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: FIGLet.VSCodeExtension/package-lock.json
 

@@ -1,7 +1,8 @@
 name: Publish Visual Studio Extension
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: [master, main]
     paths:
       - 'FIGLet.VisualStudioExtension/**'
@@ -10,7 +11,11 @@ on:
 
 jobs:
   publish:
+    if: github.event.pull_request.merged == true
     runs-on: windows-latest
+
+    permissions:
+      contents: write   # push version tag
 
     steps:
       - name: Checkout
@@ -24,14 +29,22 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
-      - name: Extract version from vsixmanifest
+      - name: Compute version
         id: version
         shell: pwsh
         run: |
-          [xml]$manifest = Get-Content "FIGLet.VisualStudioExtension/source.extension.vsixmanifest"
-          $version = $manifest.PackageManifest.Metadata.Identity.Version
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-          echo "Detected version: $version"
+          # Read major.minor from the manifest; use the Actions run number as patch.
+          # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
+          $manifestPath = Resolve-Path "FIGLet.VisualStudioExtension/source.extension.vsixmanifest"
+          [xml]$manifest = Get-Content $manifestPath
+          $base = $manifest.PackageManifest.Metadata.Identity.Version -replace '\.\d+$', ''
+          $patch = [Math]::Min(${{ github.run_number }}, 65534)
+          $newVersion = "$base.$patch"
+          $manifest.PackageManifest.Metadata.Identity.Version = $newVersion
+          $manifest.Save($manifestPath)
+          echo "version=$newVersion" >> $env:GITHUB_OUTPUT
+          echo "base=$base" >> $env:GITHUB_OUTPUT
+          echo "Version: $newVersion"
 
       - name: Check if tag exists
         id: check_tag
@@ -72,14 +85,6 @@ jobs:
             exit 1
           }
 
-      - name: Download VsixPublisher
-        if: steps.check_tag.outputs.exists == 'false'
-        shell: pwsh
-        run: |
-          # VsixPublisher is included in VS Build Tools, but we can use the marketplace API directly
-          # or download the VSCE tool. For VS Marketplace, we'll use the REST API approach.
-          Invoke-WebRequest -Uri "https://marketplace.visualstudio.com/_apis/public/gallery/publisher/Paulo%20Santos%20-%20Paul.St.Smith" -Method Head -ErrorAction SilentlyContinue
-
       - name: Publish to VS Marketplace
         if: steps.check_tag.outputs.exists == 'false'
         shell: pwsh
@@ -106,12 +111,12 @@ jobs:
           {
             "categories": ["Other"],
             "identity": {
-              "internalName": "FIGLet-Comment-Generator"
+              "internalName": "FIGLetCommentGenerator"
             },
             "overview": "Marketplace Overview.md",
-            "publisher": "Paulo Santos - Paul.St.Smith",
+            "publisher": "PaulStSmith",
             "assetFiles": [
-              { "pathOnDisk": "FIGLet.VisualStudioExtension/bin/Release/preview.png", "targetPath": "preview.png" }
+              { "pathOnDisk": "FIGLet.VisualStudioExtension/bin/Release/Resources/preview.png", "targetPath": "preview.png" }
             ]
           }
           "@
@@ -120,11 +125,22 @@ jobs:
             & $vsixPublisher publish -payload "$vsixPath" -publishManifest "publish-manifest.json" -personalAccessToken $env:VS_MARKETPLACE_PAT
           }
 
-      - name: Create and push tag
+      - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "vsext-v${{ steps.version.outputs.version }}" -m "VS Extension v${{ steps.version.outputs.version }}"
-          git push origin "vsext-v${{ steps.version.outputs.version }}"
+          gh release create "vsext-v${{ steps.version.outputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "VS Extension v${{ steps.version.outputs.version }}" \
+            --notes "## VS Extension v${{ steps.version.outputs.version }}
+
+          Published to the Visual Studio Marketplace.
+
+          | | |
+          |---|---|
+          | **Published version** | \`${{ steps.version.outputs.version }}\` |
+          | **Manifest base** | \`${{ steps.version.outputs.base }}\` |
+          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+          | **Commit** | \`${{ github.sha }}\` |"

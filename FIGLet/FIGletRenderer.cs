@@ -148,46 +148,39 @@ public partial class FIGLetRenderer(FIGFont? font)
         var lineSeparator = LineSeparator;
         var useANSIColors = UseANSIColors;
 
-        var ol = new StringBuilder[Font.Height];
+        var outputLines = new StringBuilder[Font.Height];
         for (var i = 0; i < Font.Height; i++)
-            ol[i] = new StringBuilder();
-
-        // Create ANSI processor if colors are enabled
-        var ansiProcessor = useANSIColors ? new ANSIProcessor() : null;
+            outputLines[i] = new StringBuilder();
 
         // Process each character in the input text
         var charIndex = 0;
         var plainText = new StringBuilder();
         var colorDict = new Dictionary<int, string>();
+        var ansiProcessor = new ANSIProcessor(preserveColors: useANSIColors);
 
-        if (ansiProcessor != null)
+        // First pass: Extract ANSI sequences and build plain text
+        for (charIndex = 0; charIndex < text.Length; charIndex++)
         {
-            // First pass: Extract ANSI sequences and build plain text
-            for (charIndex = 0; charIndex < text.Length; charIndex++)
+            var c = text[charIndex];
+            var isAnsiCode = ansiProcessor.ProcessCharacter(c);
+
+            if (isAnsiCode)
+                continue;
+
+            if (useANSIColors && !string.IsNullOrEmpty(ansiProcessor.CurrentColorSequence))
             {
-                var c = text[charIndex];
-                var isAnsiCode = ansiProcessor.ProcessCharacter(c);
-
-                if (!isAnsiCode)
-                {
-                    if (!string.IsNullOrEmpty(ansiProcessor.CurrentColorSequence))
-                    {
-                        // Append the current color sequence to the plain text
-                        colorDict[plainText.Length] = ansiProcessor.CurrentColorSequence;
-                        ansiProcessor.ResetColorState();
-                    }
-
-                    // Skip characters not in the font
-                    if (Font.Characters.ContainsKey(c))
-                        plainText.Append(c);
-                }
-
+                // Append the current color sequence to the plain text
+                colorDict[plainText.Length] = ansiProcessor.CurrentColorSequence;
+                ansiProcessor.ResetColorState();
             }
 
-
-            // Reset for second pass
-            text = plainText.ToString();
+            // Skip characters not in the font
+            if (Font.Characters.ContainsKey(c))
+                plainText.Append(c);
         }
+
+        // Reset for second pass
+        text = plainText.ToString();
 
         // Reverse the text for RTL fonts while preserving surrogate pairs
         if (Font.PrintDirection == 1)
@@ -234,23 +227,19 @@ public partial class FIGLetRenderer(FIGFont? font)
                 codePoint = (int)text[i];
             }
 
-            // Skip characters not in the font
-            if (!useANSIColors && Font.Characters.ContainsKey(codePoint))
-                plainText.Append(char.ConvertFromUtf32(codePoint));
-
             var charLines = Font.Characters[codePoint];
             var colorCode = string.Empty;
             _ = colorDict.TryGetValue(charIndex++, out colorCode);
 
-            if (ol[0].Length == 0)
+            if (outputLines[0].Length == 0)
             {
                 // First character, just append
                 for (var lineIndex = 0; lineIndex < Font.Height; lineIndex++)
                 {
                     // Add color code if needed
                     if (useANSIColors)
-                        ol[lineIndex].Append(colorCode);
-                    ol[lineIndex].Append(charLines[lineIndex]);
+                        outputLines[lineIndex].Append(colorCode);
+                    outputLines[lineIndex].Append(charLines[lineIndex]);
                 }
             }
             else
@@ -258,7 +247,7 @@ public partial class FIGLetRenderer(FIGFont? font)
                 // Calculate overlap with previous character
                 var overlap = int.MaxValue;
                 for (var lineIndex = 0; lineIndex < Font.Height; lineIndex++)
-                    overlap = Math.Min(overlap, CalculateOverlap(ol[lineIndex].ToString(), charLines[lineIndex], mode));
+                    overlap = Math.Min(overlap, CalculateOverlap(outputLines[lineIndex].ToString(), charLines[lineIndex], mode));
 
                 // Apply smushing rules
                 for (var lineIndex = 0; lineIndex < Font.Height; lineIndex++)
@@ -266,21 +255,21 @@ public partial class FIGLetRenderer(FIGFont? font)
                     if (overlap == 0)
                     {
                         if (useANSIColors)
-                            ol[lineIndex].Append(colorCode);
-                        ol[lineIndex].Append(charLines[lineIndex]);
+                            outputLines[lineIndex].Append(colorCode);
+                        outputLines[lineIndex].Append(charLines[lineIndex]);
                     }
                     else
                     {
                         // Use enhanced Smush method with color support
-                        Smush(ol[lineIndex], charLines[lineIndex], overlap, mode, colorCode ?? string.Empty);
+                        Smush(outputLines[lineIndex], charLines[lineIndex], overlap, mode, colorCode ?? string.Empty);
                     }
                 }
             }
         }
 
-        return string.Join(lineSeparator, ol.Select(x => x.Replace(Font.HardBlank[0], ' ')
-                                            .Append(ansiProcessor != null ? ANSIColorResetCode : string.Empty)
-                                            .ToString()));
+        return string.Join(lineSeparator, outputLines.Select(x => x.Replace(Font.HardBlank, ' ')
+                                            .Append(useANSIColors ? ANSIColorResetCode : string.Empty)
+                                            .ToString())) + lineSeparator;
     }
 
     /// <summary>
@@ -306,7 +295,7 @@ public partial class FIGLetRenderer(FIGFont? font)
 
         // Apply smushing rules character by character in the overlap area
         for (var i = 0; i < overlap; i++)
-            line.Append(SmushCharacters(lineEnd[i], character[i], mode));
+            line.Append(SmushCharacters(lineEnd[i], character[i], Font.HardBlank, mode, Font.SmushingRules));
 
         // Append the remaining part of the character (after the overlap)
         line.Append(colorCode);
@@ -332,7 +321,7 @@ public partial class FIGLetRenderer(FIGFont? font)
         if (!m1.Success || !m2.Success)
             return character.Length;
 
-        var canSmush = CanSmush(m1.Value[0], m2.Value[0], mode);
+        var canSmush = CanSmush(m1.Value[0], m2.Value[0], Font.HardBlank, mode, Font.SmushingRules);
         var overlapLength = canSmush ? Math.Max(eol.Length - m1.Index, m2.Index) + 1 : 0;
         overlapLength = Math.Min(overlapLength, character.Length);
         // Special case when we have opposing slashes
@@ -348,9 +337,11 @@ public partial class FIGLetRenderer(FIGFont? font)
     /// </summary>
     /// <param name="c1">The first character.</param>
     /// <param name="c2">The second character.</param>
+    /// <param name="hardBlank">The hard blank character defined in the FIGFont.</param>
     /// <param name="mode">The layout mode to use for smushing.</param>
+    /// <param name="rules">The smushing rules defined in the FIGFont.</param>
     /// <returns>True if the characters can be smushed together; otherwise, false.</returns>
-    private bool CanSmush(char c1, char c2, LayoutMode mode)
+    internal bool CanSmush(char c1, char c2, char hardBlank, LayoutMode mode, SmushingRules rules)
     {
         // Early return for kerning mode
         if (mode == LayoutMode.Kerning)
@@ -361,41 +352,40 @@ public partial class FIGLetRenderer(FIGFont? font)
             return false;
 
         // Handle hardblanks first
-        if (c1 == Font.HardBlank[0] || c2 == Font.HardBlank[0])
-            return Font.HasSmushingRule(SmushingRules.HardBlank);
+        if (c1 == hardBlank || c2 == hardBlank)
+            return rules.HasRule(SmushingRules.HardBlank);
 
         // Handle spaces
         if (c1 == ' ' && c2 == ' ') return true;
         if (c1 == ' ' || c2 == ' ') return true;
 
         // Rule 1: Equal Character Smushing
-        if (Font.HasSmushingRule(SmushingRules.EqualCharacter) && c1 == c2)
+        if (rules.HasRule(SmushingRules.EqualCharacter) && c1 == c2)
             return true;
 
         // Rule 2: Underscore Smushing
-        if (Font.HasSmushingRule(SmushingRules.Underscore))
+        if (rules.HasRule(SmushingRules.Underscore))
             if ((c1 == '_' && HierarchyCharacters.Contains(c2)) || (c2 == '_' && HierarchyCharacters.Contains(c1)))
                 return true;
 
         // Rule 3: Hierarchy Smushing
-        if (Font.HasSmushingRule(SmushingRules.Hierarchy))
+        if (rules.HasRule(SmushingRules.Hierarchy))
         {
-            var hierarchy = HierarchyCharacters;
-            var rank1 = hierarchy.IndexOf(c1);
-            var rank2 = hierarchy.IndexOf(c2);
+            var rank1 = HierarchyCharacters.IndexOf(c1);
+            var rank2 = HierarchyCharacters.IndexOf(c2);
 
             if (rank1 >= 0 && rank2 >= 0)
                 return true;
         }
 
         // Rule 4: Opposite Pair Smushing
-        if (Font.HasSmushingRule(SmushingRules.OppositePair))
+        if (rules.HasRule(SmushingRules.OppositePair))
             if (oppositePairs.TryGetValue(c1, out var opposite) && opposite == c2)
                 return true;
 
         // Rule 5: Big X Smushing
-        if (Font.HasSmushingRule(SmushingRules.BigX))
-            if (c1 == '>' && c2 == '<')
+        if (rules.HasRule(SmushingRules.BigX))
+            if (c1 == '>' && c2 == '<' || (c1 == '/' && c2 == '\\') || (c1 == '\\' && c2 == '/'))
                 return true;
 
         return false;
@@ -406,9 +396,11 @@ public partial class FIGLetRenderer(FIGFont? font)
     /// </summary>
     /// <param name="c1">The first character.</param>
     /// <param name="c2">The second character.</param>
+    /// <param name="hardBlank">The hard blank character defined in the FIGFont.</param>
     /// <param name="mode">The layout mode to use for smushing.</param>
+    /// <param name="rules">The smushing rules defined in the FIGFont.</param>
     /// <returns>The resulting smushed character.</returns>
-    private char SmushCharacters(char c1, char c2, LayoutMode mode)
+    internal char SmushCharacters(char c1, char c2, char hardBlank, LayoutMode mode, SmushingRules rules)
     {
         // Rule 0: Universal smushing just picks the first character
         if (mode == LayoutMode.Kerning)
@@ -420,26 +412,26 @@ public partial class FIGLetRenderer(FIGFont? font)
         if (c2 == ' ') return c1;
 
         // Handle hardblanks first
-        if (c1 == Font.HardBlank[0] || c2 == Font.HardBlank[0])
+        if (c1 == hardBlank || c2 == hardBlank)
         {
-            if (Font.HasSmushingRule(SmushingRules.HardBlank))
-                return Font.HardBlank[0];
+            if (rules.HasRule(SmushingRules.HardBlank))
+                return hardBlank;
             return c1;
         }
 
         // Rule 1: Equal Character Smushing
-        if (Font.HasSmushingRule(SmushingRules.EqualCharacter) && c1 == c2)
+        if (rules.HasRule(SmushingRules.EqualCharacter) && c1 == c2)
             return c1;
 
         // Rule 2: Underscore Smushing
-        if (Font.HasSmushingRule(SmushingRules.Underscore))
+        if (rules.HasRule(SmushingRules.Underscore))
         {
             if (c1 == '_' && HierarchyCharacters.Contains(c2)) return c2;
             if (c2 == '_' && HierarchyCharacters.Contains(c1)) return c1;
         }
 
         // Rule 3: Hierarchy Smushing
-        if (Font.HasSmushingRule(SmushingRules.Hierarchy))
+        if (rules.HasRule(SmushingRules.Hierarchy))
         {
             var hierarchy = HierarchyCharacters;
             var rank1 = hierarchy.IndexOf(c1);
@@ -450,23 +442,25 @@ public partial class FIGLetRenderer(FIGFont? font)
         }
 
         // Rule 4: Opposite Pair Smushing
-        if (Font.HasSmushingRule(SmushingRules.OppositePair))
+        if (rules.HasRule(SmushingRules.OppositePair))
             if (oppositePairs.TryGetValue(c1, out var opposite) && opposite == c2)
                 return '|';
 
         // Rule 5: Big X Smushing
-        if (Font.HasSmushingRule(SmushingRules.BigX))
+        if (rules.HasRule(SmushingRules.BigX))
         {
-            if ((c1 == '/' && c2 == '\\') || (c1 == '\\' && c2 == '/'))
+            if (c1 == '/' && c2 == '\\')
                 return '|';
+            if (c1 == '\\' && c2 == '/')
+                return 'Y';
             if (c1 == '>' && c2 == '<')
                 return 'X';
         }
 
         // Rule 6: Hardblank Smushing
-        if (Font.HasSmushingRule(SmushingRules.HardBlank))
-            if (c1 == Font.HardBlank[0] && c2 == Font.HardBlank[0])
-                return Font.HardBlank[0];
+        if (rules.HasRule(SmushingRules.HardBlank))
+            if (c1 == hardBlank && c2 == hardBlank)
+                return hardBlank;
 
         // If no smushing rules apply or are enabled, return the first character
         return c1;
@@ -482,18 +476,26 @@ public partial class FIGLetRenderer(FIGFont? font)
     /// A regex to match the first non-whitespace character in a string.
     /// </summary>
     /// <returns>A regex pattern to match the first non-whitespace character.</returns>
-    private static Regex FirstNonWhitespaceRegex() => new(@"(?<=^|\s*)\S");
+    private static Regex FirstNonWhitespaceRegex() => new(@"\S");
 
     /// <summary>
     /// Detects and processes ANSI escape sequences during rendering.
     /// </summary>
     private class ANSIProcessor
     {
+        // Whether to accumulate color sequences (only needed when UseANSIColors is true)
+        private readonly bool _preserveColors;
+
         // Track if we're currently inside an escape sequence
         private bool _inEscapeSequence = false;
 
         // Buffer to store the current escape sequence
         private readonly StringBuilder _escapeBuffer = new();
+
+        public ANSIProcessor(bool preserveColors = false)
+        {
+            _preserveColors = preserveColors;
+        }
 
         // List of ANSI sequence terminators that are NOT color-related
         private static readonly HashSet<char> NonColorTerminators =
@@ -520,7 +522,6 @@ public partial class FIGLetRenderer(FIGFont? font)
             if (c == '\u001b') // ESC character (27)
             {
                 _inEscapeSequence = true;
-                _escapeBuffer.Clear();
                 _escapeBuffer.Append(c);
                 return true;
             }
@@ -545,10 +546,11 @@ public partial class FIGLetRenderer(FIGFont? font)
                     // Sequence is complete
                     _inEscapeSequence = false;
                     var sequence = _escapeBuffer.ToString();
+                    _escapeBuffer.Clear();
 
-                    // If color sequence (ends with 'm'), keep it
-                    if (c == 'm')
-                        CurrentColorSequence = sequence;
+                    // If color sequence (ends with 'm'), keep it (only when preserving colors)
+                    if (c == 'm' && _preserveColors)
+                        CurrentColorSequence += sequence;
 
                     return true;
                 }

@@ -1,5 +1,7 @@
 using ByteForge.FIGLet;
+using System.Diagnostics;
 using System.Text;
+using System.Reflection;
 
 namespace FIGLet.Tests;
 
@@ -58,7 +60,6 @@ public class FIGLetRendererTests
         // Act & Assert
         Assert.AreEqual(string.Empty, FIGLetRenderer.Render(null));
         Assert.AreEqual(string.Empty, FIGLetRenderer.Render(""));
-        Assert.AreEqual(string.Empty, FIGLetRenderer.Render("   "));
     }
 
     [TestMethod]
@@ -69,7 +70,8 @@ public class FIGLetRendererTests
         
         // Assert
         Assert.IsNotNull(result);
-        Assert.IsTrue(result.Contains("_")); // Should contain FIG characters
+        TestUtilities.AssertMultiLineEqual("Hi\r\nHi\r\nHi\r\n", result, "Static Render should produce expected output for 'Hi'");
+
         var lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
         Assert.AreEqual(_testFont.Height, lines.Length);
     }
@@ -101,7 +103,7 @@ public class FIGLetRendererTests
         var lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
         Assert.AreEqual(_testFont.Height, lines.Length);
         // Replace hard blank with space for comparison
-        var processedResult = result.Replace(_testFont.HardBlank[0], ' ');
+        var processedResult = result.Replace(_testFont.HardBlank, ' ');
         Assert.IsTrue(processedResult.Contains("A"));
     }
 
@@ -241,16 +243,14 @@ public class FIGLetRendererTests
         Assert.IsNotNull(result);
         // Should render "Red" but without ANSI sequences
         Assert.IsFalse(result.Contains("\x1b["));
-        var processedResult = result.Replace(_testFont.HardBlank[0], ' ');
-        Assert.IsTrue(processedResult.Contains("R"));
+        Assert.IsTrue(result.StartsWith("Red"));
     }
 
     [TestMethod]
     public void Render_WithRTLFont_ShouldReverseText()
     {
-        // Arrange - Create RTL font
-        var content = TestUtilities.CreateMinimalValidFontContent(2, '$');
-        content = content.Replace("flf2a$ 2 1 5 0 0", "flf2a$ 2 1 5 0 0 1"); // Set print direction to 1 (RTL)
+        // Arrange - Create RTL font (printDirection = 1)
+        var content = TestUtilities.CreateMinimalValidFontContent(2, '$', printDirection: 1);
         using var stream = TestUtilities.CreateStreamFromString(content);
         var rtlFont = FIGFont.FromStream(stream);
         var renderer = new FIGLetRenderer(rtlFont, useANSIColors: true);
@@ -261,17 +261,72 @@ public class FIGLetRendererTests
         // Assert
         Assert.IsNotNull(result);
         // Text should be rendered as "BA" due to RTL
-        var processedResult = result.Replace(rtlFont.HardBlank[0], ' ');
+        var processedResult = result.Replace(rtlFont.HardBlank, ' ');
         // Note: This is hard to test exactly without knowing the exact font rendering,
         // but we can ensure the RTL font property is set
         Assert.AreEqual(1, rtlFont.PrintDirection);
     }
 
     [TestMethod]
+    public void Render_WithRTLFontAndANSIColors_ShouldPreserveBothReverseAndColors()
+    {
+        // Arrange — build matching LTR and RTL fonts from the same glyph data so we
+        // can compare their output directly after stripping ANSI sequences.
+        var ltrContent = TestUtilities.CreateMinimalValidFontContent(2, '$', printDirection: 0);
+        var rtlContent = TestUtilities.CreateMinimalValidFontContent(2, '$', printDirection: 1);
+
+        using var ltrStream = TestUtilities.CreateStreamFromString(ltrContent);
+        using var rtlStream = TestUtilities.CreateStreamFromString(rtlContent);
+
+        var ltrFont = FIGFont.FromStream(ltrStream)!;
+        var rtlFont = FIGFont.FromStream(rtlStream)!;
+
+        var ltrRenderer = new FIGLetRenderer(ltrFont, lineSeparator: "\n");
+        var rtlRenderer = new FIGLetRenderer(rtlFont, lineSeparator: "\n", useANSIColors: true);
+
+        // Act
+        var result = rtlRenderer.Render("\x1b[31mAB\x1b[0m");
+
+        // Assert: ANSI sequences are preserved
+        Assert.IsTrue(result.Contains("\x1b[31m"), "Red color sequence should be preserved");
+        Assert.IsTrue(result.Contains("\x1b[0m"),  "ANSI reset code should be present");
+
+        // Assert: text is reversed — RTL("AB"") stripped of color should equal LTR("BA")
+        var stripped = TestUtilities.StripANSIColors(result);
+        var ltrBA    = ltrRenderer.Render("BA");
+        Assert.AreEqual(ltrBA, stripped,
+            "RTL render of 'AB' (colors stripped) should equal LTR render of 'BA'");
+    }
+
+    [TestMethod]
+    public void Render_WithParagraphMode_ConsecutiveParagraphs_ShouldConcatenateWithoutBlankSeparation()
+    {
+        // Arrange
+        var renderer = new FIGLetRenderer(_testFont) { ParagraphMode = true, LineSeparator = "\n" };
+
+        // Act
+        var consecutive = renderer.Render("A\nB");   // No blank line between paragraphs
+        var separated   = renderer.Render("A\n\nB"); // Explicit blank line between paragraphs
+
+        // Assert: both A and B are rendered in the consecutive case
+        var stripped = consecutive.Replace(_testFont.HardBlank, ' ');
+        Assert.IsTrue(stripped.Contains("A"), "First paragraph 'A' should be rendered");
+        Assert.IsTrue(stripped.Contains("B"), "Second paragraph 'B' should be rendered");
+
+        // Assert: the blank-line separator injects exactly font.Height extra newlines.
+        // Consecutive paragraphs are simply concatenated (no blank lines between them).
+        var consecutiveNewlines = consecutive.Count(c => c == '\n');
+        var separatedNewlines   = separated.Count(c => c == '\n');
+        Assert.AreEqual(_testFont.Height, separatedNewlines - consecutiveNewlines,
+            $"Blank-line separated output should have exactly {_testFont.Height} more newlines " +
+            $"than consecutive (got {separatedNewlines} vs {consecutiveNewlines})");
+    }
+
+    [TestMethod]
     public void Render_WithUnicodeText_ShouldHandleSurrogatePairs()
     {
         // Arrange
-        var renderer = new FIGLetRenderer(FIGFont.Default);
+        var renderer = new FIGLetRenderer(_testFont);
         var emojiText = "A🚀B"; // Contains surrogate pair
         
         // Act
@@ -280,7 +335,7 @@ public class FIGLetRendererTests
         // Assert
         Assert.IsNotNull(result);
         // Should render A and B, emoji might be skipped if not in font
-        var processedResult = result.Replace(FIGFont.Default.HardBlank[0], ' ');
+        var processedResult = result.Replace(_testFont.HardBlank, ' ');
         Assert.IsTrue(processedResult.Contains("A"));
         Assert.IsTrue(processedResult.Contains("B"));
     }
@@ -290,20 +345,12 @@ public class FIGLetRendererTests
     {
         // Arrange
         var renderer = new FIGLetRenderer(_smushingFont);
-        
+
         // Act
-        var result = renderer.Render("AA");
-        
+        var result = renderer.SmushCharacters('|', '|', '$', LayoutMode.Smushing, SmushingRules.EqualCharacter);
+
         // Assert
-        Assert.IsNotNull(result);
-        // With equal character smushing, "AA" should be narrower than full size
-        var fullSizeRenderer = new FIGLetRenderer(_smushingFont) { LayoutMode = LayoutMode.FullSize };
-        var fullSizeResult = fullSizeRenderer.Render("AA");
-        
-        var smushLines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        var fullLines = fullSizeResult.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        
-        Assert.IsTrue(smushLines[0].Length < fullLines[0].Length);
+        Assert.AreEqual('|', result);
     }
 
     [TestMethod]
@@ -311,20 +358,12 @@ public class FIGLetRendererTests
     {
         // Arrange
         var renderer = new FIGLetRenderer(_smushingFont);
-        
-        // Act - Using characters from hierarchy: "|/\\[]{}()<>"
-        var result = renderer.Render("|/");
-        
+
+        // Act
+        var result = renderer.SmushCharacters('|', '/', '$', LayoutMode.Smushing, SmushingRules.Hierarchy);
+
         // Assert
-        Assert.IsNotNull(result);
-        // Should produce some smushing between hierarchy characters
-        var kerningRenderer = new FIGLetRenderer(_smushingFont) { LayoutMode = LayoutMode.Kerning };
-        var kerningResult = kerningRenderer.Render("|/");
-        
-        var smushLines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        var kernLines = kerningResult.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        
-        Assert.IsTrue(smushLines[0].Length <= kernLines[0].Length);
+        Assert.AreEqual('/', result);
     }
 
     [TestMethod]
@@ -332,31 +371,38 @@ public class FIGLetRendererTests
     {
         // Arrange
         var renderer = new FIGLetRenderer(_smushingFont);
-        
+
         // Act
-        var result = renderer.Render("[]");
-        
+        var result = renderer.SmushCharacters('[', ']', '$', LayoutMode.Smushing, SmushingRules.OppositePair);
+
         // Assert
-        Assert.IsNotNull(result);
-        // Opposite pairs should smush to "|"
-        var processedResult = result.Replace(_smushingFont.HardBlank[0], ' ');
-        Assert.IsTrue(processedResult.Contains("|"));
+        Assert.AreEqual('|', result);
     }
 
     [TestMethod]
-    public void SmushingRules_BigX_ShouldCreateXFromSlashes()
+    public void SmushingRules_BigX_ShouldCreatePipeFromSlashes()
     {
         // Arrange
         var renderer = new FIGLetRenderer(_smushingFont);
-        
+
         // Act
-        var result = renderer.Render("/\\");
-        
+        var result = renderer.SmushCharacters('/', '\\', '$', LayoutMode.Smushing, SmushingRules.BigX);
+
         // Assert
-        Assert.IsNotNull(result);
-        // Forward slash + backslash should create "|"
-        var processedResult = result.Replace(_smushingFont.HardBlank[0], ' ');
-        Assert.IsTrue(processedResult.Contains("|"));
+        Assert.AreEqual('|', result);
+    }
+
+    [TestMethod]
+    public void SmushingRules_BigX_ShouldCreateYFromSlashes()
+    {
+        // Arrange
+        var renderer = new FIGLetRenderer(_smushingFont);
+
+        // Act
+        var result = renderer.SmushCharacters('\\', '/', '$', LayoutMode.Smushing, SmushingRules.BigX);
+
+        // Assert
+        Assert.AreEqual('Y', result);
     }
 
     [TestMethod]
@@ -364,15 +410,12 @@ public class FIGLetRendererTests
     {
         // Arrange
         var renderer = new FIGLetRenderer(_smushingFont);
-        
+
         // Act
-        var result = renderer.Render("><");
-        
+        var result = renderer.SmushCharacters('>', '<', '$', LayoutMode.Smushing, SmushingRules.BigX);
+
         // Assert
-        Assert.IsNotNull(result);
-        // > + < should create "X"
-        var processedResult = result.Replace(_smushingFont.HardBlank[0], ' ');
-        Assert.IsTrue(processedResult.Contains("X"));
+        Assert.AreEqual('X', result);
     }
 
     [TestMethod]
@@ -380,15 +423,12 @@ public class FIGLetRendererTests
     {
         // Arrange
         var renderer = new FIGLetRenderer(_smushingFont);
-        
+
         // Act
-        var result = renderer.Render("_|");
-        
+        var result = renderer.SmushCharacters('_', '|', '$', LayoutMode.Smushing, SmushingRules.Underscore);
+
         // Assert
-        Assert.IsNotNull(result);
-        // Underscore should smush with hierarchy character, preferring the hierarchy char
-        var processedResult = result.Replace(_smushingFont.HardBlank[0], ' ');
-        Assert.IsTrue(processedResult.Contains("|"));
+        Assert.AreEqual('|', result);
     }
 
     [TestMethod]
@@ -396,15 +436,12 @@ public class FIGLetRendererTests
     {
         // Arrange
         var renderer = new FIGLetRenderer(_smushingFont);
-        
-        // Act - Render characters that have hard blanks next to each other
-        var result = renderer.Render("  "); // Two spaces (which contain hard blanks)
-        
+
+        // Act
+        var result = renderer.SmushCharacters(_smushingFont.HardBlank, _smushingFont.HardBlank, _smushingFont.HardBlank, LayoutMode.Smushing, SmushingRules.HardBlank);
+
         // Assert
-        Assert.IsNotNull(result);
-        // Hard blanks should smush together
-        var lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-        Assert.AreEqual(_smushingFont.Height, lines.Length);
+        Assert.AreEqual(_smushingFont.HardBlank, result);
     }
 
     [TestMethod]
@@ -427,20 +464,15 @@ public class FIGLetRendererTests
     {
         // Arrange
         var renderer = new FIGLetRenderer(_testFont);
-        
+
         foreach (var testText in TestUtilities.TestTexts)
         {
             // Act
-            var result = renderer.Render(testText);
+            var result = renderer.Render(testText.Key);
             
             // Assert
-            Assert.IsNotNull(result, $"Failed to render: '{testText}'");
-            
-            if (!string.IsNullOrWhiteSpace(testText))
-            {
-                var lines = result.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
-                Assert.IsTrue(lines.Length > 0, $"No output lines for: '{testText}'");
-            }
+            Assert.IsNotNull(result, $"Failed to render: '{testText.Key}'");
+            TestUtilities.AssertMultiLineEqual(testText.Value, result, $"Rendered output does not match expected for: '{testText.Key}'");
         }
     }
 
@@ -453,11 +485,12 @@ public class FIGLetRendererTests
         foreach (var coloredText in TestUtilities.ANSIColoredTexts)
         {
             // Act
-            var result = renderer.Render(coloredText);
-            
+            var result = renderer.Render(coloredText.Key);
+
             // Assert
-            Assert.IsNotNull(result, $"Failed to render colored text: '{coloredText}'");
-            Assert.IsTrue(result.Contains("\x1b[0m"), "Should end with reset code");
+            // Debug.WriteLine(@$"[""{coloredText.Replace("\x1b", "\\x1b").Replace("\n", "\\n").Replace("\r", "\\r")}""] = ""{result.Replace("\x1b", "\\x1b").Replace("\n", "\\n").Replace("\r", "\\r")}"",");
+            Assert.IsNotNull(result, $"Failed to render: '{coloredText.Key}'");
+            TestUtilities.AssertMultiLineEqual(coloredText.Value, result, $"Rendered output does not match expected for: '{coloredText.Key}'");
         }
     }
 
@@ -530,7 +563,7 @@ public class FIGLetRendererTests
         
         // Assert
         Assert.IsNotNull(result);
-        var processedResult = result.Replace(_testFont.HardBlank[0], ' ');
+        var processedResult = result.Replace(_testFont.HardBlank, ' ');
         Assert.IsTrue(processedResult.Contains("A"));
         Assert.IsTrue(processedResult.Contains("B"));
         // Snowman should be skipped gracefully

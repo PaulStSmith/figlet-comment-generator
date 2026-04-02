@@ -2,30 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         // ---------------------------------------------------------------
-        // VS Code Extension — launch Extension Development Host
-        // ---------------------------------------------------------------
-        {
-            "type": "extensionHost",
-            "request": "launch",
-            "name": "VS Code Extension: Debug",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}/FIGLet.VSCodeExtension"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/FIGLet.VSCodeExtension/out/**/*.js"
-            ],
-            "preLaunchTask": "extension: build",
-            "sourceMaps": true,
-            "resolveSourceMapLocations": [
-                "${workspaceFolder}/FIGLet.VSCodeExtension/**",
-                "!**/node_modules/**"
-            ]
-        },
-        // ---------------------------------------------------------------
         // FIGLet.TS — run / debug
         // ---------------------------------------------------------------
         {
-            "type": "node",
+            "type": "extensionHost",
             "request": "launch",
             "name": "FIGLet.TS: Run",
             "skipFiles": ["<node_internals>/**"],
@@ -58,6 +38,24 @@
             ]
         },
         // ---------------------------------------------------------------
+        // FIGLet.TS — Vitest (watch mode)
+        // ---------------------------------------------------------------
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "FIGLet.TS: Test (watch)",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/FIGLet.TS/node_modules/vitest/vitest.mjs",
+            "args": ["--reporter=verbose"],
+            "cwd": "${workspaceFolder}/FIGLet.TS",
+            "console": "integratedTerminal",
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/FIGLet.TS/**",
+                "!**/node_modules/**"
+            ]
+        },
+        // ---------------------------------------------------------------
         // FIGLet.TS — Vitest (debug with breakpoints — all tests)
         // ---------------------------------------------------------------
         {
@@ -67,6 +65,24 @@
             "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
             "program": "${workspaceFolder}/FIGLet.TS/node_modules/vitest/vitest.mjs",
             "args": ["run", "--reporter=verbose", "--pool=forks", "--poolOptions.forks.singleFork=true"],
+            "cwd": "${workspaceFolder}/FIGLet.TS",
+            "console": "integratedTerminal",
+            "sourceMaps": true,
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/FIGLet.TS/**",
+                "!**/node_modules/**"
+            ]
+        },
+        // ---------------------------------------------------------------
+        // FIGLet.TS — Vitest (debug with breakpoints — current file)
+        // ---------------------------------------------------------------
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "FIGLet.TS: Test (debug current file)",
+            "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+            "program": "${workspaceFolder}/FIGLet.TS/node_modules/vitest/vitest.mjs",
+            "args": ["run", "${relativeFile}", "--reporter=verbose", "--pool=forks", "--poolOptions.forks.singleFork=true"],
             "cwd": "${workspaceFolder}/FIGLet.TS",
             "console": "integratedTerminal",
             "sourceMaps": true,
