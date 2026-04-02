@@ -29,14 +29,29 @@ jobs:
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v2
 
-      - name: Extract version from vsixmanifest
+      - name: Bump patch version
         id: version
         shell: pwsh
         run: |
-          [xml]$manifest = Get-Content "FIGLet.VisualStudioExtension/source.extension.vsixmanifest"
-          $version = $manifest.PackageManifest.Metadata.Identity.Version
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-          echo "Detected version: $version"
+          $manifestPath = Resolve-Path "FIGLet.VisualStudioExtension/source.extension.vsixmanifest"
+          [xml]$manifest = Get-Content $manifestPath
+          $current = $manifest.PackageManifest.Metadata.Identity.Version
+          $parts = $current.Split('.')
+          $parts[2] = [string]([int]$parts[2] + 1)
+          $newVersion = $parts -join '.'
+          $manifest.PackageManifest.Metadata.Identity.Version = $newVersion
+          $manifest.Save($manifestPath)
+          echo "version=$newVersion" >> $env:GITHUB_OUTPUT
+          echo "Bumped version: $current -> $newVersion"
+
+      - name: Commit version bump
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add FIGLet.VisualStudioExtension/source.extension.vsixmanifest
+          git commit -m "chore: bump VS extension version to ${{ steps.version.outputs.version }} [skip ci]"
+          git push origin HEAD:master
 
       - name: Check if tag exists
         id: check_tag
