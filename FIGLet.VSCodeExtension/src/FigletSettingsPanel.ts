@@ -125,6 +125,8 @@ export class FigletSettingsPanel {
                 await config.update('fontDirectory', fontDirectory, vscode.ConfigurationTarget.Global);
                 await config.update('defaultFont',   defaultFont,   vscode.ConfigurationTarget.Global);
                 await config.update('layoutMode',    layoutMode,    vscode.ConfigurationTarget.Global);
+                this.dispose();
+                vscode.window.showInformationMessage('FIGLet settings saved.');
                 break;
             }
 

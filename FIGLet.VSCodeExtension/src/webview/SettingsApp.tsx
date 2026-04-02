@@ -163,11 +163,6 @@ const S = {
         cursor: 'pointer',
         minWidth: '72px',
     },
-    saved: {
-        color: 'var(--vscode-notificationsInfoIcon-foreground, var(--vscode-textLink-foreground))',
-        fontSize: 'var(--vscode-font-size)',
-        marginRight: '8px',
-    },
 };
 
 export function SettingsApp() {
@@ -177,7 +172,6 @@ export function SettingsApp() {
     const [fonts,         setFonts]            = useState<FontRow[]>([]);
     const [selectedFont,  setSelectedFont]     = useState('small');
     const [previewText,   setPreviewText]      = useState('Preview');
-    const [savedMsg,      setSavedMsg]         = useState('');
     const [sortCol,       setSortCol]          = useState<keyof FontRow>('name');
     const [sortAsc,       setSortAsc]          = useState(true);
 
@@ -265,8 +259,6 @@ export function SettingsApp() {
             type: 'saveSettings',
             settings: { fontDirectory, defaultFont, layoutMode },
         });
-        setSavedMsg('Saved.');
-        setTimeout(() => setSavedMsg(''), 2000);
     };
 
     const handleClose = () => {
@@ -365,7 +357,6 @@ export function SettingsApp() {
 
             {/* Footer */}
             <div style={S.footer}>
-                {savedMsg && <span style={S.saved}>{savedMsg}</span>}
                 <button style={S.btn} onClick={handleSave}>Save</button>
                 <button style={S.btnSecondary} onClick={handleClose}>Close</button>
             </div>
