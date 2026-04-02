@@ -5,6 +5,7 @@
   "description": "Create beautiful ASCII art comments in your code using FIGlet fonts",
   "version": "0.0.1",
   "license": "MIT",
+  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/PaulStSmith/figlet-comment-generator.git"
