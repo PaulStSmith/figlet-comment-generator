@@ -69,6 +69,8 @@ jobs:
 
       - name: Publish to npm
         if: steps.check_tag.outputs.exists == 'false'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --provenance
 
       - name: Create and push tag
