@@ -1,61 +1,82 @@
 <!--
-   -  ___     _                  _  _     _            _   _         _ 
+   -  ___     _                  _  _     _            _   _         _
    - | _ \___| |___ __ _ ___ ___| \| |___| |_ ___ ___ | |_| |_ _ __ | |
    - |   / -_) / -_) _` (_-</ -_) .` / _ \  _/ -_)_-<_| ' \  _| '  \| |
    - |_|_\___|_\___\__,_/__/\___|_|\_\___/\__\___/__(_)_||_\__|_|_|_|_|
-   -                                                                   
+   -
    -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>FIGlet Comment Generator - Release Notes</title>
-    <link rel="stylesheet" href="Resources/style.css">
+    <link rel="stylesheet" href="./media/style.css">
 </head>
 <body>
-<pre><code>██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗ 
-██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝ 
-██████╔╝ ╚████╔╝    ██║   █████╗  █████╗  ██║   ██║██████╔╝██║  ███╗█████╗   
-██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝   
-██████╔╝   ██║      ██║   ███████╗██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗ 
-╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ 
+<pre><code>██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
+██████╔╝ ╚████╔╝    ██║   █████╗  █████╗  ██║   ██║██████╔╝██║  ███╗█████╗
+██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝
+██████╔╝   ██║      ██║   ███████╗██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗
+╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
                  ███████╗██╗ ██████╗ ██╗     ███████╗████████╗    ███████╗██╗   ██╗██╗████████╗███████╗
                  ██╔════╝██║██╔════╝ ██║     ██╔════╝╚══██╔══╝    ██╔════╝██║   ██║██║╚══██╔══╝██╔════╝
-                 █████╗  ██║██║  ███╗██║     █████╗     ██║       ███████╗██║   ██║██║   ██║   █████╗  
-                 ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║       ╚════██║██║   ██║██║   ██║   ██╔══╝  
+                 █████╗  ██║██║  ███╗██║     █████╗     ██║       ███████╗██║   ██║██║   ██║   █████╗
+                 ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║       ╚════██║██║   ██║██║   ██║   ██╔══╝
                  ██║     ██║╚██████╔╝███████╗███████╗   ██║       ███████║╚██████╔╝██║   ██║   ███████╗
                  ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝       ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝</code></pre>
 
-    <h1>FIGlet Comment Generator - Release Notes</h1>
+    <h1>FIGlet Comment Generator &mdash; Release Notes</h1>
 
     <div class="version">
-        Version 1.2.3 - Update Release (April 2026)
+        Version 1.3.0 &mdash; Update Release (April 2026)
     </div>
 
     <div class="feature-section">
-        <h3>Enhancements and Refactoring</h3>
+        <h3>New Features</h3>
         <ul class="feature-list">
-            <li>VS Code extension now supports live preview of banners before insertion.</li>
-            <li>Improved font selection UI and added more bundled fonts.</li>
-            <li>Comment wrapping logic improved for more languages.</li>
-            <li>Performance improvements for large banners and files.</li>
-            <li>Updated to use the latest <b>FIGLet TS Library</b> for more accurate rendering.</li>
+            <li class="feature-item">Retro&#8209;terminal aesthetic with a clean, modern UI for the banner composer panel.</li>
+            <li class="feature-item">Context&#8209;aware insertion: the extension detects the cursor position and applies the correct comment syntax automatically.</li>
+            <li class="feature-item">Customizable keyboard shortcuts — default shortcut <code>Ctrl+Alt+B</code> to invoke the banner generator.</li>
+            <li class="feature-item">Live preview of banners before insertion.</li>
         </ul>
     </div>
 
     <div class="feature-section">
-        <h3>Bug Fixes</h3>
+        <h3>Enhancements</h3>
         <ul class="feature-list">
-            <li>Fixed an issue where banners were not inserted at the correct cursor position in some editors.</li>
-            <li>Resolved font preview glitches on some platforms.</li>
+            <li class="feature-item">Renderer refactored to support ANSI color codes, paragraph mode, and RTL fonts.</li>
+            <li class="feature-item">Stricter FIGfont header validation for better error messages on malformed <code>.flf</code> files.</li>
+            <li class="feature-item">Font manager now loads and caches <code>.flf</code> files from a configurable directory.</li>
+            <li class="feature-item">Updated settings panel with improved UX: accessible via <kbd>Shift+Ctrl+P</kbd> → <code>FIGLet Settings</code>, right&#8209;click context menu, or <kbd>Ctrl+,</kbd>.</li>
+            <li class="feature-item">Three layout modes fully supported: Full Size, Kerning, and Smushing (default).</li>
+            <li class="feature-item">All six official smushing rules implemented: Equal, Underscore, Hierarchy, Opposite Pair, Big X, Hardblank.</li>
         </ul>
     </div>
 
     <div class="feature-section">
-        <h3>Credits</h3>
+        <h3>Language Support</h3>
+        <p>The extension automatically detects the active file type and wraps the banner in the correct comment syntax:</p>
+        <ul class="feature-list">
+            <li class="feature-item">C&#8209;style languages (C, C++, C#, Java, JS, TS): <code>//</code> or <code>/* */</code></li>
+            <li class="feature-item">Python, PowerShell, Ruby, Shell: <code>#</code></li>
+            <li class="feature-item">HTML / XML: <code>&lt;!-- --&gt;</code></li>
+            <li class="feature-item">SQL: <code>--</code></li>
+            <li class="feature-item">20+ additional languages supported</li>
+        </ul>
+    </div>
+
+    <div class="feature-section">
+        <h3>🔧 Powered By</h3>
+        <p>This extension uses our own <strong>FIGLet TypeScript Library</strong> &mdash; part of the ByteForge FIGLet Suite &mdash;
+            for rendering FIGLet text with full support for FLF font parsing, all layout modes, and all official smushing rules.</p>
+    </div>
+
+    <div class="feature-section">
+        <h3>💡 Credits</h3>
         <ul>
-            <li>Original FIGLet concept by Frank, Ian & Glenn</li>
-            <li>Implementations by Paulo Santos (ByteForge)</li>
+            <li>Original FIGLet concept by <strong>Frank, Ian &amp; Glenn</strong></li>
+            <li>Implementations by <strong>Paulo Santos (ByteForge)</strong></li>
             <li>FIGLet specifications: <a href="http://www.figlet.org/">figlet.org</a></li>
         </ul>
     </div>
