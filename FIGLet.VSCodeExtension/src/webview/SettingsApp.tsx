@@ -188,7 +188,7 @@ export function SettingsApp() {
         if (!font)           { return '(font not loaded)'; }
         if (!previewText.trim()) { return ''; }
         try {
-            return new FIGLetRenderer(font).render(previewText.trim(), toLayoutMode(layoutMode));
+            return new FIGLetRenderer(font, toLayoutMode(layoutMode)).render(previewText.trim());
         } catch (e) {
             return `Render error: ${e}`;
         }

@@ -17,7 +17,14 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:figlet.insertBanner",
+    "onCommand:figlet.selectFontDirectory",
+    "onCommand:figlet.selectDefaultFont",
+    "onCommand:figlet.inspectConfig",
+    "onCommand:figlet.openSettings",
+    "onCommand:figlet.showWelcome"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [

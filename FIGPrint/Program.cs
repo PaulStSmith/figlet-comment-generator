@@ -1,8 +1,15 @@
-﻿using ByteForge.FIGLet; // Your FIGlet Core Library
+﻿using ByteForge.FIGLet;
 using System.CommandLine;
 
 namespace ByteForge.FIGPrint;
 
+/*
+ *  ___                              
+ * | _ \_ _ ___  __ _ _ _ __ _ _ __  
+ * |  _/ '_/ _ \/ _` | '_/ _` | '  \ 
+ * |_| |_| \___/\__, |_| \__,_|_|_|_|
+ *              |___/                
+ */
 /// <summary>
 /// The main program class for the FIGPrint application.
 /// </summary>

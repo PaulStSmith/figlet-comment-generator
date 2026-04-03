@@ -1,209 +1,344 @@
-# FIGLet Core Library
+# 🌐 **BYTEFORGE FIGLET SUITE — FIGLET .NET LIBRARY**
 
-A C# implementation of FIGLet (Frank, Ian & Glenn's letters) - a program for making large letters out of ordinary text.
+```
+██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
+██████╔╝ ╚████╔╝    ██║   █████╗  █████╗  ██║   ██║██████╔╝██║  ███╗█████╗
+██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝
+██████╔╝   ██║      ██║   ███████╗██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗
+╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+                 ███████╗██╗ ██████╗ ██╗     ███████╗████████╗    ███████╗██╗   ██╗██╗████████╗███████╗
+                 ██╔════╝██║██╔════╝ ██║     ██╔════╝╚══██╔══╝    ██╔════╝██║   ██║██║╚══██╔══╝██╔════╝
+                 █████╗  ██║██║  ███╗██║     █████╗     ██║       ███████╗██║   ██║██║   ██║   █████╗
+                 ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║       ╚════██║██║   ██║██║   ██║   ██╔══╝
+                 ██║     ██║╚██████╔╝███████╗███████╗   ██║       ███████║╚██████╔╝██║   ██║   ███████╗
+                 ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝       ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝
+```
 
-## Overview
+> **ByteForge.FIGLet**
+> *A fast, spec‑compliant FIGLet engine for .NET.*
 
-This library provides a robust and efficient implementation of the FIGLet specification, allowing you to create ASCII art from text using FIGLet fonts. It supports all standard FIGLet features including various smushing rules and layout modes.
+## 📘 Overview
 
-## Features
+`ByteForge.FIGLet` is the C# / .NET implementation of the FIGLet rendering engine at the heart of the ByteForge FIGLet Suite.
 
-- Full FIGLet font (.flf) file parsing and loading
-- Automatic handling of compressed/zipped font files
-- Support for all standard FIGLet smushing rules:
-  - Equal Character
-  - Underscore
-  - Hierarchy
-  - Opposite Pair
-  - Big X
-  - Hard Blank
-- Multiple layout modes:
-  - Full Size (no smushing)
-  - Kerning (minimal smushing)
-  - Smushing (full character overlap)
-- ANSI color support for terminal output
-- Unicode support including surrogate pairs
-- Thread-safe design
-- Efficient string manipulation with StringBuilder
-- Automatic handling of paragraph formatting
-- Default embedded font included
-- Comprehensive XML documentation
-- Nullable reference type support
+It provides a robust and efficient implementation of the FIGLet specification, allowing you to create ASCII art from text using FIGLet fonts. It supports all standard FIGLet features including various smushing rules, layout modes, ANSI color preservation, and Unicode.
 
-## Usage
+This library powers:
+
+- The **Visual Studio FIGLet Comment Generator** extension
+- The **FIGPrint CLI**
+- Any .NET application that needs FIGLet rendering
+
+## ✨ Features
+
+- 🔤 Render FIGLet text using any `.flf` font
+- 📄 Full FIGLet font (`.flf`) file parsing and loading
+- 🗜️ Automatic handling of compressed/zipped font files
+- 🎨 ANSI color support for terminal output
+- 🌏 Unicode support including surrogate pairs
+- 📝 Paragraph formatting support
+- ⚙️ Supports Full Size, Kerning, and Smushing layout modes
+- 🧠 Implements all official smushing rules
+- 📦 Default embedded font included — works out of the box
+- 🚀 No external dependencies, fast and lightweight
+- 🧱 Multi-target: .NET Framework 4.7.2 through .NET 10.0
+
+### Sample Output
+
+```
+  _  _     _ _          _        _       _    _ _
+ | || |___| | |___      \ \    / /__ _ _| |__| | |
+ | __ / -_) | / _ \_     \ \/\/ / _ \ '_| / _` |_|
+ |_||_\___|_|_\___( )     \_/\_/\___/_| |_\__,_(_)
+                  |/
+```
+
+## 🛠 Installation
+
+Install via **NuGet**:
+
+```bash
+dotnet add package FIGLet
+```
+
+Or via the NuGet Package Manager UI — search for `FIGLet`.
+
+## 🚀 Quick Start
+
+### Basic Usage
 
 ```csharp
-// Load a FIGLet font
-var font = FIGFont.FromFile("standard.flf");
+using ByteForge.FIGLet;
+
+// Load a font from a file (returns null if the file is not found)
+var font = FIGFont.FromFile("standard.flf") ?? throw new FileNotFoundException("Font not found");
 
 // Create a renderer
 var renderer = new FIGLetRenderer(font);
 
 // Render text
-string asciiArt = renderer.Render("Hello World!", LayoutMode.Smushing);
+string asciiArt = renderer.Render("Hello, World!");
 Console.WriteLine(asciiArt);
 ```
 
 ### Using the Default Font
 
-The library comes with a built-in default font:
+The library ships with a built-in default font — no file required:
 
 ```csharp
-// Use the default embedded font
-var renderer = new FIGLetRenderer();
+using ByteForge.FIGLet;
 
-// Render text
-string asciiArt = renderer.Render("Hello World!");
+var renderer = new FIGLetRenderer(FIGFont.Default);
+Console.WriteLine(renderer.Render("Hello, World!"));
+```
+
+### Static Rendering
+
+For one-shot rendering without creating a renderer instance:
+
+```csharp
+using ByteForge.FIGLet;
+
+string asciiArt = FIGLetRenderer.Render("Hello, World!");
 Console.WriteLine(asciiArt);
 ```
 
-### Sample Output
-
-Below is an example of text rendered using the default settings:
-
-```
-  _  _     _ _          _        _       _    _ _ 
- | || |___| | |___      \ \    / /__ _ _| |__| | |
- | __ / -_) | / _ \_     \ \/\/ / _ \ '_| / _` |_|
- |_||_\___|_|_\___( )     \_/\_/\___/_| |_\__,_(_)
-                  |/                               
-```
-
-### Layout Modes
+## ⚙️ Layout Modes
 
 The library supports three layout modes:
 
-1. `LayoutMode.FullSize`: No character compression
-2. `LayoutMode.Kerning`: Basic spacing adjustment
-3. `LayoutMode.Smushing`: Full character combining (default)
+| Mode | Value | Description |
+|------|-------|-------------|
+| `LayoutMode.FullSize` | `-1` | No character compression — each character is rendered at full width |
+| `LayoutMode.Kerning` | `0` | Characters are moved together until they touch but do not overlap |
+| `LayoutMode.Smushing` | `1` | Characters are merged according to the font's smushing rules (default) |
 
 ```csharp
-// Example with different layout modes
-string fullSize = renderer.Render("Text", LayoutMode.FullSize);
-string kerning = renderer.Render("Text", LayoutMode.Kerning);
-string smushing = renderer.Render("Text", LayoutMode.Smushing);
+using ByteForge.FIGLet;
+
+var font = FIGFont.Default;
+
+string fullSize = FIGLetRenderer.Render("Text", font, LayoutMode.FullSize);
+string kerning  = FIGLetRenderer.Render("Text", font, LayoutMode.Kerning);
+string smushing = FIGLetRenderer.Render("Text", font, LayoutMode.Smushing);
 ```
 
-### ANSI Color Support
+## 🧩 Smushing Rules
 
-The library supports ANSI color codes for terminal output, allowing you to create colorful FIGLet text:
+The library implements all official FIGLet smushing rules as defined in the FIGLet specification. The font file determines which rules are active.
 
-```csharp
-// Create a renderer with ANSI color support enabled
-var colorRenderer = new FIGLetRenderer(font, useANSIColors: true);
+| Rule | Flag | Description |
+|------|------|-------------|
+| Equal Character | `1` | Two identical characters smush into one |
+| Underscore | `2` | Underscore is replaced by a character from the hierarchy |
+| Hierarchy | `4` | Characters from "higher" classes replace those from "lower" ones |
+| Opposite Pair | `8` | Matching bracket/parenthesis pairs smush into a vertical bar |
+| Big X | `16` | `\` and `/` smush into `X`; `>` and `<` smush into `=` |
+| Hardblank | `32` | Two hardblanks smush into one hardblank |
 
-// Render text with ANSI colors
-string colorfulText = "\u001b[31mRed\u001b[0m \u001b[32mGreen\u001b[0m \u001b[34mBlue\u001b[0m";
-string colorfulAsciiArt = colorRenderer.Render(colorfulText);
-Console.WriteLine(colorfulAsciiArt);
-```
-
-You can also enable color support when using the static rendering methods:
-
-```csharp
-string colorfulAsciiArt = FIGLetRenderer.Render(colorfulText, font, LayoutMode.Smushing, useANSIColors: true);
-```
-
-### Paragraph Mode
-
-The library can automatically handle paragraphs in input text:
+You can inspect a font's active rules at runtime:
 
 ```csharp
-// Multi-paragraph text
-string paragraphs = "Paragraph 1\n\nParagraph 2";
+using ByteForge.FIGLet;
 
-// Enable paragraph mode (enabled by default)
-var renderer = new FIGLetRenderer(font, paragraphMode: true);
-string formattedText = renderer.Render(paragraphs);
-```
+// FromFile returns null if the file is not found
+var font = FIGFont.FromFile("standard.flf") ?? throw new FileNotFoundException("Font not found");
 
-### Smushing Rules
-
-The library implements all standard FIGLet smushing rules as defined in the FIGLet specification:
-
-```csharp
-// Check if a specific smushing rule is enabled
-bool hasEqualCharRule = font.HasSmushingRule(SmushingRules.EqualCharacter);
+bool hasEqualCharRule  = font.HasSmushingRule(SmushingRules.EqualCharacter);
 bool hasUnderscoreRule = font.HasSmushingRule(SmushingRules.Underscore);
 ```
 
-### Unicode Support
+## 📁 Font Support
 
-The library fully supports Unicode characters, including surrogate pairs:
+- Standard `.flf` font files
+- Compressed `.flf` files inside `.zip` archives (auto-detected via `FIGFontStream`)
+
+## 🎨 ANSI Color Support
+
+The library preserves ANSI color codes through the rendering process, allowing you to create colorful FIGLet text in terminals:
 
 ```csharp
-// Render Unicode text
-string unicodeArt = renderer.Render("Hello 😊 World! 你好，世界！");
+using ByteForge.FIGLet;
+
+var renderer = new FIGLetRenderer(
+    FIGFont.Default,
+    useANSIColors: true
+);
+
+string colorfulText = "\x1b[31mRed\x1b[0m \x1b[32mGreen\x1b[0m \x1b[34mBlue\x1b[0m";
+Console.WriteLine(renderer.Render(colorfulText));
 ```
 
-## Implementation Details
+## 📝 Paragraph Mode
 
-The library consists of the following main components:
+When enabled (the default), blank lines in the input produce separate FIGLet renderings spaced by the font's character height:
 
-1. **FIGFont**: Handles font loading and storage
-   - Parses .flf font files
-   - Supports loading from files, streams, or embedded resources
-   - Handles compressed/zipped font files
-   - Stores character data and font metadata
-   - Manages smushing rules configuration
+```csharp
+using ByteForge.FIGLet;
 
-2. **FIGLetRenderer**: Core rendering engine
-   - Converts input text to FIGLet output
-   - Implements character smushing logic
-   - Handles different layout modes
-   - Processes ANSI color codes
-   - Supports paragraph formatting
+var renderer = new FIGLetRenderer(FIGFont.Default);
 
-3. **LayoutMode**: Enumeration defining rendering modes
-   - Controls how characters are combined
+string paragraphs = "Paragraph 1\n\nParagraph 2";
+Console.WriteLine(renderer.Render(paragraphs));
+```
+Output:
+```text
+  ___                                  _        _ 
+ | _ \__ _ _ _ __ _ __ _ _ _ __ _ _ __| |_     / |
+ |  _/ _` | '_/ _` / _` | '_/ _` | '_ \ ' \    | |
+ |_| \__,_|_| \__,_\__, |_| \__,_| .__/_||_|   |_|
+                   |___/         |_|              
 
-4. **SmushingRules**: Flags enumeration for smushing rules
-   - Defines available character combining rules
 
-5. **FIGFontStream**: Utility class for font loading
-   - Handles automatic detection and extraction of zipped fonts
 
-## Performance Considerations
 
-- Uses `StringBuilder` for efficient string manipulation
-- Lazy initialization of the default font
-- Immutable font design for thread safety
-- Efficient regular expressions for whitespace handling
-- Optimized character smushing calculations
-- Intelligent ANSI color code handling
-- Support for surrogate pairs without performance degradation
 
-## Supported Frameworks
-
-- .NET Framework 4.7.2, 4.8, 4.8.1
-- .NET Standard 2.0, 2.1
-- .NET Core 3.1
-- .NET 5.0, 6.0, 7.0, 8.0, 9.0
-
-## NuGet Installation
-
-Install the package from NuGet:
+  ___                                  _        ___ 
+ | _ \__ _ _ _ __ _ __ _ _ _ __ _ _ __| |_     |_  )
+ |  _/ _` | '_/ _` / _` | '_/ _` | '_ \ ' \     / / 
+ |_| \__,_|_| \__,_\__, |_| \__,_| .__/_||_|   /___|
+                   |___/         |_|                
 
 ```
-Install-Package FIGLet
+
+## 🌏 Unicode Support
+
+The library fully supports Unicode characters including surrogate pairs. Characters not present in the font are skipped gracefully:
+
+```csharp
+using ByteForge.FIGLet;
+
+var renderer = new FIGLetRenderer(FIGFont.Default);
+Console.WriteLine(renderer.Render("Hello 😊 World!"));
+```
+Output:
+```
+  _  _     _ _          __      __       _    _ _ 
+ | || |___| | |___      \ \    / /__ _ _| |__| | |
+ | __ / -_) | / _ \      \ \/\/ / _ \ '_| / _` |_|
+ |_||_\___|_|_\___/       \_/\_/\___/_| |_\__,_(_)
+
+```
+## 📖 API Reference
+
+### `FIGFont`
+
+Handles font loading and storage.
+
+| Member | Description |
+|--------|-------------|
+| `FIGFont.Default` | Returns the built-in default font (lazy-loaded, cached) |
+| `FIGFont.FromFile(path)` | Loads a font from a `.flf` or `.zip` file |
+| `FIGFont.FromStream(stream)` | Loads a font from a `Stream` |
+| `FIGFont.FromReader(reader)` | Loads a font from a `TextReader` |
+| `FIGFont.FromArray(lines)` | Parses a font from a `string[]` |
+| `.Height` | Character height in rows |
+| `.HardBlank` | The hard-blank character |
+| `.Characters` | Dictionary mapping character code point → glyph rows |
+| `.SmushingRules` | Active smushing rules flags |
+| `.PrintDirection` | `0` = left-to-right, `1` = right-to-left |
+| `.HasSmushingRule(rule)` | Tests whether a specific rule is active |
+
+### `FIGLetRenderer`
+
+Core rendering engine.
+
+| Member | Description |
+|--------|-------------|
+| `new FIGLetRenderer(font, mode?, separator?, useANSIColors?, paragraphMode?)` | Create an instance |
+| `FIGLetRenderer.Render(text, font?, mode?, separator?, useANSIColors?, paragraphMode?)` | Static one-shot render |
+| `.Render(text)` | Render text using instance settings |
+| `.LayoutMode` | Active `LayoutMode` |
+| `.LineSeparator` | Line separator string (default: platform line separator) |
+| `.UseANSIColors` | Whether to preserve ANSI color codes through rendering |
+| `.ParagraphMode` | Whether blank lines produce separate FIGLet renders |
+
+### `LayoutMode`
+
+```csharp
+enum LayoutMode
+{
+    FullSize = -1,   // No character compression
+    Kerning  =  0,   // Minimal spacing
+    Smushing =  1,   // Full character overlap (default)
+    Default  =  1,
+}
 ```
 
-Or using the .NET CLI:
+### `SmushingRules`
 
+```csharp
+[Flags]
+enum SmushingRules
+{
+    None           =  0,
+    EqualCharacter =  1,
+    Underscore     =  2,
+    Hierarchy      =  4,
+    OppositePair   =  8,
+    BigX           = 16,
+    HardBlank      = 32,
+}
 ```
-dotnet add package FIGLet
-```
 
-## Contributing
+## 🏗 Implementation Details
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. **FIGFont** — Parses `.flf` font files; supports loading from files, streams, readers, or string arrays; handles ZIP-compressed font files via `FIGFontStream`; manages smushing rule configuration.
 
-## License
+2. **FIGLetRenderer** — Converts input text to FIGLet output; implements character smushing logic; handles different layout modes; processes ANSI color codes in a single pre-pass; supports paragraph formatting and RTL fonts.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+3. **LayoutMode** — Enumeration controlling how characters are combined during rendering.
 
-## Credits
+4. **SmushingRules** — Flags enumeration defining which character-combining rules are active.
 
-- Original FIGLet concept by Frank, Ian & Glenn
-- FIGLet specifications: http://www.figlet.org/
-- Implementation by Paulo Santos
+## ⚡ Performance Considerations
+
+- Default font is lazy-loaded once and cached for the application lifetime
+- ANSI color codes are handled in a single pre-pass, not during rendering
+- Surrogate pairs are supported without performance degradation
+- Efficient string building throughout the rendering pipeline
+
+## 🔧 Used By
+
+This library powers:
+
+- **Visual Studio FIGLet Comment Generator** extension
+- **FIGPrint** CLI tool
+- Any .NET application that needs ASCII art banners
+
+## 🔗 Related Packages
+
+- **[@byte-forge/figlet](https://www.npmjs.com/package/@byte-forge/figlet)** — The equivalent TypeScript / Node.js library (npm)
+- **[FIGLet Comment Generator (VS Code)](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.figlet-comment-generator)** — VS Code extension
+- **[FIGLet Comment Generator (Visual Studio)](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator)** — Visual Studio 2022+ extension
+
+## 🤝 Contributing
+
+Contributions are welcome!
+To contribute:
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a Pull Request
+
+## 📜 License
+
+This library is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+
+## 💡 Credits
+
+- Original FIGLet concept by **Frank, Ian & Glenn**
+- Implementations by **Paulo Santos (ByteForge)**
+- FIGLet specification: [figlet.org](http://www.figlet.org/)
+
+## Support
+
+If you encounter any issues or have feature requests, please:
+1. Search existing [issues](https://github.com/PaulStSmith/figlet-comment-generator/issues)
+2. Create a new issue if needed
+
+---
+
+Made with ❤️ by Paulo Santos

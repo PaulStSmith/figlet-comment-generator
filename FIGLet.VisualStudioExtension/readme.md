@@ -1,108 +1,139 @@
-# FIGLet Comment Generator for Visual Studio
+# 🌐 **BYTEFORGE FIGLET SUITE — VISUAL STUDIO EXTENSION**
 
 ```
- ___ ___ ___ _        _        ___                         _        ___                       _           
-| __|_ _/ __| |   ___| |_     / __|___ _ __  _ __  ___ _ _| |_     / __|___ _ _  ___ _ _ __ _| |_ ___ _ _ 
-| _| | | (_ | |__/ -_)  _|   | (__/ _ \ '  \| '  \/ -_) ' \  _|   | (_ / -_) ' \/ -_) '_/ _` |  _/ _ \ '_|
-|_| |___\___|____\___|\__|    \___\___/_|_|_|_|_|_\___|_||_\__|    \___\___|_||_\___|_| \__,_|\__\___/_|  
-
+██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗ 
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝ 
+██████╔╝ ╚████╔╝    ██║   █████╗  █████╗  ██║   ██║██████╔╝██║  ███╗█████╗   
+██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝   
+██████╔╝   ██║      ██║   ███████╗██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗ 
+╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ 
+                 ███████╗██╗ ██████╗ ██╗     ███████╗████████╗    ███████╗██╗   ██╗██╗████████╗███████╗
+                 ██╔════╝██║██╔════╝ ██║     ██╔════╝╚══██╔══╝    ██╔════╝██║   ██║██║╚══██╔══╝██╔════╝
+                 █████╗  ██║██║  ███╗██║     █████╗     ██║       ███████╗██║   ██║██║   ██║   █████╗  
+                 ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║       ╚════██║██║   ██║██║   ██║   ██╔══╝  
+                 ██║     ██║╚██████╔╝███████╗███████╗   ██║       ███████║╚██████╔╝██║   ██║   ███████╗
+                 ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝       ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝
 ```
 
-Add stylish ASCII art text banners to your code comments! This Visual Studio extension allows you to generate FIGLet-based ASCII art text headers that make your code more organized and visually appealing.
+> **FIGLet Comment Generator for Visual Studio**  
+> *Generate ASCII art banners directly inside your C#, C++, and .NET projects.*
 
-## Features
+## 📘 Overview
 
-* Generate ASCII art text headers for classes, methods, or any custom text
-* Integrates directly into Visual Studio's menu and context menu
-* Automatically detects current code elements (classes, methods) for quick banner creation
-* Supports a wide variety of programming languages with appropriate comment styles
-* Visual preview of generated banners before insertion
-* Multiple FIGLet fonts and layout options
-* Theme-aware UI that matches your Visual Studio color scheme
+![Extension Screenshot](Resources/screenshot.png)
 
-## Installation
+The **FIGLet Comment Generator** extension brings FIGLet ASCII art directly into **Visual Studio**.  
+Create bold, readable section headers and file banners inside your code with a single command.
 
-Install directly from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator).
+This extension is powered by the **FIGLet .NET Library** — the same engine used across the ByteForge FIGLet Suite — ensuring accurate, spec‑compliant rendering of FIGLet fonts and smushing rules.
 
-## Usage
+## ✨ Features
 
-### From the Main Menu
+- 🎨 Generate FIGLet ASCII banners inside Visual Studio  
+- 🔤 Choose from multiple FIGLet fonts  
+- 🧠 Automatically wraps banners using the correct comment syntax  
+- ⚙️ Supports Full Size, Kerning, and Smushing layout modes  
+- 🧩 Works with any language that uses line or block comments  
+- 🖥️ Clean, native Visual Studio UI  
+- 🧱 Powered by the official .NET FIGLet engine  
 
-1. Click on **Edit → FIGLet Comment Generator** in the main menu
-2. Enter your text, select a font and layout mode
-3. Preview how it will look in your code
-4. Click "OK" to insert the banner at the current cursor position
+## 🛠 Installation
 
-### From the Context Menu
+### **From Visual Studio Marketplace**
+1. Open **Extensions → Manage Extensions**  
+2. Search for:  
+   **FIGLet Comment Generator**  
+3. Click **Download**  
+4. Restart Visual Studio to complete installation  
 
-Right-click in your code editor and select one of:
-* **Insert FIGLet Banner** - Creates a banner with custom text
-* **Insert FIGLet Class Banner** - Automatically creates a banner for the current class
-* **Insert FIGLet Method Banner** - Automatically creates a banner for the current method
+### **Supported Versions**
+- Visual Studio **2022**  
+- Visual Studio **2026**  
 
-### Configuration
+## 🚀 Usage
 
-Access the extension settings via **Tools → Options → FIGLet Comment Generator**:
+### **Insert a FIGLet Banner**
+1. Open any source-code editor.
+2. Right-click where you want the banner to be and select `Insert FIGLet Banner`
+3. Enter your text  
+4. Choose a font  
+5. Press **OK**  
 
-* **Font Directory**: Specify a directory containing additional FIGLet font files (.flf)
-* **Layout Mode**: Choose the default layout mode for banners
-* **Preview**: Test how your banners will look with different fonts
+The extension will insert a fully formatted ASCII banner wrapped in the correct comment syntax for your file type.
 
-## Supported Languages
+## 🧩 Supported Languages
 
-The extension automatically detects the appropriate comment style for various programming languages, including:
+The extension automatically detects the file type and applies the correct comment style:
 
-* C#, C/C++, Java, JavaScript, TypeScript
-* Python, Ruby, Perl, R
-* HTML, XML, XAML, SVG
-* SQL variants (T-SQL, MySQL, PostgreSQL, etc.)
-* PowerShell, Bash, and many more
+- C# / C++ / Java → `//` or `/* */`  
+- F# → `//`  
+- VB.NET → `'`  
+- SQL → `--`  
+- JavaScript / TypeScript → `//`  
+- Many others supported through Visual Studio’s language service  
 
-## Custom Fonts
+## ⚙️ Settings & Customization
 
-The extension comes with the default FIGLet font, but you can add more by:
+Open **Tools → Options → FIGLet Comment Generator** to configure:
 
-1. Downloading .flf font files from [FIGLet Font Database](http://www.figlet.org/fontdb.cgi)
-2. Placing them in your configured font directory
-3. Selecting them from the dropdown in the generator dialog
+- Default FIGLet font  
+- Default layout mode  
+- FIGLet font folder
 
-## Examples
+## 🔧 Powered By
 
-### Class Banner
+This extension is powered by the **FIGLet .NET Library** — the same engine used across the ByteForge FIGLet Suite — ensuring accurate, spec‑compliant rendering of FIGLet fonts and smushing rules.
+
+- Full FLF font parsing  
+- All official smushing rules  
+- Layout modes (FullSize, Kerning, Smushing)  
+- Hardblank handling  
+- Accurate horizontal/vertical layout logic  
+
+## 🧱 Example
+
+Input:
+```
+My Section
+```
+
+Output (using “Small” font):
 ```csharp
 /*
- *   ___         _     ___ _                   _   ___      _          _           
- *  / __|___  __| |___| __| |___ _ __  ___ _ _| |_|   \ ___| |_ ___ __| |_ ___ _ _ 
- * | (__/ _ \/ _` / -_) _|| / -_) '  \/ -_) ' \  _| |) / -_)  _/ -_) _|  _/ _ \ '_|
- *  \___\___/\__,_\___|___|_\___|_|_|_\___|_||_\__|___/\___|\__\___\__|\__\___/_|  
- *                                                                                 
+ *  __  __          ___         _   _          
+ * |  \/  |_  _    / __| ___ __| |_(_)___ _ _  
+ * | |\/| | || |   \__ \/ -_) _|  _| / _ \ ' \ 
+ * |_|  |_|\_, |   |___/\___\__|\__|_\___/_||_|
+ *         |__/                                
  */
-internal partial class CodeElementDetector
-{
-    // Class implementation
-}
 ```
 
-### Method Banner
-```csharp
-/*
- * __   ___ _        _ __  __     _   _            _ ___                       
- * \ \ / (_) |_ __ _| |  \/  |___| |_| |_  ___  __| | _ \_ _ ___  __ ___ ______
- *  \ V /| |  _/ _` | | |\/| / -_)  _| ' \/ _ \/ _` |  _/ '_/ _ \/ _/ -_)_-<_-<
- *   \_/ |_|\__\__,_|_|_|  |_\___|\__|_||_\___/\__,_|_| |_| \___/\__\___/__/__/
- *                                                                             
- */
-public void VitalMethodProcess()
-{
-    // Method implementation
-}
-```
+## 🤝 Contributing
 
-## Credits
+Contributions are welcome!  
+To contribute:
 
-* Based on the [FIGLet](http://www.figlet.org/) ASCII art text technology
-* Developed by ByteForge
+1. Fork the repository  
+2. Create a feature branch  
+3. Commit your changes  
+4. Open a Pull Request  
 
-## License
+## 📜 License
 
-[MIT License](LICENSE)
+This extension is licensed under the **MIT License**.
+
+## 💡 Credits
+
+- Original FIGLet concept by **Frank, Ian & Glenn**  
+- Implementations by **Paulo Santos (ByteForge)**  
+- FIGLet specifications: [figlet.org](http://www.figlet.org/)
+
+## Support
+
+If you encounter any issues or have feature requests, please:
+1. Search existing [issues](https://github.com/PaulStSmith/FIGLet-comment-generator/issues)
+2. Create a new issue if needed
+
+---
+
+Made with ❤️ by Paulo Santos

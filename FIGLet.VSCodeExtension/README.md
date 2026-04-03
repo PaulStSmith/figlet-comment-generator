@@ -1,144 +1,135 @@
-# FIGLet Comment Generator for VS Code
+# 🌐 **BYTEFORGE FIGLET SUITE — VS CODE EXTENSION**
 
 ```
- ___ ___ ___ _        _        ___                         _        ___                       _
-| __|_ _/ __| |   ___| |_     / __|___ _ __  _ __  ___ _ _| |_     / __|___ _ _  ___ _ _ __ _| |_ ___ _ _
-| _| | | (_ | |__/ -_)  _|   | (__/ _ \ '  \| '  \/ -_) ' \  _|   | (_ / -_) ' \/ -_) '_/ _` |  _/ _ \ '_|
-|_| |___\___|____\___|\__|    \___\___/_|_|_|_|_|_\___|_||_\__|    \___\___|_||_\___|_| \__,_|\__\___/_|
+██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗ 
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝ 
+██████╔╝ ╚████╔╝    ██║   █████╗  █████╗  ██║   ██║██████╔╝██║  ███╗█████╗   
+██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝   
+██████╔╝   ██║      ██║   ███████╗██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗ 
+╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ 
+                 ███████╗██╗ ██████╗ ██╗     ███████╗████████╗    ███████╗██╗   ██╗██╗████████╗███████╗
+                 ██╔════╝██║██╔════╝ ██║     ██╔════╝╚══██╔══╝    ██╔════╝██║   ██║██║╚══██╔══╝██╔════╝
+                 █████╗  ██║██║  ███╗██║     █████╗     ██║       ███████╗██║   ██║██║   ██║   █████╗  
+                 ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║       ╚════██║██║   ██║██║   ██║   ██╔══╝  
+                 ██║     ██║╚██████╔╝███████╗███████╗   ██║       ███████║╚██████╔╝██║   ██║   ███████╗
+                 ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝       ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝
 ```
 
-Add stylish ASCII art text banners to your code comments! This VS Code extension lets you generate
-FIGLet-based ASCII art text headers that make your code more organised and visually appealing.
+> **FIGLet Comment Generator for VS Code**  
+> *Generate ASCII art banners directly inside your editor.*
 
-## Features
+## 📘 Overview
 
-* Generate ASCII art text headers for classes, methods, or any custom text
-* Integrates into the editor context menu and the Command Palette
-* Automatically wraps banners in the correct comment style for the active language
-* Supports 40+ programming languages with appropriate comment syntax
-* Live preview of the generated banner before insertion
-* Multiple FIGLet fonts and layout modes (Full Size, Kerning, Smushing)
-* Dedicated settings panel with font preview
+The **FIGLet Comment Generator** extension brings the power of FIGLet ASCII art directly into **Visual Studio Code**.  
+Create eye‑catching section headers, file banners, and comment blocks with just a few keystrokes — all rendered using the ByteForge FIGLet Suite engine.
 
-## Installation
+![Extension Screenshot](./media/screenshot.png)
 
-Install directly from the
-[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.figlet-comment-generator).
+This extension is powered by our own **FIGLet TypeScript Library** and integrates seamlessly with any programming language supported by VS Code.
 
-## Usage
+## ✨ Features
 
-### Keyboard Shortcut
+- 🎨 Generate ASCII art banners using FIGLet fonts  
+- 🔤 Choose from multiple FIGLet fonts  
+- 🧠 Automatically wraps banners in the correct comment syntax  
+- ⚙️ Supports multiple layout modes (Full Size, Kerning, Smushing)  
+- 🧩 Context‑aware insertion based on cursor position  
+- ⌨️ Customizable keyboard shortcuts  
+- 🖥️ Retro‑terminal aesthetic with clean, modern UI  
 
-Press **`Ctrl+Alt+B`** (Windows / Linux) or **`Cmd+Alt+B`** (macOS) while the editor is focused to
-open the banner generator.
+## 🛠 Installation
 
-### Command Palette
+1. Open **VS Code**  
+2. Press `Shift+Ctrl+X` (Windows/Linux) or `Shift+Cmd+X` (macOS)  
+3. Search for `FIGLet Comment Generator`
+4. Click Install
 
-Open the Command Palette (**`Ctrl+Shift+P`** / **`Cmd+Shift+P`**) and search for:
+## 🚀 Usage
 
-* **FIGlet Comments: Generate FIGlet Banner** – open the banner generator
+### **Generate a FIGLet banner**
 
-### Context Menu
+1. Place your cursor at the line where you want the banner  
+2. Press `Ctrl+Alt+B` (Windows/Linux/macOS)  
+3. Type your text  
+4. Select a font (optional)  
+5. Press **Enter**  
 
-Right-click anywhere in the editor and choose **FIGlet Comments → Generate FIGlet Banner**.
+### Example
 
-### Settings
-
-Open the settings panel via:
-
-* Context menu **FIGlet Comments → FIGlet Settings**, or
-* Command Palette **FIGlet Comments: FIGlet Settings**
-
-Available settings:
-
-| Setting | Description |
-|---|---|
-| `figlet.fontDirectory` | Path to a directory containing additional `.flf` font files |
-| `figlet.defaultFont` | Font selected by default when the panel opens |
-| `figlet.layoutMode` | Default layout: `full`, `kerning`, or `smush` |
-
-You can also configure these values in **File → Preferences → Settings** under the
-**FIGlet Comments** section.
-
-## Layout Modes
-
-| Mode | Description |
-|---|---|
-| **Full Size** | Characters placed side-by-side with no overlap |
-| **Kerning** | Characters moved together until they touch |
-| **Smushing** | Characters merged using the font's smushing rules *(default)* |
-
-## Supported Languages
-
-The extension automatically detects the appropriate comment style for the active file, including:
-
-* C#, C/C++, Java, JavaScript, TypeScript
-* Python, Ruby, Perl, R
-* HTML, XML, XAML, SVG
-* SQL variants (T-SQL, MySQL, PostgreSQL, SQLite, …)
-* PowerShell, Bash, and many more
-
-## Custom Fonts
-
-The extension ships with the built-in `small` FIGLet font. To use additional fonts:
-
-1. Download `.flf` font files from the [FIGLet Font Database](http://www.figlet.org/fontdb.cgi)
-2. Place them in a directory on your machine
-3. Set that path in **`figlet.fontDirectory`** (via Settings or the settings panel)
-4. The new fonts will appear in the font dropdown immediately
-
-## Examples
-
-### JavaScript
-
-```javascript
-//  _  _     _ _      __      __       _    _
-// | || |___| | |___  \ \    / /__ _ _| |__| |
-// | __ / -_) | / _ \  \ \/\/ / _ \ '_| / _` |
-// |_||_\___|_|_\___/   \_/\_/\___/_| |_\__,_|
-//
-function HelloWorld() {
-    // ...
-}
+Input:
+```
+Hello, World!
 ```
 
-### Python
-
+Output (using the “small” font):
 ```python
-#  ___      _   _
-# | _ \_  _| |_| |_  ___ _ _
-# |  _/ || |  _| ' \/ _ \ ' \
-# |_|  \_, |\__|_||_\___/_||_|
-#       |__/
-def python():
-    pass
+#   _  _     _ _          __      __       _    _ _
+#  | || |___| | |___      \ \    / /__ _ _| |__| | |
+#  | __ / -_) | / _ \_     \ \/\/ / _ \ '_| / _` |_|
+#  |_||_\___|_|_\___( )     \_/\_/\___/_| |_\__,_(_)
+#                   |/
 ```
 
-### C#
+## ⚙️ Configuration
 
-```csharp
-/*
- *   ___         _     ___ _                   _   ___      _          _
- *  / __|___  __| |___| __| |___ _ __  ___ _ _| |_|   \ ___| |_ ___ __| |_ ___ _ _
- * | (__/ _ \/ _` / -_) _|| / -_) '  \/ -_) ' \  _| |) / -_)  _/ -_) _|  _/ _ \ '_|
- *  \___\___/\__,_\___|___|_\___|_|_|_\___|_||_\__|___/\___|\__\___\__|\__\___/_|
- */
-internal partial class CodeElementDetector
-{
-    // ...
-}
-```
+![Settings Screenshot](./media/screenshot-settings.png)
 
-## Getting Started Page
+Open **Settings**, you have three methods:
+1. Press `Shift+Ctrl+P` and search for `FIGLet Settings`
+2. Right-click any text editor and select `FIGLet Comments > FIGLet Settings`
+3. Press `Ctrl+,` (or go to `File > Preferences > Settings`) and search for `FIGlet`
 
-After installation, a **Getting Started** page opens automatically. You can reopen it at any time
-via **FIGlet Comments: Getting Started** in the Command Palette.
+You can configure:
 
-## Credits
+- Default font  
+- Default layout mode  
+- Font folder location
 
-* Based on the [FIGLet](http://www.figlet.org/) ASCII art text technology
-* Developed by [ByteForge](https://github.com/PaulStSmith)
+## 🧩 Supported Languages
 
-## License
+The extension automatically detects the file type and uses the correct comment syntax:
 
-[MIT License](LICENSE)
+- C‑style languages: `//` or `/* */`  
+- Python: `#`  
+- HTML/XML: `<!-- -->`  
+- SQL: `--`  
+- PowerShell: `#`  
+- Many more  
+
+## 🔧 Powered By
+
+This extension uses our own **FIGLet TypeScript Library** — part of the ByteForge FIGLet Suite — for rendering FIGLet text with full support for:
+
+- FLF font parsing  
+- Layout modes (FullSize, Kerning, Smushing)  
+- Smushing rules (Equal, Underscore, Hierarchy, Opposite Pair, Big X, Hardblank)  
+
+## 🤝 Contributing
+
+Contributions are welcome!  
+If you’d like to improve the extension:
+
+1. Fork the repository  
+2. Create a feature branch  
+3. Commit your changes  
+4. Open a Pull Request  
+
+## 📜 License
+
+This extension is licensed under the **MIT License**.
+
+## 💡 Credits
+
+- Original FIGLet concept by **Frank, Ian & Glenn**  
+- Implementations by **Paulo Santos (ByteForge)**  
+- FIGLet specifications: [figlet.org](http://www.figlet.org/)
+
+## Support
+
+If you encounter any issues or have feature requests, please:
+1. Search existing [issues](https://github.com/PaulStSmith/FIGLet-comment-generator/issues)
+2. Create a new issue if needed
+
+---
+
+Made with ❤️ by Paulo Santos

@@ -235,9 +235,9 @@
                     DockPanel.Dock="Left"
                     VerticalAlignment="Center">
                     <Hyperlink 
-                        NavigateUri="https://bitl.to/4Ll1"
+                        NavigateUri="https://github.com/PaulStSmith/figlet-comment-generator/issues"
                         Click="Hyperlink_Click" >
-                        FIGLet Comment Generator
+                        Report an issue or request a feature
                     </Hyperlink>
                 </TextBlock>
             </StackPanel>
