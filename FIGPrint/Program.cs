@@ -1,4 +1,4 @@
-﻿using ByteForge.FIGLet; // Your FIGlet Core Library
+﻿using ByteForge.FIGLet;
 using System.CommandLine;
 
 namespace ByteForge.FIGPrint;
@@ -141,6 +141,13 @@ class Program
                 ShowAvailableFonts();
                 return 1;
             }
+               /*
+                *  _  _     _ _          __      __       _    _ _ 
+                * | || |___| | |___      \ \    / /__ _ _| |__| | |
+                * | __ / -_) | / _ \_     \ \/\/ / _ \ '_| / _` |_|
+                * |_||_\___|_|_\___( )     \_/\_/\___/_| |_\__,_(_)
+                *                  |/                              
+                */
 
             // Load the FIGlet font
             var font = FIGFont.FromFile(fontPath);
