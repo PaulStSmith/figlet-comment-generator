@@ -148,7 +148,9 @@ h3 {
     bottom: 100%;
     box-shadow: var(--shadow-md);
     color: white;
-    font-family: 'Fira Code', Consolas, monospace;
+    font-family: 'Cascadia Mono NF SemiLight', 'Cascadia Mono PL SemiLight', 'Cascadia Mono', 
+                 'Cascadia Code NF SemiLight', 'Cascadia Code PL SemiLight', 'Cascadia Code', 
+                 Consolas, 'Courier New', Courier, monospace;
     font-size: 0.875rem;
     left: 50%;
     opacity: 0;
@@ -160,6 +162,7 @@ h3 {
     visibility: hidden;
     white-space: pre;
     width: max-content;
+    line-height: 1.0;
     z-index: 10;
 }
 
@@ -213,8 +216,9 @@ li {
 .code, code {
     background-color: var(--code-bg);
     border-radius: 4px;
-    font-family: 'Fira Code', Consolas, monospace;
-    padding: 0.2em 0.4em;
+    font-family: 'Cascadia Mono NF SemiLight', 'Cascadia Mono PL SemiLight', 'Cascadia Mono', 
+                 'Cascadia Code NF SemiLight', 'Cascadia Code PL SemiLight', 'Cascadia Code', 
+                 Consolas, 'Courier New', Courier, monospace;
     font-size: 0.9em;
 }
 
@@ -247,7 +251,10 @@ pre {
     padding: var(--space-4);
     overflow-x: auto;
     margin: var(--space-4) 0;
-    font-family: 'Fira Code', Consolas, monospace;
+    font-family: 'Cascadia Mono NF SemiLight', 'Cascadia Mono PL SemiLight', 'Cascadia Mono', 
+                 'Cascadia Code NF SemiLight', 'Cascadia Code PL SemiLight', 'Cascadia Code', 
+                 Consolas, 'Courier New', Courier, monospace;
+    line-height: 1.0;
 }
 
 /* Responsive Design */
