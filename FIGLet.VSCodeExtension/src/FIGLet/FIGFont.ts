@@ -2,6 +2,13 @@ import { SmushingRules } from './SmushingRules.js';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
+/*
+ *   ___ ___ ___ ___        _   
+ *  | __|_ _/ __| __|__ _ _| |_ 
+ *  | _| | | (_ | _/ _ \ ' \  _|
+ *  |_| |___\___|_|\___/_||_\__|
+ *                              
+ */
 /**
  * Represents a FIGfont used for rendering text in FIGLet style.
  */
@@ -127,6 +134,14 @@ export class FIGFont {
         }
         if (headerParts.length > 7) {
             font.fullLayout = parseInt(headerParts[7]);
+        }
+
+        if (isNaN(font.height) || isNaN(font.baseline) || isNaN(font.maxLength) || isNaN(font.oldLayout) || isNaN(commentLines)) {
+            throw new Error("Invalid FIGfont header parameters");
+        }
+
+        if (lines.length < 1 + commentLines + font.height * (126 - 32 + 1)) {
+            throw new Error("Not enough lines in FIGfont file for required characters");
         }
 
         font.comments = lines.slice(1, 1 + commentLines).join('\n');
