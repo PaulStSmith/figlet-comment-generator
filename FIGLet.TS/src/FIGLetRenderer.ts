@@ -2,6 +2,13 @@ import { FIGFont } from './FIGFont.js';
 import { LayoutMode } from './LayoutMode.js';
 import { SmushingRules } from './SmushingRules.js';
 
+/*
+ *   ___ ___ ___ _        _   ___             _                 
+ *  | __|_ _/ __| |   ___| |_| _ \___ _ _  __| |___ _ _ ___ _ _ 
+ *  | _| | | (_ | |__/ -_)  _|   / -_) ' \/ _` / -_) '_/ -_) '_|
+ *  |_| |___\___|____\___|\__|_|_\___|_||_\__,_\___|_| \___|_|  
+ *                                                              
+ */
 /**
  * Class for rendering text using FIGLet fonts.
  */
@@ -443,6 +450,17 @@ export class FIGLetRenderer {
 // Ported from the C# inner class of the same name in FIGLetRenderer.cs.
 // ---------------------------------------------------------------------------
 
+/*
+ *     _   _  _ ___ ___ ___                                
+ *    /_\ | \| / __|_ _| _ \_ _ ___  __ ___ ______ ___ _ _ 
+ *   / _ \| .` \__ \| ||  _/ '_/ _ \/ _/ -_)_-<_-</ _ \ '_|
+ *  /_/ \_\_|\_|___/___|_| |_| \___/\__\___/__/__/\___/_|  
+ *                                                         
+ */
+/**
+ * Helper class to process ANSI escape sequences in the input text, 
+ * optionally preserving color codes for mapping to rendered output positions.
+ */
 class ANSIProcessor {
     /** Whether to accumulate color sequences (only needed when useANSIColors is true). */
     private readonly preserveColors: boolean;
