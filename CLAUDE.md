@@ -73,9 +73,37 @@ The VS Code extension embeds a **copy** of the TypeScript implementation at `FIG
 
 **SmushingRules** (flags): `EqualCharacter`, `Underscore`, `Hierarchy`, `OppositePair`, `BigX`, `HardBlank`
 
+**FIGLetFontManager** (VS Code extension): Singleton that loads and caches `.flf` files from the configured font directory. Exposes `availableFonts` and `setFontDirectory()`.
+
+### VS Code Webview Architecture
+
+The VS Code extension uses **React (TSX)** components for its UI, bundled by webpack:
+- `src/webview/App.tsx` — main banner composer panel
+- `src/webview/SettingsApp.tsx` — settings panel
+- `src/webview/index.tsx` / `settings-index.tsx` — React entry points
+
+The extension host and webview communicate via `postMessage`. Message types (defined in `FigletPanel.ts`):
+- `ready` — webview signals it is ready to receive data
+- `ok` — user confirmed; carries `{ text, font, layoutMode, language }`
+- `cancel` — user dismissed the panel
+- `requestFont` — webview requests raw `.flf` content by font name
+- `openExternal` — webview requests the host open a URL in the system browser
+
+When editing webview UI, run `npm run watch` (runs webpack in watch mode) and press **F5** in VS Code to launch the Extension Development Host.
+
 ### Language Comment System
 
 `LanguageCommentStyles` (in both C# and TypeScript) maps 40+ languages to their comment formats. Each extension uses this to wrap rendered ASCII art in appropriate comment syntax based on the active file type.
+
+### VS Code Extension Settings
+
+Configuration key prefix: `figlet`
+- `fontDirectory` — path to directory of `.flf` font files
+- `defaultFont` — name of the default font (default: `small`)
+- `layoutMode` — `full` | `kerning` | `smush` (default: `smush`)
+- `defaultWidth` — target render width in characters (default: `80`)
+
+Publisher ID: `paulo-santos.figlet`
 
 ### Font Management
 
@@ -135,3 +163,39 @@ The test suite uses embedded resources for fonts and expected outputs:
 - `ExpectedOutputs/*.txt`: Reference renderings for regression testing
 
 Test categories: Unit tests per component, smushing rule tests, integration tests, performance benchmarks.
+
+## Changelog Update Process
+
+**CRITICAL: ChangeLog is organized by year with separate files**
+
+The ChangeLog system uses a master index file with year-specific detail files:
+
+### File Structure:
+- **`ChangeLog.md`** - Master index with links to year-specific files and quick summaries
+- **`ChangeLog-YYYY.md`** - Detailed entries for each year (e.g., `ChangeLog-2024.md`, `ChangeLog-2025.md`)
+
+### Update Process:
+1. **Determine Year**: Check commit date to identify which year file to update
+2. **Get Full Commit Messages**: Use `git log` to retrieve complete commit messages including full body text:
+   - Use `git log --format="%h|%ad|%an|%s%n%b" --date=short` to get full commit details
+   - Each commit includes hash, date, author, subject, and complete message body
+3. **Target File**: Update the appropriate year-specific file:
+   - **2024 commits** → Update `ChangeLog-2024.md`
+   - **2025 commits** → Update `ChangeLog-2025.md`
+   - **Future years** → Create new `ChangeLog-YYYY.md` file and update master `ChangeLog.md`
+4. **Format**: Each entry uses the FULL text from the git commit message, following this pattern:
+   ```
+   ### Commit Subject Line
+   YYYY-MM-DD : Author Name
+   ● Bullet point from commit body (use full text from git log)
+   ● Additional bullet points from commit body
+   ● All details from the complete commit message
+   ```
+5. **Order**: Entries MUST be in reverse chronological order (newest commits at the TOP of the file)
+6. **Master File**: Update `ChangeLog.md` summary highlights when significant milestones are reached
+
+### Important Notes:
+- **DO NOT create custom changelog entries** - always base them on actual git commit messages
+- **DO NOT update the wrong file** - check commit dates carefully
+- **Always maintain both the master index and year-specific files**
+- **For new years**: Create new year file and add navigation link in master `ChangeLog.md`

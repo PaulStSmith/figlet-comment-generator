@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35327.3
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FIGLet", "FIGLet\FIGLet.csproj", "{95F47E11-8653-4A39-AEE4-B25FFB255F37}"
 EndProject
@@ -21,6 +21,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontGenerator", "FontGenerator\FontGenerator.csproj", "{517617B6-58D2-4AB7-84A1-2DF467C087E3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIGLet.Tests", "FIGLet.Tests\FIGLet.Tests.csproj", "{1E80FC0B-C03C-4DF3-965E-919A76412D1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{4311424D-7EB3-48E3-B250-C330A1A4F974}"
+	ProjectSection(SolutionItems) = preProject
+		ChangeLog-2024.md = ChangeLog-2024.md
+		ChangeLog-2025.md = ChangeLog-2025.md
+		ChangeLog-2026.md = ChangeLog-2026.md
+		ChangeLog.md = ChangeLog.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +103,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4311424D-7EB3-48E3-B250-C330A1A4F974} = {CB83148A-AB11-4E35-ABBF-5AF6D317CB99}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {95010506-A759-47E0-B507-C7BBCE018F9A}

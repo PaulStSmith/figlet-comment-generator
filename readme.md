@@ -57,8 +57,8 @@ It includes libraries, IDE extensions, and command‑line tools that make it eas
 Choose your environment:
 
 - **Visual Studio** → Install *FIGLet Comment Generator* from the Marketplace.  
-- **VS Code** → Install *FIGLet Comments* from the Marketplace.  
-- **CLI** → Download *FigPrint* and run `figprint Hello World`.  
+- **VS Code** → Install *FIGLet Comment Generator* from the Marketplace.  
+- **CLI** → Install *FigPrint*, using `winget install FIGPrint` and run `figprint Hello World`.  
 - **.NET / Node.js** → Add the FIGLet library via NuGet or npm.
 
 ## 🤝 Contributing
