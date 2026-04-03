@@ -155,32 +155,42 @@ public class FIGFont
         if (!header.StartsWith("flf2a"))
             throw new FormatException("Invalid FIGfont format");
 
-        var headerParts = header.Split(' ');
-        font.Signature = headerParts[0];
-        font.HardBlank = headerParts[0].Substring(5, 1)[0];
-        font.Height = int.Parse(headerParts[1]);
-        font.Baseline = int.Parse(headerParts[2]);
-        font.MaxLength = int.Parse(headerParts[3]);
-        font.OldLayout = int.Parse(headerParts[4]);
-        var commentLines = int.Parse(headerParts[5]);
-        if (headerParts.Length > 6 && int.TryParse(headerParts[6], out var printDirection))
-            font.PrintDirection = printDirection;
-        if (headerParts.Length > 7 && int.TryParse(headerParts[7], out var fullLayout))
-            font.FullLayout = fullLayout;
+        var currentLine = 1;
+        try
+        {
+            var headerParts = header.Split(' ');
+            font.Signature = headerParts[0];
+            font.HardBlank = headerParts[0].Substring(5, 1)[0];
+            font.Height = int.Parse(headerParts[1]);
+            font.Baseline = int.Parse(headerParts[2]);
+            font.MaxLength = int.Parse(headerParts[3]);
+            font.OldLayout = int.Parse(headerParts[4]);
+            var commentLines = int.Parse(headerParts[5]);
+            if (headerParts.Length > 6 && int.TryParse(headerParts[6], out var printDirection))
+                font.PrintDirection = printDirection;
+            if (headerParts.Length > 7 && int.TryParse(headerParts[7], out var fullLayout))
+                font.FullLayout = fullLayout;
 
-        font.Comments = string.Join("\n", lines.Skip(1).Take(commentLines));
+            if (lines.Length < 1 + commentLines + (font.Height * (126 - 32 + 1)))
+                throw new FormatException("Not enough lines in FIGfont file for required characters");
 
-        // Skip header and comments
-        var currentLine = 1 + commentLines;
+            font.Comments = string.Join("\n", lines.Skip(1).Take(commentLines));
+
+            // Skip header and comments
+            currentLine += commentLines;
+        }
+        catch (Exception ex)
+        {
+            throw new FormatException("Error parsing FIGfont header: " + ex.Message, ex);
+        }
 
         // Load required characters (ASCII 32-126)
         for (var charCode = 32; charCode <= 126; charCode++)
         {
             var charLines = new string[font.Height];
             for (var i = 0; i < font.Height; i++)
-            {
                 ParseCharacterLine(lines, font, currentLine, charLines, i);
-            }
+
             font.Characters.Add(charCode, charLines);
             currentLine += font.Height;
         }
