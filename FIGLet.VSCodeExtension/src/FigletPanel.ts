@@ -223,7 +223,7 @@ export class FigletPanel {
                 msg.layoutMode === 'kerning' ? LayoutMode.Kerning :
                     LayoutMode.Smushing;
 
-        const figletText = new FIGLetRenderer(font).render(msg.text, layoutMode);
+        const figletText = new FIGLetRenderer(font, layoutMode).render(msg.text);
         await BannerUtils.insertBanner(editor, figletText, msg.language);
     }
 

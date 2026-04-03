@@ -104,7 +104,7 @@ function buildPreview(text: string, font: FIGFont | undefined, layout: LayoutKey
     if (!font) { return '(font not loaded)'; }
     const renderText = text.trim() || PREVIEW_PLACEHOLDER;
     try {
-        const rendered = new FIGLetRenderer(font).render(renderText, toLayoutMode(layout));
+        const rendered = new FIGLetRenderer(font, toLayoutMode(layout)).render(renderText);
         return LanguageCommentStyles.wrapInComments(rendered, language);
     } catch (e) {
         return `Render error: ${e}`;
@@ -267,7 +267,7 @@ export function App() {
     };
 
     const handleLinkClick = () => {
-        vscode.postMessage({ type: 'openExternal', url: 'https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator' });
+        vscode.postMessage({ type: 'openExternal', url: 'https://github.com/PaulStSmith/figlet-comment-generator/issues' });
     };
 
     return (
@@ -318,7 +318,7 @@ export function App() {
                     tabIndex={0}
                     onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleLinkClick(); } }}
                 >
-                    FIGLet Comment Generator
+                    Report an issue or request a feature
                 </span>
                 <div style={S.spacer} />
                 <button style={S.btn} onClick={handleOk} disabled={!inputText.trim()}>
