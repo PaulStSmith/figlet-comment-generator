@@ -1,6 +1,13 @@
 import * as vscode from 'vscode';
 import { LanguageCommentStyles } from './LanguageCommentStyles';
 
+/*
+ *   ___                         _   _ _   _ _    
+ *  | _ ) __ _ _ _  _ _  ___ _ _| | | | |_(_) |___
+ *  | _ \/ _` | ' \| ' \/ -_) '_| |_| |  _| | (_-<
+ *  |___/\__,_|_||_|_||_\___|_|  \___/ \__|_|_/__/
+ *                                                
+ */
 export class BannerUtils {
     /**
      * Generates the indentation string based on the current line

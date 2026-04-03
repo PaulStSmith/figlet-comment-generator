@@ -1,5 +1,12 @@
 import * as vscode from 'vscode';
 
+/*
+ *  __      __   _                  ___               _ 
+ *  \ \    / /__| |__ ___ _ __  ___| _ \__ _ _ _  ___| |
+ *   \ \/\/ / -_) / _/ _ \ '  \/ -_)  _/ _` | ' \/ -_) |
+ *    \_/\_/\___|_\__\___/_|_|_\___|_| \__,_|_||_\___|_|
+ *                                                      
+ */
 /**
  * A read-only webview panel shown on first install (and on demand via the
  * "FIGLet: Getting Started" command) that explains how to use the extension.

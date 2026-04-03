@@ -2,6 +2,13 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+/*
+ *   ___ _      _        _    ___ ___        __ _      
+ *  | __(_)__ _| |   ___| |_ / __/ _ \ _ _  / _(_)__ _ 
+ *  | _|| / _` | |__/ -_)  _| (_| (_) | ' \|  _| / _` |
+ *  |_| |_\__, |____\___|\__|\___\___/|_||_|_| |_\__, |
+ *        |___/                                  |___/ 
+ */
 export interface FigletConfig {
     fontDirectory: string;
     defaultFont: string;
@@ -9,6 +16,13 @@ export interface FigletConfig {
     defaultWidth?: number;
 }
 
+/*
+ *    ___           __ _                    _   _          __  __                             
+ *   / __|___ _ _  / _(_)__ _ _  _ _ _ __ _| |_(_)___ _ _ |  \/  |__ _ _ _  __ _ __ _ ___ _ _ 
+ *  | (__/ _ \ ' \|  _| / _` | || | '_/ _` |  _| / _ \ ' \| |\/| / _` | ' \/ _` / _` / -_) '_|
+ *   \___\___/_||_|_| |_\__, |\_,_|_| \__,_|\__|_\___/_||_|_|  |_\__,_|_||_\__,_\__, \___|_|  
+ *                      |___/                                                   |___/         
+ */
 export class ConfigurationManager {
     private static readonly SECTION = 'figlet';
 

@@ -2,6 +2,13 @@ import * as path from 'path';
 import { FIGFont } from './FIGLet/FIGFont.js';
 import { SmushingRules } from './FIGLet/SmushingRules.js';
 
+/*
+ *   ___ ___ ___ ___        _   ___       __     
+ *  | __|_ _/ __| __|__ _ _| |_|_ _|_ _  / _|___ 
+ *  | _| | | (_ | _/ _ \ ' \  _|| || ' \|  _/ _ \
+ *  |_| |___\___|_|\___/_||_\__|___|_||_|_| \___/
+ *                                               
+ */
 /**
  * Factory class for creating FIGFontInfo instances
  */
