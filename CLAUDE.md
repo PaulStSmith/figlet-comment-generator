@@ -103,7 +103,7 @@ Configuration key prefix: `figlet`
 - `layoutMode` — `full` | `kerning` | `smush` (default: `smush`)
 - `defaultWidth` — target render width in characters (default: `80`)
 
-Publisher ID: `paulo-santos.figlet`
+Publisher ID: `PaulStSmith.figlet-comment-generator`
 
 ### Font Management
 

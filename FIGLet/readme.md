@@ -42,7 +42,7 @@ This library powers:
 - 🧠 Implements all official smushing rules
 - 📦 Default embedded font included — works out of the box
 - 🚀 No external dependencies, fast and lightweight
-- 🧱 Multi-target: .NET Framework 4.7.2 through .NET 9.0
+- 🧱 Multi-target: .NET Framework 4.7.2 through .NET 10.0
 
 ### Sample Output
 

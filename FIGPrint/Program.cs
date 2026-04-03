@@ -3,6 +3,13 @@ using System.CommandLine;
 
 namespace ByteForge.FIGPrint;
 
+/*
+ *  ___                              
+ * | _ \_ _ ___  __ _ _ _ __ _ _ __  
+ * |  _/ '_/ _ \/ _` | '_/ _` | '  \ 
+ * |_| |_| \___/\__, |_| \__,_|_|_|_|
+ *              |___/                
+ */
 /// <summary>
 /// The main program class for the FIGPrint application.
 /// </summary>
@@ -141,13 +148,6 @@ class Program
                 ShowAvailableFonts();
                 return 1;
             }
-               /*
-                *  _  _     _ _          __      __       _    _ _ 
-                * | || |___| | |___      \ \    / /__ _ _| |__| | |
-                * | __ / -_) | / _ \_     \ \/\/ / _ \ '_| / _` |_|
-                * |_||_\___|_|_\___( )     \_/\_/\___/_| |_\__,_(_)
-                *                  |/                              
-                */
 
             // Load the FIGlet font
             var font = FIGFont.FromFile(fontPath);

@@ -77,7 +77,7 @@ Output (using the “small” font):
 Open **Settings**, you have three methods:
 1. Press `Shift+Ctrl+P` and search for `FIGLet Settings`
 2. Right-click any text editor and select `FIGLet Comments > FIGLet Settings`
-3. Press `Ctrl+,` (or go to `File > Prefernce > Settings`) and search for `FIGlet`
+3. Press `Ctrl+,` (or go to `File > Preferences > Settings`) and search for `FIGlet`
 
 You can configure:
 
@@ -98,7 +98,7 @@ The extension automatically detects the file type and uses the correct comment s
 
 ## 🔧 Powered By
 
-This extension uses pur own **LIGLet TypeScript Library** — part of the ByteForge FIGLet Suite — for rendering FIGLet text with full support for:
+This extension uses our own **FIGLet TypeScript Library** — part of the ByteForge FIGLet Suite — for rendering FIGLet text with full support for:
 
 - FLF font parsing  
 - Layout modes (FullSize, Kerning, Smushing)  

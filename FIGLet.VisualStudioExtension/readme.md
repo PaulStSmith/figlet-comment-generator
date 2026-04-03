@@ -20,7 +20,7 @@
 
 ## 📘 Overview
 
-![Extension Screenshot]
+![Extension Screenshot](Resources/screenshot.png)
 
 The **FIGLet Comment Generator** extension brings FIGLet ASCII art directly into **Visual Studio**.  
 Create bold, readable section headers and file banners inside your code with a single command.
