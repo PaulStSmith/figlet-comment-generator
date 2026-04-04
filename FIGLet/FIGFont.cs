@@ -242,7 +242,7 @@ public class FIGFont
         if (blockStart >= lines.Length)
             return '@';
         var firstRaw = lines[blockStart].TrimEnd('\r', '\n');
-        return firstRaw.Length > 0 ? firstRaw[^1] : '@';
+        return firstRaw.Length > 0 ? firstRaw[firstRaw.Length - 1] : '@';
     }
 
     private static void ParseCharacterLine(string[] lines, FIGFont font, int currentLine, string[] charLines, int i, char endmark)
