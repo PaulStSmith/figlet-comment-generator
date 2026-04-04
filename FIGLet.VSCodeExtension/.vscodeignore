@@ -26,6 +26,12 @@ CONTRIBUTING.md
 CHANGELOG.md
 vsc-extension-quickstart.md
 
+# Media — screenshot and icon PNGs are intentionally kept; Marketplace renders them from README.md
+# media/screenshot.png        ← kept
+# media/screenshot-settings.png ← kept
+# media/icon.png               ← kept
+media/*.js.LICENSE.txt
+
 # Type-only files already compiled into out/
 **/*.ts
 
