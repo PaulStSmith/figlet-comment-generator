@@ -6,6 +6,7 @@ on:
     paths:
       - 'FIGLet/FIGLet.csproj'
       - 'FIGLet.TS/package.json'
+      - 'FIGLet.Python/pyproject.toml'
 
 jobs:
   sync:
@@ -33,26 +34,36 @@ jobs:
       - name: Read versions
         id: versions
         run: |
-          CS_VER=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj)
+          CS_VER=$(grep -om1 '<Version>[^<]*' FIGLet/FIGLet.csproj | sed 's/<Version>//')
           TS_VER=$(node -p "require('./FIGLet.TS/package.json').version")
+          PY_VER=$(python3 - <<'EOF'
+          import re
+          text = open("FIGLet.Python/pyproject.toml").read()
+          m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.MULTILINE)
+          print(m.group(1) if m else "0.0.0")
+          EOF
+          )
           echo "cs=$CS_VER" >> $GITHUB_OUTPUT
           echo "ts=$TS_VER" >> $GITHUB_OUTPUT
-          echo "C# version:  $CS_VER"
-          echo "TS  version: $TS_VER"
+          echo "py=$PY_VER" >> $GITHUB_OUTPUT
+          echo "C# version:     $CS_VER"
+          echo "TS  version:    $TS_VER"
+          echo "Python version: $PY_VER"
 
       - name: Determine target version
         id: target
         run: |
           CS_VER="${{ steps.versions.outputs.cs }}"
           TS_VER="${{ steps.versions.outputs.ts }}"
-          if [ "$CS_VER" = "$TS_VER" ]; then
+          PY_VER="${{ steps.versions.outputs.py }}"
+          GREATER=$(printf '%s\n' "$CS_VER" "$TS_VER" "$PY_VER" | sort -V | tail -1)
+          if [ "$CS_VER" = "$GREATER" ] && [ "$TS_VER" = "$GREATER" ] && [ "$PY_VER" = "$GREATER" ]; then
             echo "in_sync=true" >> $GITHUB_OUTPUT
-            echo "Versions already in sync: $CS_VER"
+            echo "All versions already in sync: $GREATER"
           else
-            GREATER=$(printf '%s\n' "$CS_VER" "$TS_VER" | sort -V | tail -1)
             echo "in_sync=false" >> $GITHUB_OUTPUT
             echo "version=$GREATER" >> $GITHUB_OUTPUT
-            echo "Versions differ — will sync both to $GREATER"
+            echo "Versions differ — will sync all to $GREATER"
           fi
 
       - name: Update C# version
@@ -74,11 +85,31 @@ jobs:
           " "$TARGET"
           echo "Updated package.json to $TARGET"
 
+      - name: Update Python version
+        if: steps.target.outputs.in_sync == 'false' && steps.versions.outputs.py != steps.target.outputs.version
+        run: |
+          TARGET="${{ steps.target.outputs.version }}"
+          python3 - "$TARGET" <<'EOF'
+          import re, sys
+          new_ver = sys.argv[1]
+          path = "FIGLet.Python/pyproject.toml"
+          text = open(path).read()
+          text = re.sub(r'^(version\s*=\s*)"[^"]+"', rf'\1"{new_ver}"', text, flags=re.MULTILINE)
+          open(path, "w").write(text)
+          init_path = "FIGLet.Python/byteforge_figlet/__init__.py"
+          init_text = open(init_path).read()
+          init_text = re.sub(r'__version__\s*=\s*"[^"]+"', f'__version__ = "{new_ver}"', init_text)
+          open(init_path, "w").write(init_text)
+          print(f"Updated pyproject.toml and __init__.py to {new_ver}")
+          EOF
+          echo "Updated Python to $TARGET"
+
       - name: Commit and push sync
         if: steps.target.outputs.in_sync == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add FIGLet/FIGLet.csproj FIGLet.TS/package.json
+          git add FIGLet/FIGLet.csproj FIGLet.TS/package.json \
+                  FIGLet.Python/pyproject.toml FIGLet.Python/byteforge_figlet/__init__.py
           git commit -m "chore: sync library versions to ${{ steps.target.outputs.version }} [skip ci]"
           git push origin HEAD:${{ github.head_ref }}
