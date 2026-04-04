@@ -209,9 +209,15 @@ When addressing review comments on a PR (from Copilot, team members, or any revi
 
 To reply to an inline PR comment via `gh`:
 ```bash
-gh api repos/OWNER/REPO/pulls/comments/COMMENT_ID/replies \
-  -X POST -f body="Your reply here"
+gh api repos/OWNER/REPO/pulls/PR_NUMBER/comments \
+  -X POST \
+  -f body="Your reply here" \
+  -f commit_id="$(gh api repos/OWNER/REPO/pulls/PR_NUMBER --jq '.head.sha')" \
+  -f path="path/to/file.ext" \
+  -F position=LINE_POSITION \
+  -f in_reply_to="COMMENT_ID"
 ```
+> **Note:** The `/pulls/comments/COMMENT_ID/replies` endpoint only works for comments that are themselves replies. For top-level review comments, use the form above with `in_reply_to`.
 
 - Keep replies concise: describe what was changed and why it resolves the concern
 - Reply to each comment individually as it is addressed, not in a batch at the end
