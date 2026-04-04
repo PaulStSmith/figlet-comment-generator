@@ -225,6 +225,22 @@ public class FIGFont
     }
 
     /// <summary>
+    /// Detects the endmark character used by a glyph block from the last character
+    /// of its first raw line (after stripping CR/LF).  Falls back to '@' if the
+    /// line is empty.
+    /// </summary>
+    /// <param name="lines">The array of lines containing the FIGfont data.</param>
+    /// <param name="blockStart">The index of the first line of the glyph block.</param>
+    private static char DetectEndmark(string[] lines, int blockStart)
+    {
+        if (blockStart >= lines.Length)
+            return '@';
+        var firstRaw = lines[blockStart].TrimEnd('\r', '\n');
+        // Use Length-1 indexing (rather than ^1) for .NET Framework 4.7.2 compatibility.
+        return firstRaw.Length > 0 ? firstRaw[firstRaw.Length - 1] : '@';
+    }
+
+    /// <summary>
     /// Parses a single character line from the FIGfont data.
     /// </summary>
     /// <param name="lines">The array of lines containing the FIGfont data.</param>
@@ -232,19 +248,7 @@ public class FIGFont
     /// <param name="currentLine">The current line index in the FIGfont data.</param>
     /// <param name="charLines">The array of character lines being populated.</param>
     /// <param name="i">The index of the current character line.</param>
-    /// <summary>
-    /// Detects the endmark character used by a glyph block from the last character
-    /// of its first raw line (after stripping CR/LF).  Falls back to '@' if the
-    /// line is empty.
-    /// </summary>
-    private static char DetectEndmark(string[] lines, int blockStart)
-    {
-        if (blockStart >= lines.Length)
-            return '@';
-        var firstRaw = lines[blockStart].TrimEnd('\r', '\n');
-        return firstRaw.Length > 0 ? firstRaw[firstRaw.Length - 1] : '@';
-    }
-
+    /// <param name="endmark">The endmark character detected for this glyph block.</param>
     private static void ParseCharacterLine(string[] lines, FIGFont font, int currentLine, string[] charLines, int i, char endmark)
     {
         charLines[i] = lines[currentLine + i].TrimEnd('\r', '\n').TrimEnd(endmark);

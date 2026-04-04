@@ -11,6 +11,9 @@
     <Nullable>enable</Nullable>
     <LangVersion>12.0</LangVersion>
     <AssemblyName>ByteForge.$(MSBuildProjectName)</AssemblyName>
+    <!-- NU1510: System.IO.Compression is an intentional explicit reference required for
+         .NET Framework 4.7.2 targets where it is not implicitly available. The warning
+         is a false positive on multi-targeted builds and is safe to suppress here. -->
     <NoWarn>$(NoWarn);NU1510</NoWarn>
   </PropertyGroup>
   <ItemGroup>
