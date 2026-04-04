@@ -172,48 +172,52 @@ jobs:
             $manifestDir = "$manifestsOut/manifests/b/ByteForge/FIGPrint/$version"
             New-Item -ItemType Directory -Force -Path $manifestDir | Out-Null
 
-            Set-Content "$manifestDir/ByteForge.FIGPrint.yaml" -Encoding UTF8 -Value @"
-PackageIdentifier: ByteForge.FIGPrint
-PackageVersion: $version
-DefaultLocale: en-US
-ManifestType: version
-ManifestVersion: 1.6.0
-"@
+            # PowerShell here-strings require "@ at column 0, which conflicts with
+            # YAML indentation. Use string arrays joined with newlines instead.
+            $n = "`n"
 
-            Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -Value @"
-PackageIdentifier: ByteForge.FIGPrint
-PackageVersion: $version
-InstallerType: zip
-NestedInstallerType: portable
-NestedInstallerFiles:
-- RelativeFilePath: FIGPrint.exe
-  PortableCommandAlias: figprint
-Installers:
-- Architecture: x64
-  InstallerUrl: $x64Url
-  InstallerSha256: $x64Sha256
-- Architecture: arm64
-  InstallerUrl: $arm64Url
-  InstallerSha256: $arm64Sha256
-ManifestType: installer
-ManifestVersion: 1.6.0
-"@
+            @("PackageIdentifier: ByteForge.FIGPrint",
+              "PackageVersion: $version",
+              "DefaultLocale: en-US",
+              "ManifestType: version",
+              "ManifestVersion: 1.6.0",
+              "") -join $n |
+              Set-Content "$manifestDir/ByteForge.FIGPrint.yaml" -Encoding UTF8 -NoNewline
 
-            Set-Content "$manifestDir/ByteForge.FIGPrint.locale.en-US.yaml" -Encoding UTF8 -Value @"
-PackageIdentifier: ByteForge.FIGPrint
-PackageVersion: $version
-PackageLocale: en-US
-Publisher: ByteForge
-PublisherUrl: https://github.com/PaulStSmith
-PublisherSupportUrl: https://github.com/${{ github.repository }}/issues
-PackageName: FIGPrint
-PackageUrl: https://github.com/${{ github.repository }}
-License: MIT
-LicenseUrl: https://github.com/${{ github.repository }}/blob/master/LICENSE
-ShortDescription: Command-line utility for rendering text using FIGlet fonts
-ManifestType: defaultLocale
-ManifestVersion: 1.6.0
-"@
+            @("PackageIdentifier: ByteForge.FIGPrint",
+              "PackageVersion: $version",
+              "InstallerType: zip",
+              "NestedInstallerType: portable",
+              "NestedInstallerFiles:",
+              "- RelativeFilePath: FIGPrint.exe",
+              "  PortableCommandAlias: figprint",
+              "Installers:",
+              "- Architecture: x64",
+              "  InstallerUrl: $x64Url",
+              "  InstallerSha256: $x64Sha256",
+              "- Architecture: arm64",
+              "  InstallerUrl: $arm64Url",
+              "  InstallerSha256: $arm64Sha256",
+              "ManifestType: installer",
+              "ManifestVersion: 1.6.0",
+              "") -join $n |
+              Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -NoNewline
+
+            @("PackageIdentifier: ByteForge.FIGPrint",
+              "PackageVersion: $version",
+              "PackageLocale: en-US",
+              "Publisher: ByteForge",
+              "PublisherUrl: https://github.com/PaulStSmith",
+              "PublisherSupportUrl: https://github.com/${{ github.repository }}/issues",
+              "PackageName: FIGPrint",
+              "PackageUrl: https://github.com/${{ github.repository }}",
+              "License: MIT",
+              "LicenseUrl: https://github.com/${{ github.repository }}/blob/master/LICENSE",
+              "ShortDescription: Command-line utility for rendering text using FIGlet fonts",
+              "ManifestType: defaultLocale",
+              "ManifestVersion: 1.6.0",
+              "") -join $n |
+              Set-Content "$manifestDir/ByteForge.FIGPrint.locale.en-US.yaml" -Encoding UTF8 -NoNewline
           }
 
           # Locate the generated YAML files (wingetcreate nests them under

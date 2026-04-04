@@ -50,13 +50,39 @@ jobs:
         run: |
           CS_VER=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj)
           TS_VER=$(node -p "require('./FIGLet.TS/package.json').version")
-          echo "C# version:  $CS_VER"
-          echo "TS  version: $TS_VER"
-          if [ "$CS_VER" != "$TS_VER" ]; then
-            echo "::error::Version mismatch — FIGLet.csproj ($CS_VER) and FIGLet.TS/package.json ($TS_VER) must be the same."
+          PY_VER=$(grep -oPm1 '(?<=^version = ")[^"]+' FIGLet.Python/pyproject.toml)
+          echo "C#     version: $CS_VER"
+          echo "TS     version: $TS_VER"
+          echo "Python version: $PY_VER"
+          if [ "$CS_VER" != "$TS_VER" ] || [ "$CS_VER" != "$PY_VER" ]; then
+            echo "::error::Version mismatch — FIGLet.csproj ($CS_VER), FIGLet.TS/package.json ($TS_VER), and FIGLet.Python/pyproject.toml ($PY_VER) must all be the same."
             exit 1
           fi
           echo "Versions match: $CS_VER"
+
+  # -------------------------------------------------------------------------
+  # Python — install and run pytest suite
+  # -------------------------------------------------------------------------
+  test-python:
+    name: Python Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        working-directory: FIGLet.Python
+        run: pip install pytest .
+
+      - name: Test
+        working-directory: FIGLet.Python
+        run: pytest tests/ -v
 
   # -------------------------------------------------------------------------
   # TypeScript — build and run Vitest suite

@@ -36,33 +36,10 @@ jobs:
         working-directory: FIGLet.Python
         run: |
           # Read major.minor from pyproject.toml; use the Actions run number as patch.
-          BASE=$(python - <<'EOF'
-          import re, sys
-          text = open("pyproject.toml").read()
-          m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.MULTILINE)
-          if not m:
-              sys.exit("version not found in pyproject.toml")
-          ver = m.group(1)
-          # Strip patch component to get major.minor
-          parts = ver.rsplit(".", 1)
-          print(parts[0])
-          EOF
-          )
+          BASE=$(python3 -c "import re; t=open('pyproject.toml').read(); m=re.search(r'version\s*=\s*\"([^\"]+)\"', t); print(m.group(1).rsplit('.', 1)[0])")
           NEW_VERSION="$BASE.${{ github.run_number }}"
-          python - "$NEW_VERSION" <<'EOF'
-          import re, sys
-          new_ver = sys.argv[1]
-          path = "pyproject.toml"
-          text = open(path).read()
-          text = re.sub(r'^(version\s*=\s*)"[^"]+"', rf'\1"{new_ver}"', text, flags=re.MULTILINE)
-          # Also update __version__ in __init__.py
-          init_path = "byteforge_figlet/__init__.py"
-          init_text = open(init_path).read()
-          init_text = re.sub(r'__version__\s*=\s*"[^"]+"', f'__version__ = "{new_ver}"', init_text)
-          open(path, "w").write(text)
-          open(init_path, "w").write(init_text)
-          print(f"Updated to {new_ver}")
-          EOF
+          sed -i "s/^version = \"[^\"]*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" byteforge_figlet/__init__.py
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Version: $NEW_VERSION"
 
