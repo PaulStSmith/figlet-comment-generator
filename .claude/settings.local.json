@@ -16,7 +16,11 @@
       "Bash(../.venv/Scripts/pytest tests/test_renderer.py::TestRender::test_all_test_texts -v)",
       "Bash(python3 -c \":*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm test:*)",
+      "Bash(dotnet build:*)",
+      "Bash(grep -v \"^$\")"
     ],
     "deny": [],
     "ask": []
