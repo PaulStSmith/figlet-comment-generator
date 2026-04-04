@@ -112,11 +112,15 @@ jobs:
       - name: Submit to winget
         if: steps.check_tag.outputs.exists == 'false'
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
         run: |
-          $version   = "${{ steps.version.outputs.version }}"
-          $x64Url    = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
-          $arm64Url  = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
-          $token     = "${{ secrets.WINGET_GITHUB_TOKEN }}"
+          $version    = "${{ steps.version.outputs.version }}"
+          $x64Url     = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-x64.zip"
+          $arm64Url   = "https://github.com/${{ github.repository }}/releases/download/figprint-v$version/FIGPrint-$version-win-arm64.zip"
+          $token      = "${{ secrets.WINGET_GITHUB_TOKEN }}"
+          $packageId  = "ByteForge.FIGPrint"
+          $manifestsOut = "./winget-manifests"
 
           # Install wingetcreate
           Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
@@ -134,7 +138,6 @@ jobs:
             if ($_.Exception -and $_.Exception.Response -and $_.Exception.Response.StatusCode) {
               $statusCode = [int]$_.Exception.Response.StatusCode
             }
-
             if ($statusCode -eq 404) {
               Write-Host "Package not found in winget-pkgs (HTTP 404). Treating as first-time submission."
               $exists = $false
@@ -144,22 +147,93 @@ jobs:
             }
           }
 
+          # Generate manifest YAML files locally (no --submit; we open the PR ourselves
+          # so we can control the branch name and PR title format).
           if ($exists) {
-            Write-Host "Package exists — submitting update for v$version"
-            ./wingetcreate.exe update ByteForge.FIGPrint `
+            Write-Host "Package exists — generating update manifest for v$version"
+            ./wingetcreate.exe update $packageId `
               --version $version `
               --urls "$x64Url|x64" "$arm64Url|arm64" `
-              --submit `
+              --out $manifestsOut `
               --token $token
           } else {
-            Write-Host "Package not found — submitting new manifest for v$version"
+            Write-Host "Package not found — generating new manifest for v$version"
             ./wingetcreate.exe new "$x64Url" "$arm64Url" `
-              --id          ByteForge.FIGPrint `
-              --name        FIGPrint `
-              --publisher   ByteForge `
-              --version     $version `
-              --license     MIT `
+              --id                ByteForge.FIGPrint `
+              --name              FIGPrint `
+              --publisher         ByteForge `
+              --publisher-url     "https://github.com/PaulStSmith" `
+              --publisher-support-url "https://github.com/${{ github.repository }}/issues" `
+              --package-url       "https://github.com/${{ github.repository }}" `
+              --version           $version `
+              --license           MIT `
+              --license-url       "https://github.com/${{ github.repository }}/blob/master/LICENSE" `
               --short-description "Command-line utility for rendering text using FIGlet fonts" `
-              --submit `
-              --token $token
+              --out               $manifestsOut `
+              --token             $token
           }
+
+          # Locate the generated YAML files (wingetcreate nests them under
+          # manifests/<letter>/<Publisher>/<Package>/<version>/)
+          $yamlFiles = Get-ChildItem -Path $manifestsOut -Recurse -Filter "*.yaml"
+          if ($yamlFiles.Count -eq 0) {
+            Write-Error "wingetcreate did not produce any YAML files in $manifestsOut"
+            exit 1
+          }
+          Write-Host "Generated $($yamlFiles.Count) manifest file(s):"
+          $yamlFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
+
+          # Identify the token owner (the fork will live under their account)
+          $ownerLogin = gh api user --jq '.login'
+          Write-Host "Submitting PR as: $ownerLogin"
+
+          # Ensure a fork of microsoft/winget-pkgs exists under the token owner
+          gh repo fork microsoft/winget-pkgs --clone=false
+          Write-Host "Fork ready at $ownerLogin/winget-pkgs"
+
+          # Get the current HEAD SHA of microsoft/winget-pkgs master
+          $baseSha = gh api repos/microsoft/winget-pkgs/git/refs/heads/master --jq '.object.sha'
+
+          # Create (or recreate) a branch on the fork
+          $branchName = "figprint-v$version"
+          $existingRef = gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" 2>&1
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Branch $branchName already exists — deleting and recreating"
+            gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" -X DELETE
+          }
+          gh api "repos/$ownerLogin/winget-pkgs/git/refs" `
+            -X POST `
+            -f ref="refs/heads/$branchName" `
+            -f sha="$baseSha" | Out-Null
+          Write-Host "Created branch $branchName"
+
+          # Upload each YAML file to the correct path in the fork branch
+          $targetBase = "manifests/b/ByteForge/FIGPrint/$version"
+          foreach ($file in $yamlFiles) {
+            $content     = [Convert]::ToBase64String(
+                             [System.Text.Encoding]::UTF8.GetBytes(
+                               (Get-Content $file.FullName -Raw)))
+            $targetPath  = "$targetBase/$($file.Name)"
+            Write-Host "Uploading $($file.Name) → $targetPath"
+            gh api "repos/$ownerLogin/winget-pkgs/contents/$targetPath" `
+              -X PUT `
+              -f message="Add $packageId $version" `
+              -f content="$content" `
+              -f branch="$branchName" | Out-Null
+          }
+
+          # Open the PR with the required winget title format
+          $prTitle = if ($exists) {
+            "New version: $packageId version $version"
+          } else {
+            "New package: $packageId version $version"
+          }
+          $prBody  = "Automated submission from [$packageId v$version](https://github.com/${{ github.repository }}/releases/tag/figprint-v$version)."
+
+          Write-Host "Opening PR: $prTitle"
+          gh pr create `
+            --repo  microsoft/winget-pkgs `
+            --head  "$ownerLogin`:$branchName" `
+            --base  master `
+            --title $prTitle `
+            --body  $prBody
