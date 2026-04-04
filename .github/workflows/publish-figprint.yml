@@ -28,6 +28,9 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Copy LICENSE
+        run: cp LICENSE FIGPrint/LICENSE
+
       - name: Compute version
         id: version
         shell: pwsh
@@ -158,19 +161,59 @@ jobs:
               --token $token
           } else {
             Write-Host "Package not found — generating new manifest for v$version"
-            ./wingetcreate.exe new "$x64Url" "$arm64Url" `
-              --id                ByteForge.FIGPrint `
-              --name              FIGPrint `
-              --publisher         ByteForge `
-              --publisher-url     "https://github.com/PaulStSmith" `
-              --publisher-support-url "https://github.com/${{ github.repository }}/issues" `
-              --package-url       "https://github.com/${{ github.repository }}" `
-              --version           $version `
-              --license           MIT `
-              --license-url       "https://github.com/${{ github.repository }}/blob/master/LICENSE" `
-              --short-description "Command-line utility for rendering text using FIGlet fonts" `
-              --out               $manifestsOut `
-              --token             $token
+
+            # wingetcreate new is interactive and does not accept metadata flags.
+            # Build the three manifest YAML files manually instead.
+            $x64Sha256   = (Get-FileHash "./FIGPrint-$version-win-x64.zip"   -Algorithm SHA256).Hash.ToUpper()
+            $arm64Sha256 = (Get-FileHash "./FIGPrint-$version-win-arm64.zip" -Algorithm SHA256).Hash.ToUpper()
+            Write-Host "x64   SHA256: $x64Sha256"
+            Write-Host "arm64 SHA256: $arm64Sha256"
+
+            $manifestDir = "$manifestsOut/manifests/b/ByteForge/FIGPrint/$version"
+            New-Item -ItemType Directory -Force -Path $manifestDir | Out-Null
+
+            Set-Content "$manifestDir/ByteForge.FIGPrint.yaml" -Encoding UTF8 -Value @"
+PackageIdentifier: ByteForge.FIGPrint
+PackageVersion: $version
+DefaultLocale: en-US
+ManifestType: version
+ManifestVersion: 1.6.0
+"@
+
+            Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -Value @"
+PackageIdentifier: ByteForge.FIGPrint
+PackageVersion: $version
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+- RelativeFilePath: FIGPrint.exe
+  PortableCommandAlias: figprint
+Installers:
+- Architecture: x64
+  InstallerUrl: $x64Url
+  InstallerSha256: $x64Sha256
+- Architecture: arm64
+  InstallerUrl: $arm64Url
+  InstallerSha256: $arm64Sha256
+ManifestType: installer
+ManifestVersion: 1.6.0
+"@
+
+            Set-Content "$manifestDir/ByteForge.FIGPrint.locale.en-US.yaml" -Encoding UTF8 -Value @"
+PackageIdentifier: ByteForge.FIGPrint
+PackageVersion: $version
+PackageLocale: en-US
+Publisher: ByteForge
+PublisherUrl: https://github.com/PaulStSmith
+PublisherSupportUrl: https://github.com/${{ github.repository }}/issues
+PackageName: FIGPrint
+PackageUrl: https://github.com/${{ github.repository }}
+License: MIT
+LicenseUrl: https://github.com/${{ github.repository }}/blob/master/LICENSE
+ShortDescription: Command-line utility for rendering text using FIGlet fonts
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
+"@
           }
 
           # Locate the generated YAML files (wingetcreate nests them under

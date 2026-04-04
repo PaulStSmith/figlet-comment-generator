@@ -36,6 +36,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: FIGLet.TS/package-lock.json
 
+      - name: Copy LICENSE
+        working-directory: .
+        run: cp LICENSE FIGLet.TS/LICENSE
+
       - name: Compute version
         id: version
         run: |

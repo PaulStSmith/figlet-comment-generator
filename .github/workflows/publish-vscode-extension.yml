@@ -34,6 +34,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: FIGLet.VSCodeExtension/package-lock.json
 
+      - name: Copy LICENSE
+        working-directory: .
+        run: cp LICENSE FIGLet.VSCodeExtension/LICENSE
+
       - name: Compute version
         id: version
         run: |
