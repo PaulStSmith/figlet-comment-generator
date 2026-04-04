@@ -5,6 +5,11 @@
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Suppress nullable warnings that are meaningless in test projects:
+         CS8618 = non-nullable field uninitialized (fields are set in TestInitialize)
+         CS8625 = null literal assigned to non-nullable (intentional in null-input tests)
+         CS8602 = dereference of possibly null reference (acceptable in test assertions) -->
+    <NoWarn>CS8618;CS8625;CS8602</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
