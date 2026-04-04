@@ -30,7 +30,7 @@
     <Authors>Paulo Santos</Authors>
     <Description>A C# implementation of FIGLet (Frank, Ian &amp; Glenn's letters) - a program for making large letters out of ordinary text.</Description>
     <PackageTags>figlet;ascii-art;text-formatting</PackageTags>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/PaulStSmith/figlet-comment-generator</PackageProjectUrl>
     <RepositoryUrl>https://github.com/PaulStSmith/figlet-comment-generator</RepositoryUrl>
@@ -38,7 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="readme.md" Pack="true" PackagePath="\" />
-    <None Include="LICENSE" Pack="true" PackagePath="\" />
+    <None Include="LICENSE" Pack="true" PackagePath="\" Condition="Exists('LICENSE')" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net4.7.2' OR '$(TargetFramework)' == 'net4.8' OR '$(TargetFramework)' == 'net4.8.1'">
     <Reference Include="System.IO.Compression" />

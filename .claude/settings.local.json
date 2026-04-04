@@ -8,10 +8,15 @@
       "Bash(unzip:*)",
       "Bash(winget validate:*)",
       "Bash(msbuild:*)",
-      "Bash(cmd /c:*",
+      "Bash(cmd /c:*)",
       "Bash(powershell -Command:*)",
       "Bash(git mv:*)",
       "Bash(gh:*)",
+      "Bash(../.venv/Scripts/pytest tests/ -q)",
+      "Bash(../.venv/Scripts/pytest tests/test_renderer.py::TestRender::test_all_test_texts -v)",
+      "Bash(python3 -c \":*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

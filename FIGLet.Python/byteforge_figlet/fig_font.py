@@ -116,7 +116,7 @@ class FIGFont:
             raise ValueError("Invalid FIGfont format: header must start with 'flf2a'")
 
         try:
-            parts = header.split(" ")
+            parts = header.split()
             font.signature = parts[0]
             font.hard_blank = parts[0][5] if len(parts[0]) > 5 else "#"
             font.height = int(parts[1])
@@ -175,13 +175,31 @@ class FIGFont:
     # Helpers
     # ------------------------------------------------------------------ #
     @staticmethod
+    def _strip_endmark(raw: str, endmark: str) -> str:
+        """Strip the FIGlet end-of-line endmark character(s) from a raw line.
+
+        FIGlet fonts mark the end of each glyph row with one endmark character
+        (two on the final row).  We strip all trailing occurrences so that
+        glyphs whose visual shape happens to be the endmark character itself
+        (e.g. ``@`` in a font using ``@`` as its endmark) are rendered as empty
+        rather than as a stray endmark column.
+        """
+        stripped = raw.rstrip("\r\n")
+        if not endmark:
+            return stripped
+        return stripped.rstrip(endmark)
+
+    @staticmethod
     def _read_char_lines(lines: List[str], font: "FIGFont", start: int) -> List[str]:
+        # Detect the endmark from the last character of the first raw line.
+        first_raw = lines[start].rstrip("\r\n") if start < len(lines) else ""
+        endmark = first_raw[-1] if first_raw else "@"
         result: List[str] = []
         for i in range(font.height):
             raw = lines[start + i] if start + i < len(lines) else ""
-            # Strip trailing @ markers and newline characters
-            stripped = raw.rstrip("\r\n").rstrip("@")
-            # Workaround: some fonts use '#' as EOL even when hardblank != '#'
+            stripped = FIGFont._strip_endmark(raw, endmark)
+            # Workaround: some fonts use '#' as a secondary endmark even when
+            # hard_blank != '#'.  Mirrors the same special case in the C# port.
             if stripped.endswith("#") and font.hard_blank != "#":
                 stripped = stripped.rstrip("#")
             result.append(stripped)
