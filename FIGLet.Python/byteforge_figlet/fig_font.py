@@ -10,6 +10,22 @@ from typing import Dict, List, Optional
 from .smushing_rules import SmushingRules
 
 
+class _ClassProperty:
+    """Descriptor for a lazily-evaluated class-level property.
+
+    ``@classmethod @property`` was deprecated in Python 3.11 and removed in
+    3.13.  This descriptor replicates that behaviour across all supported
+    Python versions.
+    """
+    __slots__ = ("_func",)
+
+    def __init__(self, func):
+        self._func = func
+
+    def __get__(self, obj, objtype=None):
+        return self._func(objtype if objtype is not None else type(obj))
+
+
 class FIGFont:
     """Represents a FIGfont loaded from a .flf file."""
 
@@ -18,8 +34,7 @@ class FIGFont:
     # ------------------------------------------------------------------ #
     _default: Optional["FIGFont"] = None
 
-    @classmethod
-    @property
+    @_ClassProperty
     def default(cls) -> "FIGFont":
         """Return the built-in 'small' FIGfont (loaded once and cached)."""
         if cls._default is None:
