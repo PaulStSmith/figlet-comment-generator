@@ -33,9 +33,11 @@ jobs:
         shell: pwsh
         run: |
           # Read major.minor from csproj; use the Actions run number as patch.
+          # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
           [xml]$csproj = Get-Content FIGPrint/FIGPrint.csproj
           $base = ($csproj.Project.PropertyGroup.Version | Where-Object { $_ }) -replace '\.\d+$', ''
-          $newVersion = "$base.${{ github.run_number }}"
+          $patch = [Math]::Min(${{ github.run_number }}, 65534)
+          $newVersion = "$base.$patch"
           (Get-Content FIGPrint/FIGPrint.csproj -Raw) `
             -replace '<Version>[^<]*</Version>', "<Version>$newVersion</Version>" |
             Set-Content FIGPrint/FIGPrint.csproj -NoNewline
