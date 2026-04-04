@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="readme.md" Pack="true" PackagePath="\" />
+    <None Include="LICENSE" Pack="true" PackagePath="\" Condition="Exists('LICENSE')" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net4.7.2' OR '$(TargetFramework)' == 'net4.8' OR '$(TargetFramework)' == 'net4.8.1'">
     <Reference Include="System.IO.Compression" />

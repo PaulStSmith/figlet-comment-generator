@@ -24,6 +24,10 @@ jobs:
         with:
           fetch-depth: 0  # Need full history for tags
 
+      - name: Copy LICENSE
+        shell: bash
+        run: cp LICENSE FIGLet.VisualStudioExtension/LICENSE
+
       - name: Setup .NET Framework
         uses: microsoft/setup-msbuild@v2
 

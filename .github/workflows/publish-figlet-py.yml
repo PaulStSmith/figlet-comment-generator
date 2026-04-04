@@ -1,0 +1,91 @@
+name: Publish FIGLet Python
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master, main]
+    paths:
+      - 'FIGLet.Python/**'
+      - '.github/workflows/publish-figlet-py.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # required to create GitHub releases and push tags
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Need full history for tags
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Copy LICENSE
+        run: cp LICENSE FIGLet.Python/LICENSE
+
+      - name: Compute version
+        id: version
+        working-directory: FIGLet.Python
+        run: |
+          # Read major.minor from pyproject.toml; use the Actions run number as patch.
+          BASE=$(python3 -c "import re; t=open('pyproject.toml').read(); m=re.search(r'version\s*=\s*\"([^\"]+)\"', t); print(m.group(1).rsplit('.', 1)[0])")
+          NEW_VERSION="$BASE.${{ github.run_number }}"
+          sed -i "s/^version = \"[^\"]*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+          sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" byteforge_figlet/__init__.py
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $NEW_VERSION"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          TAG_NAME="figlet-py-v${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME already exists, skipping publish"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG_NAME does not exist, will publish"
+          fi
+
+      - name: Install build tools
+        if: steps.check_tag.outputs.exists == 'false'
+        run: pip install hatchling build twine
+
+      - name: Run tests
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: FIGLet.Python
+        run: |
+          pip install pytest .
+          pytest tests/ -v
+
+      - name: Build distribution
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: FIGLet.Python
+        run: python -m build
+
+      - name: Publish to PyPI
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: FIGLet.Python
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
+
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "figlet-py-v${{ steps.version.outputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "FIGLet Python v${{ steps.version.outputs.version }}" \
+            --notes-file "FIGLet.Python/README.md" \
+            FIGLet.Python/dist/*

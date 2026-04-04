@@ -362,6 +362,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
 # Claude Code worktrees
 .claude/worktrees/
 
@@ -369,3 +370,6 @@ FodyWeavers.xsd
 FIGLet.VSCodeExtension/media/*.js
 FIGLet.VSCodeExtension/media/*.js.map
 FIGLet.VSCodeExtension/media/*.LICENSE.txt
+
+# Python Virtual Environments
+.venv/
