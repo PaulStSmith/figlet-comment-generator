@@ -93,6 +93,7 @@ jobs:
           VS_MARKETPLACE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
         run: |
           $vsixPath = "${{ steps.find_vsix.outputs.vsix_path }}"
+          $overviewPath = Join-Path $env:GITHUB_WORKSPACE "FIGLet.VisualStudioExtension\readme.md"
 
           # Use VsixPublisher from VS installation or download it
           $vsixPublisher = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
@@ -105,16 +106,16 @@ jobs:
           if (-not (Test-Path $vsixPublisher)) {
             # Download and use tfx-cli as alternative
             npm install -g tfx-cli
-            tfx extension publish --vsix "$vsixPath" --token $env:VS_MARKETPLACE_PAT --no-prompt
+            tfx extension publish --vsix "$vsixPath" --token $env:VS_MARKETPLACE_PAT --overview-markdown "$overviewPath" --no-prompt
           } else {
-            # Create publish manifest
+            # Create publish manifest with absolute path to overview
             $publishManifest = @"
           {
             "categories": ["Other"],
             "identity": {
               "internalName": "FIGLetCommentGenerator"
             },
-            "overview": "Marketplace Overview.md",
+            "overview": "$overviewPath",
             "publisher": "PaulStSmith",
             "assetFiles": [
               { "pathOnDisk": "FIGLet.VisualStudioExtension/bin/Release/Resources/preview.png", "targetPath": "preview.png" }
