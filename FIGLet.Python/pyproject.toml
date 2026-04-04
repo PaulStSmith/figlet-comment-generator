@@ -26,9 +26,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/PaulStSmith/FIGLetAddIn"
-Repository = "https://github.com/PaulStSmith/FIGLetAddIn"
-Issues = "https://github.com/PaulStSmith/FIGLetAddIn/issues"
+Homepage = "https://github.com/PaulStSmith/figlet-comment-generator"
+Repository = "https://github.com/PaulStSmith/figlet-comment-generator"
+Issues = "https://github.com/PaulStSmith/figlet-comment-generator/issues"
 
 [project.scripts]
 figprint = "byteforge_figlet.__main__:main"

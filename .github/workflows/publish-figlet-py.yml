@@ -71,13 +71,18 @@ jobs:
         working-directory: FIGLet.Python
         run: python -m build
 
+      - name: Check distribution metadata
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: FIGLet.Python
+        run: twine check dist/*
+
       - name: Publish to PyPI
         if: steps.check_tag.outputs.exists == 'false'
         working-directory: FIGLet.Python
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload dist/*
+        run: twine upload --verbose dist/*
 
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
