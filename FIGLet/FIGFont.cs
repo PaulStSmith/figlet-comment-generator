@@ -187,9 +187,10 @@ public class FIGFont
         // Load required characters (ASCII 32-126)
         for (var charCode = 32; charCode <= 126; charCode++)
         {
+            var endmark = DetectEndmark(lines, currentLine);
             var charLines = new string[font.Height];
             for (var i = 0; i < font.Height; i++)
-                ParseCharacterLine(lines, font, currentLine, charLines, i);
+                ParseCharacterLine(lines, font, currentLine, charLines, i, endmark);
 
             font.Characters.Add(charCode, charLines);
             currentLine += font.Height;
@@ -206,11 +207,12 @@ public class FIGFont
             var codePoint = ParseInt(codeLine.Split([' '], 2)[0]);
             currentLine++; // Move past the code point line
 
+            var endmark = DetectEndmark(lines, currentLine);
             var charLines = new string[font.Height];
             for (var i = 0; i < font.Height; i++)
             {
                 if (currentLine + i >= lines.Length) break;
-                ParseCharacterLine(lines, font, currentLine, charLines, i);
+                ParseCharacterLine(lines, font, currentLine, charLines, i, endmark);
             }
             font.Characters.Add(codePoint, charLines);
             currentLine += font.Height;
@@ -230,9 +232,22 @@ public class FIGFont
     /// <param name="currentLine">The current line index in the FIGfont data.</param>
     /// <param name="charLines">The array of character lines being populated.</param>
     /// <param name="i">The index of the current character line.</param>
-    private static void ParseCharacterLine(string[] lines, FIGFont font, int currentLine, string[] charLines, int i)
+    /// <summary>
+    /// Detects the endmark character used by a glyph block from the last character
+    /// of its first raw line (after stripping CR/LF).  Falls back to '@' if the
+    /// line is empty.
+    /// </summary>
+    private static char DetectEndmark(string[] lines, int blockStart)
     {
-        charLines[i] = lines[currentLine + i].TrimEnd(['@', '\n', '\r']);
+        if (blockStart >= lines.Length)
+            return '@';
+        var firstRaw = lines[blockStart].TrimEnd('\r', '\n');
+        return firstRaw.Length > 0 ? firstRaw[^1] : '@';
+    }
+
+    private static void ParseCharacterLine(string[] lines, FIGFont font, int currentLine, string[] charLines, int i, char endmark)
+    {
+        charLines[i] = lines[currentLine + i].TrimEnd('\r', '\n').TrimEnd(endmark);
 
         /*
          * A special case when FIG font designer uses a different hard blank character

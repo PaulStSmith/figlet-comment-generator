@@ -151,10 +151,12 @@ export class FIGFont {
 
         // Load required characters (ASCII 32-126)
         for (let charCode = 32; charCode <= 126; charCode++) {
+            const endmark = FIGFont.detectEndmark(lines, currentLine);
+            const endmarkRe = new RegExp(`[${endmark.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\n\\r]+$`);
             const charLines: string[] = new Array(font.height);
             for (let i = 0; i < font.height; i++) {
                 charLines[i] = lines[currentLine + i]
-                    .replace(/[@\n\r]+$/, '')  // TrimEnd equivalent
+                    .replace(endmarkRe, '')
                     // Special case for different hard blank character
                     .replace(/#$/, font.hardBlank === "#" ? "#" : "");
             }
@@ -172,10 +174,12 @@ export class FIGFont {
             const codePoint = parseInt(codeLine.split(' ')[0]);
             currentLine++; // Move past the code point line
 
+            const endmark = FIGFont.detectEndmark(lines, currentLine);
+            const endmarkRe = new RegExp(`[${endmark.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\n\\r]+$`);
             const charLines: string[] = new Array(font.height);
             for (let i = 0; i < font.height; i++) {
                 if (currentLine + i >= lines.length) { break; }
-                charLines[i] = lines[currentLine + i].replace(/[@\n\r]+$/, '');
+                charLines[i] = lines[currentLine + i].replace(endmarkRe, '');
             }
             font.characters.set(String.fromCodePoint(codePoint), charLines);
             currentLine += font.height;
@@ -201,6 +205,17 @@ export class FIGFont {
             console.error('Error loading default font:', error);
             return null;
         }
+    }
+
+    /**
+     * Detects the endmark character used by a glyph block from the last character
+     * of its first raw line (after stripping CR/LF).  Falls back to '@' if the
+     * line is empty.
+     */
+    private static detectEndmark(lines: string[], blockStart: number): string {
+        if (blockStart >= lines.length) return '@';
+        const firstRaw = lines[blockStart].replace(/[\r\n]+$/, '');
+        return firstRaw.length > 0 ? firstRaw[firstRaw.length - 1] : '@';
     }
 
     /**
