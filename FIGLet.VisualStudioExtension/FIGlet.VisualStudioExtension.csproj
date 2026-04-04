@@ -119,8 +119,14 @@
     <Content Include="FodyWeavers.xml" />
     <Content Include="Resources\figlet-settings.png" />
     <Content Include="Resources\figlet-ui.png" />
-    <Content Include="Resources\screenshot-settings.png" />
-    <Content Include="Resources\screenshot.png" />
+    <Content Include="Resources\screenshot-settings.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Resources\screenshot.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\style.css" />
     <None Include="readme.md" />
     <None Include="source.extension.vsixmanifest">

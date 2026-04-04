@@ -85,7 +85,12 @@ jobs:
         id: package
         run: |
           VSIX_NAME="figlet-${{ steps.version.outputs.version }}.vsix"
-          vsce package --out "$VSIX_NAME"
+          # --baseContentUrl rewrites relative image paths in README.md to absolute
+          # GitHub raw-content URLs, so marketplace screenshots load reliably without
+          # depending on binary assets being inside the VSIX.
+          vsce package \
+            --baseContentUrl "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/FIGLet.VSCodeExtension" \
+            --out "$VSIX_NAME"
           echo "vsix_name=$VSIX_NAME" >> $GITHUB_OUTPUT
 
       - name: Publish to VS Code Marketplace

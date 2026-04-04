@@ -116,7 +116,9 @@ jobs:
               overview   = $overviewPath
               publisher  = 'PaulStSmith'
               assetFiles = @(
-                @{ pathOnDisk = "FIGLet.VisualStudioExtension/bin/Release/Resources/preview.png"; targetPath = "preview.png" }
+                @{ pathOnDisk = "FIGLet.VisualStudioExtension/Resources/preview.png";            targetPath = "preview.png" }
+                @{ pathOnDisk = "FIGLet.VisualStudioExtension/Resources/screenshot.png";         targetPath = "Resources/screenshot.png" }
+                @{ pathOnDisk = "FIGLet.VisualStudioExtension/Resources/screenshot-settings.png"; targetPath = "Resources/screenshot-settings.png" }
               )
             }
             $manifest | ConvertTo-Json -Depth 10 | Out-File -FilePath "publish-manifest.json" -Encoding UTF8

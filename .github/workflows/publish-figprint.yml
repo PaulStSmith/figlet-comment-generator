@@ -28,14 +28,21 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Extract version from csproj
+      - name: Compute version
         id: version
         shell: pwsh
         run: |
+          # Read major.minor from csproj; use the Actions run number as patch.
+          # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
           [xml]$csproj = Get-Content FIGPrint/FIGPrint.csproj
-          $version = $csproj.Project.PropertyGroup.Version | Where-Object { $_ }
-          echo "version=$version" >> $env:GITHUB_OUTPUT
-          echo "Detected version: $version"
+          $base = ($csproj.Project.PropertyGroup.Version | Where-Object { $_ }) -replace '\.\d+$', ''
+          $patch = [Math]::Min(${{ github.run_number }}, 65534)
+          $newVersion = "$base.$patch"
+          (Get-Content FIGPrint/FIGPrint.csproj -Raw) `
+            -replace '<Version>[^<]*</Version>', "<Version>$newVersion</Version>" |
+            Set-Content FIGPrint/FIGPrint.csproj -NoNewline
+          echo "version=$newVersion" >> $env:GITHUB_OUTPUT
+          echo "Version: $newVersion"
 
       - name: Check if tag exists
         id: check_tag
@@ -93,27 +100,7 @@ jobs:
         with:
           tag_name: figprint-v${{ steps.version.outputs.version }}
           name: FIGPrint v${{ steps.version.outputs.version }}
-          body: |
-            ## FIGPrint v${{ steps.version.outputs.version }}
-
-            A command-line utility for rendering text using FIGlet fonts.
-
-            ### Installation
-
-            **Windows (winget):**
-            ```
-            winget install ByteForge.FIGPrint
-            ```
-
-            **Manual:**
-            Download the ZIP for your architecture, extract, and add to PATH.
-
-            ### Usage
-            ```
-            figprint "Hello World"
-            figprint --font big "Hello"
-            figprint --showList
-            ```
+          body_path: FIGPrint/readme.md
           files: |
             FIGPrint-${{ steps.version.outputs.version }}-win-x64.zip
             FIGPrint-${{ steps.version.outputs.version }}-win-arm64.zip
