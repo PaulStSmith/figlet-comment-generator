@@ -6,6 +6,111 @@
 
 ## April 2026
 
+### fix: address PR #27 Copilot review comments
+2026-04-04 : Paulo Santos
+● FIGFont.cs: separate the fused doc comments — DetectEndmark now has its own correct `<summary>` and `<param>` tags; ParseCharacterLine gets its own doc block with the added endmark param documented
+● FIGFont.cs: add inline comment explaining why `Length - 1` indexing is used instead of `[^1]` (multi-target back to .NET Framework 4.7.2)
+● FIGLet.csproj: add inline XML comment explaining the NU1510 suppression is intentional (System.IO.Compression explicit reference needed for net472 targets)
+
+### chore(build): update build, permissions, and compat
+2026-04-04 : Paulo Santos
+● Remove permissions config from settings.local.json
+● Ignore .claude/settings.local.json in .gitignore
+● Add LICENSE copy step to VS extension build for compliance
+● Refactor FIGFont endmark detection for C# compatibility
+● Suppress NU1510 warning in FIGLet.csproj build
+
+### fix(winget): bump ManifestVersion from 1.6.0 to 1.12.0
+2026-04-04 : Paulo Santos
+● 1.6.0 is deprecated in the winget-pkgs repo
+● Future FIGPrint releases will now generate manifests targeting the currently recommended schema version (1.12.0)
+● Updated all three manifest types: version, defaultLocale, installer
+
+### chore(ci): fix Node.js 20 deprecation and suppress test nullable warnings
+2026-04-04 : Paulo Santos
+● Upgrade actions/setup-python from v5 to v6 to use the Node.js 24 runtime
+● Add `<NoWarn>CS8618;CS8625;CS8602</NoWarn>` in FIGLet.Tests.csproj; these nullable warnings are meaningless in test code (fields set via TestInitialize, intentional null inputs, and assertion-only dereferences)
+
+### feat(font): detect endmark dynamically across all three implementations
+2026-04-04 : Paulo Santos
+● C#, TypeScript, and VS Code extension FIGFont implementations now detect the glyph endmark character from the last character of the first raw line of each glyph block, rather than hardcoding `@`
+● Brings all three into parity with the Python library fix
+● Correctly handles fonts that use a non-standard endmark character
+
+### fix(py): address all Copilot review comments on PR #26
+2026-04-04 : Paulo Santos
+● Fix invalid JSON in .claude/settings.local.json (missing closing paren, trailing comma)
+● Revert pyproject.toml license to SPDX text expression to avoid missing-file build errors
+● Fix header parsing to use `split()` instead of `split(" ")` for robustness with multiple spaces
+● Detect FIGlet endmark dynamically from the first glyph line instead of hardcoding `@`; use `rstrip(endmark)` to correctly handle glyphs whose character equals the endmark; preserve the `#` workaround that mirrors the C# implementation
+● Revert FIGLet.csproj to PackageLicenseExpression and add Exists() guard on LICENSE include
+● Add Exists() guard to VS extension LICENSE content include
+
+### feat(font): add class-level property descriptor
+2026-04-04 : Paulo Santos
+● Introduce `_ClassProperty` descriptor to replicate `@classmethod @property` behavior removed in Python 3.13
+● Replace deprecated `@classmethod @property` on `FIGFont.default` with `@_ClassProperty`
+● Ensures compatibility with Python 3.11+ while maintaining lazy loading and caching of the default FIGfont
+
+### ci(workflow): copy LICENSE before dependency install
+2026-04-04 : Paulo Santos
+● Update CI to copy LICENSE from repo root into FIGLet.Python before installing dependencies
+● Ensures LICENSE file is present when pip runs the build (hatchling validates it at install time)
+
+### ci: improve version checks and Python/WinGet workflows
+2026-04-04 : Paulo Santos
+● Add Python version check to CI — ensures C#, TypeScript, and Python library versions stay in sync
+● Add `test-python` job: sets up Python 3.13, installs pytest, and runs the full test suite
+● Refactor Python publish workflow: use python3/sed for version bumping instead of fragile heredoc
+● Rewrite WinGet YAML generation in PowerShell using string arrays to avoid here-string indentation issues in YAML
+
+### feat(py): add byteforge-figlet Python library & CI
+2026-04-04 : Paulo Santos
+● Introduce `byteforge-figlet`: fast, spec-compliant FIGLet engine for Python with zero dependencies
+● Add core modules: FIGFont, FIGLetRenderer, LayoutMode, SmushingRules, and bundled "small" font
+● Implement CLI entry point (`__main__.py`) and `figprint` command
+● Provide `pyproject.toml` for packaging and metadata (hatchling)
+● Include full pytest-based test suite (141 tests) mirroring the C# and TypeScript implementations
+● Add `publish-figlet-py.yml` GitHub Actions workflow for PyPI and GitHub Releases automation
+● Update `sync-library-versions.yml` to sync Python version with C# and TypeScript
+
+### ci(workflows): include LICENSE in packages, improve WinGet
+2026-04-04 : Paulo Santos
+● Copy root LICENSE into each package/project directory in all CI publish workflows
+● Ensures LICENSE is present in all distributed artifacts (NuGet, npm, PyPI, VSIX)
+● Replace interactive `wingetcreate` with manual PowerShell YAML manifest generation
+● Compute SHA256 for installers and write all three WinGet manifest files directly
+
+### fix(ci): open winget PR directly instead of relying on wingetcreate --submit
+2026-04-04 : Paulo Santos
+● `wingetcreate` only generates manifest YAML files; it does not open the PR in `microsoft/winget-pkgs`
+● Fork `microsoft/winget-pkgs` under the token owner if not already forked
+● Create a per-version branch (`figprint-vX.Y.Z`) on the fork
+● Upload the three YAML files to `manifests/b/ByteForge/FIGPrint/<version>/`
+● Open the PR against `microsoft/winget-pkgs` with the required title format
+
+### chore(settings): update Bash command permissions
+2026-04-04 : Paulo Santos
+● Broaden allowed Bash commands with generic patterns
+● Add support for GitHub CLI (`gh`) and `git mv` commands
+● Remove duplicates and overly specific Bash command entries
+
+### docs(claude): fix gh command for replying to top-level PR review comments
+2026-04-04 : Paulo Santos
+● The `/pulls/comments/ID/replies` endpoint only works for existing reply threads
+● Top-level review comments require `POST /pulls/PR/comments` with `in_reply_to`
+● Update CLAUDE.md with the correct form and a note explaining the distinction
+
+### chore(config): add MIT license and update allowed cmds
+2026-04-04 : Paulo Santos
+● Add MIT License file for 2024–2026, Paulo Santos
+● Update settings.local.json to allow git push, npm test, dotnet build, and additional Bash commands
+
+### fix(ci): cap patch version at 65534 in NuGet and FIGPrint workflows
+2026-04-04 : Paulo Santos
+● System.Version components are limited to 0–65535; cap the patch derived from `github.run_number` at 65534
+● Matches the same guard already in place in publish-vs-extension.yml
+
 ### docs(readme): modernize for ByteForge FIGLet Suite
 2026-04-03 : Paulo Santos
 ● Rewrite readme to reflect ByteForge FIGLet Suite branding
