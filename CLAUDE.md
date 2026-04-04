@@ -199,3 +199,19 @@ The ChangeLog system uses a master index file with year-specific detail files:
 - **DO NOT update the wrong file** - check commit dates carefully
 - **Always maintain both the master index and year-specific files**
 - **For new years**: Create new year file and add navigation link in master `ChangeLog.md`
+
+## Pull Request Review Comments
+
+When addressing review comments on a PR (from Copilot, team members, or any reviewer):
+
+1. **Fix the code** as described in the comment
+2. **Reply to the comment** immediately after fixing it — do not leave comments unacknowledged
+
+To reply to an inline PR comment via `gh`:
+```bash
+gh api repos/OWNER/REPO/pulls/comments/COMMENT_ID/replies \
+  -X POST -f body="Your reply here"
+```
+
+- Keep replies concise: describe what was changed and why it resolves the concern
+- Reply to each comment individually as it is addressed, not in a batch at the end
