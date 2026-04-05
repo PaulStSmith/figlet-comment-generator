@@ -6,6 +6,18 @@
 
 ## April 2026
 
+### fix(py): remove redundant force-include causing duplicate ZIP entries
+2026-04-04 : Paulo Santos
+● hatchling's `packages = ["byteforge_figlet"]` already includes the entire package directory tree (fonts/ and all)
+● The `force-include` block was re-adding `byteforge_figlet/fonts` a second time, producing a wheel with duplicate filenames in its local ZIP headers
+● PyPI rejects such wheels with a 400 Bad Request — removing the redundant block fixes the upload
+
+### fix(py): fix PyPI upload — correct repo URLs and add metadata validation
+2026-04-04 : Paulo Santos
+● Fix `Homepage`, `Repository`, and `Issues` URLs in pyproject.toml (were pointing at the old `FIGLetAddIn` repo name instead of `figlet-comment-generator`)
+● Add `twine check dist/*` step before upload to catch metadata problems early and surface actionable errors
+● Add `--verbose` to `twine upload` so a 400/4xx response shows the full PyPI error message instead of just "Bad Request"
+
 ### fix: address PR #27 Copilot review comments
 2026-04-04 : Paulo Santos
 ● FIGFont.cs: separate the fused doc comments — DetectEndmark now has its own correct `<summary>` and `<param>` tags; ParseCharacterLine gets its own doc block with the added endmark param documented
