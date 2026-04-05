@@ -196,7 +196,9 @@ jobs:
           #
           # The Version manifest
           #
-          @("PackageIdentifier: $PackageId",
+          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.12.0.schema.json",
+            "",
+            "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
             "DefaultLocale: en-US",
             "ManifestType: version",
@@ -207,7 +209,9 @@ jobs:
           #
           # The Default Locale manifest
           #
-          @("PackageIdentifier: $PackageId",
+          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json",
+            "",
+            "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
             "PackageLocale: en-US",
             "Publisher: ByteForge",
@@ -226,7 +230,9 @@ jobs:
           #
           # The Installer manifest
           #
-          @("PackageIdentifier: $PackageId",
+          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json",
+            "",
+            "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
             "Installers:",
             "- Architecture: x64",
