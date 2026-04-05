@@ -42,6 +42,10 @@ Text can be supplied as command-line arguments or piped through standard input, 
 winget install ByteForge.FIGPrint
 ```
 
+#### *NOTE*
+
+A PR for inclusion of _FIGPrint CLI_ into the WinGet library is currently pending review. (see [#355518](https://github.com/microsoft/winget-pkgs/pull/355518))
+
 ### Manual download
 
 Download the latest release for your platform from the
