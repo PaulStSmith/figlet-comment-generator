@@ -36,8 +36,5 @@ figprint = "byteforge_figlet.__main__:main"
 [tool.hatch.build.targets.wheel]
 packages = ["byteforge_figlet"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"byteforge_figlet/fonts" = "byteforge_figlet/fonts"
-
 [tool.hatch.metadata]
 allow-direct-references = true
