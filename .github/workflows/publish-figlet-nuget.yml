@@ -85,7 +85,7 @@ jobs:
             cat assets/banners/figlet-net.txt
             echo '```'
             echo ''
-            echo '.NET FIGLet rendering library — multi-targets from .NET Framework 4.7.2 to .NET 9.'
+            echo '.NET FIGLet rendering library — multi-targets from .NET Framework 4.7.2 to .NET 10.'
             echo ''
             echo "📦 Published to [NuGet](https://www.nuget.org/packages/ByteForge.FIGLet/${{ steps.version.outputs.version }})"
             echo ''
