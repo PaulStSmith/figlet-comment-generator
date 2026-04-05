@@ -126,3 +126,17 @@ jobs:
             --title "@byte-forge/figlet v${{ steps.version.outputs.version }}" \
             --notes-file /tmp/release-notes.md \
             "FIGLet.TS/${{ steps.pack.outputs.tarball }}"
+
+      - name: Delete previous releases
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_TAG="figlet-ts-v${{ steps.version.outputs.version }}"
+          gh release list --limit 1000 --json tagName \
+            --jq '.[] | .tagName | select(startswith("figlet-ts-v"))' \
+            | while read -r tag; do
+                [ "$tag" = "$NEW_TAG" ] && continue
+                gh release delete "$tag" --yes --cleanup-tag || true
+              done

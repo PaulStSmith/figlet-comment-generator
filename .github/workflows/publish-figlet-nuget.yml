@@ -102,3 +102,16 @@ jobs:
             --title "ByteForge.FIGLet v${{ steps.version.outputs.version }}" \
             --notes-file /tmp/release-notes.md \
             ./nupkg/*.nupkg
+
+      - name: Delete previous releases
+        if: steps.check_tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_TAG="figlet-v${{ steps.version.outputs.version }}"
+          gh release list --limit 1000 --json tagName \
+            --jq '.[] | .tagName | select(startswith("figlet-v"))' \
+            | while read -r tag; do
+                [ "$tag" = "$NEW_TAG" ] && continue
+                gh release delete "$tag" --yes --cleanup-tag || true
+              done

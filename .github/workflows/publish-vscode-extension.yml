@@ -130,3 +130,17 @@ jobs:
             --notes-file /tmp/release-notes.md \
             "FIGLet.VSCodeExtension/${{ steps.package.outputs.vsix_name }}"
 
+      - name: Delete previous releases
+        if: steps.check_tag.outputs.exists == 'false'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_TAG="vscode-v${{ steps.version.outputs.version }}"
+          gh release list --limit 1000 --json tagName \
+            --jq '.[] | .tagName | select(startswith("vscode-v"))' \
+            | while read -r tag; do
+                [ "$tag" = "$NEW_TAG" ] && continue
+                gh release delete "$tag" --yes --cleanup-tag || true
+              done
+
