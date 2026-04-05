@@ -98,19 +98,36 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: figprint-v${{ steps.version.outputs.version }}
-          name: FIGPrint v${{ steps.version.outputs.version }}
-          body_path: FIGPrint/readme.md
-          files: |
-            FIGPrint-${{ steps.version.outputs.version }}-win-x64.zip
-            FIGPrint-${{ steps.version.outputs.version }}-win-arm64.zip
-          draft: false
-          prerelease: false
+        shell: pwsh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $banner  = Get-Content assets/banners/figprint.txt -Raw -Encoding UTF8
+          $notes   = @"
+          ``````
+          $banner
+          ``````
+
+          Cross-platform CLI tool for rendering text as FIGLet ASCII art.
+
+          📦 Install via winget: ``winget install ByteForge.FIGPrint``
+
+          | | |
+          |---|---|
+          | **Version** | ``$version`` |
+          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+          | **Commit** | ``${{ github.sha }}`` |
+
+          📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/ChangeLog-2026.md)
+          "@
+          $notes | Set-Content "$env:TEMP\release-notes.md" -Encoding UTF8
+          gh release create "figprint-v$version" `
+            --target "${{ github.sha }}" `
+            --title "FIGPrint v$version" `
+            --notes-file "$env:TEMP\release-notes.md" `
+            "FIGPrint-$version-win-x64.zip" `
+            "FIGPrint-$version-win-arm64.zip"
 
       - name: Submit to winget
         if: steps.check_tag.outputs.exists == 'false'

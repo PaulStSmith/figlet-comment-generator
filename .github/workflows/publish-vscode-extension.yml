@@ -107,17 +107,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          {
+            echo '```'
+            cat assets/banners/figlet-vscode-extension.txt
+            echo '```'
+            echo ''
+            echo 'VS Code extension for inserting FIGLet ASCII art comments.'
+            echo ''
+            echo '📦 Published to the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.figlet-comment-generator)'
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
+            echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"
+            echo "| **Commit** | \`${{ github.sha }}\` |"
+            echo ''
+            echo "📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/ChangeLog-2026.md)"
+          } > /tmp/release-notes.md
           gh release create "vscode-v${{ steps.version.outputs.version }}" \
             --target "${{ github.sha }}" \
             --title "VS Code Extension v${{ steps.version.outputs.version }}" \
-            --notes "## VS Code Extension v${{ steps.version.outputs.version }}
-
-          Published to the VS Code Marketplace.
-
-          | | |
-          |---|---|
-          | **Version** | \`${{ steps.version.outputs.version }}\` |
-          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
-          | **Commit** | \`${{ github.sha }}\` |" \
+            --notes-file /tmp/release-notes.md \
             "FIGLet.VSCodeExtension/${{ steps.package.outputs.vsix_name }}"
 

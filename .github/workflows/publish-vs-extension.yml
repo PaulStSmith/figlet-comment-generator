@@ -136,17 +136,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          {
+            echo '```'
+            cat assets/banners/figlet-vs-extension.txt
+            echo '```'
+            echo ''
+            echo 'Visual Studio 2022+ extension for inserting FIGLet ASCII art comments.'
+            echo ''
+            echo '📦 Published to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator)'
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
+            echo "| **Manifest base** | \`${{ steps.version.outputs.base }}\` |"
+            echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"
+            echo "| **Commit** | \`${{ github.sha }}\` |"
+            echo ''
+            echo "📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/ChangeLog-2026.md)"
+          } > "$RUNNER_TEMP/release-notes.md"
           gh release create "vsext-v${{ steps.version.outputs.version }}" \
             --target "${{ github.sha }}" \
             --title "VS Extension v${{ steps.version.outputs.version }}" \
-            --notes "## VS Extension v${{ steps.version.outputs.version }}
-
-          Published to the Visual Studio Marketplace.
-
-          | | |
-          |---|---|
-          | **Published version** | \`${{ steps.version.outputs.version }}\` |
-          | **Manifest base** | \`${{ steps.version.outputs.base }}\` |
-          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
-          | **Commit** | \`${{ github.sha }}\` |" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
             "${{ steps.find_vsix.outputs.vsix_path }}"
