@@ -232,9 +232,18 @@ jobs:
             "- Architecture: x64",
             "  InstallerUrl: $x64Url",
             "  InstallerSha256: $x64Sha256",
+            "  InstallerType: zip",
+            "  NestedInstallerType: portable",
+            "  NestedInstallerFiles:",
+            "  - RelativeFilePath: FIGPrint.exe",
+
             "- Architecture: arm64",
             "  InstallerUrl: $arm64Url",
             "  InstallerSha256: $arm64Sha256",
+            "  InstallerType: zip",
+            "  NestedInstallerType: portable",
+            "  NestedInstallerFiles:",
+            "  - RelativeFilePath: FIGPrint.exe",
             "ManifestType: installer",
             "ManifestVersion: 1.12.0",
             "") -join $n |
