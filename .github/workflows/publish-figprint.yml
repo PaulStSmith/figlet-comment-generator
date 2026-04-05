@@ -275,26 +275,43 @@ jobs:
           if ($LASTEXITCODE -eq 0) {
             Write-Host "Branch $branchName already exists — deleting and recreating"
             gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" -X DELETE
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Failed to delete existing branch $branchName"
+              exit 1
+            }
           }
           gh api "repos/$ownerLogin/winget-pkgs/git/refs" `
             -X POST `
             -f ref="refs/heads/$branchName" `
-            -f sha="$baseSha" | Out-Null
+            -f sha="$baseSha"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to create branch $branchName on fork"
+            exit 1
+          }
           Write-Host "Created branch $branchName"
 
-          # Upload each YAML file to the correct path in the fork branch
+          # Upload each YAML file to the correct path in the fork branch.
+          # Build the JSON body and pipe via --input to avoid argument-length
+          # issues when passing large base64 strings through -f flags.
           $targetBase = "manifests/b/ByteForge/FIGPrint/$version"
           foreach ($file in $yamlFiles) {
-            $content     = [Convert]::ToBase64String(
-                             [System.Text.Encoding]::UTF8.GetBytes(
-                               (Get-Content $file.FullName -Raw)))
-            $targetPath  = "$targetBase/$($file.Name)"
+            $encoded    = [Convert]::ToBase64String(
+                            [System.Text.Encoding]::UTF8.GetBytes(
+                              (Get-Content $file.FullName -Raw)))
+            $targetPath = "$targetBase/$($file.Name)"
+            $body       = [PSCustomObject]@{
+                            message = "Add $packageId $version"
+                            content = $encoded
+                            branch  = $branchName
+                          } | ConvertTo-Json -Compress
             Write-Host "Uploading $($file.Name) → $targetPath"
-            gh api "repos/$ownerLogin/winget-pkgs/contents/$targetPath" `
-              -X PUT `
-              -f message="Add $packageId $version" `
-              -f content="$content" `
-              -f branch="$branchName" | Out-Null
+            $body | gh api "repos/$ownerLogin/winget-pkgs/contents/$targetPath" `
+              -X PUT --input -
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Failed to upload $($file.Name) to $targetPath"
+              exit 1
+            }
+            Write-Host "  ✓ Uploaded successfully"
           }
 
           # Open the PR with the required winget title format
