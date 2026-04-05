@@ -119,7 +119,7 @@ jobs:
           | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
           | **Commit** | ``${{ github.sha }}`` |
 
-          📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/master/ChangeLog-2026.md)
+          📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/ChangeLog-2026.md)
           "@
           $notes | Set-Content "$env:TEMP\release-notes.md" -Encoding UTF8
           gh release create "figprint-v$version" `

@@ -152,10 +152,10 @@ jobs:
             echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"
             echo "| **Commit** | \`${{ github.sha }}\` |"
             echo ''
-            echo "📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/master/ChangeLog-2026.md)"
-          } > /tmp/release-notes.md
+            echo "📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/ChangeLog-2026.md)"
+          } > "$RUNNER_TEMP/release-notes.md"
           gh release create "vsext-v${{ steps.version.outputs.version }}" \
             --target "${{ github.sha }}" \
             --title "VS Extension v${{ steps.version.outputs.version }}" \
-            --notes-file /tmp/release-notes.md \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
             "${{ steps.find_vsix.outputs.vsix_path }}"
