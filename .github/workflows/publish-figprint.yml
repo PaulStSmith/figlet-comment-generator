@@ -153,11 +153,8 @@ jobs:
           $packageId  = "ByteForge.FIGPrint"
           $manifestsOut = "./winget-manifests"
 
-          # Install wingetcreate
-          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-
-          # Detect whether ByteForge.FIGPrint already exists in winget-pkgs.
-          # 'update' only works for existing packages; first-time submissions need 'new'.
+          # Detect whether ByteForge.FIGPrint already exists in winget-pkgs
+          # to determine whether the PR title says "New package" or "New version".
           $apiUrl  = "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/b/ByteForge/FIGPrint"
           $headers = @{ Authorization = "Bearer $token"; "User-Agent" = "GitHub-Actions" }
           $exists  = $false
@@ -178,75 +175,65 @@ jobs:
             }
           }
 
-          # Generate manifest YAML files locally (no --submit; we open the PR ourselves
-          # so we can control the branch name and PR title format).
-          if ($exists) {
-            Write-Host "Package exists — generating update manifest for v$version"
-            ./wingetcreate.exe update $packageId `
-              --version $version `
-              --urls "$x64Url|x64" "$arm64Url|arm64" `
-              --out $manifestsOut `
-              --token $token
-          } else {
-            Write-Host "Package not found — generating new manifest for v$version"
+          # Always build manifests manually to guarantee ManifestVersion 1.12.0.
+          # wingetcreate update emits 1.6.0 manifests which are rejected by the pipeline.
+          $action = if ($exists) { "update" } else { "new" }
+          Write-Host "Package $action — generating manifest for v$version"
 
-            # wingetcreate new is interactive and does not accept metadata flags.
-            # Build the three manifest YAML files manually instead.
-            $x64Sha256   = (Get-FileHash "./FIGPrint-$version-win-x64.zip"   -Algorithm SHA256).Hash.ToUpper()
-            $arm64Sha256 = (Get-FileHash "./FIGPrint-$version-win-arm64.zip" -Algorithm SHA256).Hash.ToUpper()
-            Write-Host "x64   SHA256: $x64Sha256"
-            Write-Host "arm64 SHA256: $arm64Sha256"
+          $x64Sha256   = (Get-FileHash "./FIGPrint-$version-win-x64.zip"   -Algorithm SHA256).Hash.ToUpper()
+          $arm64Sha256 = (Get-FileHash "./FIGPrint-$version-win-arm64.zip" -Algorithm SHA256).Hash.ToUpper()
+          Write-Host "x64   SHA256: $x64Sha256"
+          Write-Host "arm64 SHA256: $arm64Sha256"
 
-            $manifestDir = "$manifestsOut/manifests/b/ByteForge/FIGPrint/$version"
-            New-Item -ItemType Directory -Force -Path $manifestDir | Out-Null
+          $manifestDir = "$manifestsOut/manifests/b/ByteForge/FIGPrint/$version"
+          New-Item -ItemType Directory -Force -Path $manifestDir | Out-Null
 
-            # PowerShell here-strings require "@ at column 0, which conflicts with
-            # YAML indentation. Use string arrays joined with newlines instead.
-            $n = "`n"
+          # PowerShell here-strings require "@ at column 0, which conflicts with
+          # YAML indentation. Use string arrays joined with newlines instead.
+          $n = "`n"
 
-            @("PackageIdentifier: ByteForge.FIGPrint",
-              "PackageVersion: $version",
-              "DefaultLocale: en-US",
-              "ManifestType: version",
-              "ManifestVersion: 1.12.0",
-              "") -join $n |
-              Set-Content "$manifestDir/ByteForge.FIGPrint.yaml" -Encoding UTF8 -NoNewline
+          @("PackageIdentifier: ByteForge.FIGPrint",
+            "PackageVersion: $version",
+            "DefaultLocale: en-US",
+            "ManifestType: version",
+            "ManifestVersion: 1.12.0",
+            "") -join $n |
+            Set-Content "$manifestDir/ByteForge.FIGPrint.yaml" -Encoding UTF8 -NoNewline
 
-            @("PackageIdentifier: ByteForge.FIGPrint",
-              "PackageVersion: $version",
-              "InstallerType: zip",
-              "NestedInstallerType: portable",
-              "NestedInstallerFiles:",
-              "- RelativeFilePath: FIGPrint.exe",
-              "  PortableCommandAlias: figprint",
-              "Installers:",
-              "- Architecture: x64",
-              "  InstallerUrl: $x64Url",
-              "  InstallerSha256: $x64Sha256",
-              "- Architecture: arm64",
-              "  InstallerUrl: $arm64Url",
-              "  InstallerSha256: $arm64Sha256",
-              "ManifestType: installer",
-              "ManifestVersion: 1.12.0",
-              "") -join $n |
-              Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -NoNewline
+          @("PackageIdentifier: ByteForge.FIGPrint",
+            "PackageVersion: $version",
+            "InstallerType: zip",
+            "NestedInstallerType: portable",
+            "NestedInstallerFiles:",
+            "- RelativeFilePath: FIGPrint.exe",
+            "  PortableCommandAlias: figprint",
+            "Installers:",
+            "- Architecture: x64",
+            "  InstallerUrl: $x64Url",
+            "  InstallerSha256: $x64Sha256",
+            "- Architecture: arm64",
+            "  InstallerUrl: $arm64Url",
+            "  InstallerSha256: $arm64Sha256",
+            "ManifestType: installer",
+            "ManifestVersion: 1.12.0",
+            "") -join $n |
+            Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -NoNewline
 
-            @("PackageIdentifier: ByteForge.FIGPrint",
-              "PackageVersion: $version",
-              "PackageLocale: en-US",
-              "Publisher: ByteForge",
-              "PublisherUrl: https://github.com/PaulStSmith",
-              "PublisherSupportUrl: https://github.com/${{ github.repository }}/issues",
-              "PackageName: FIGPrint",
-              "PackageUrl: https://github.com/${{ github.repository }}",
-              "License: MIT",
-              "LicenseUrl: https://github.com/${{ github.repository }}/blob/master/LICENSE",
-              "ShortDescription: Command-line utility for rendering text using FIGlet fonts",
-              "ManifestType: defaultLocale",
-              "ManifestVersion: 1.12.0",
-              "") -join $n |
-              Set-Content "$manifestDir/ByteForge.FIGPrint.locale.en-US.yaml" -Encoding UTF8 -NoNewline
-          }
+          @("PackageIdentifier: ByteForge.FIGPrint",
+            "PackageVersion: $version",
+            "PackageLocale: en-US",
+            "Publisher: ByteForge",
+            "PublisherUrl: https://github.com/PaulStSmith",
+            "PublisherSupportUrl: https://github.com/${{ github.repository }}/issues",
+            "PackageName: FIGPrint",
+            "PackageUrl: https://github.com/${{ github.repository }}",
+            "License: MIT",
+            "LicenseUrl: https://github.com/${{ github.repository }}/blob/master/LICENSE",
+            "ShortDescription: Command-line utility for rendering text using FIGlet fonts",
+            "ManifestType: defaultLocale",
+            "ManifestVersion: 1.12.0",
+            "") -join $n |
+            Set-Content "$manifestDir/ByteForge.FIGPrint.locale.en-US.yaml" -Encoding UTF8 -NoNewline
 
           # Locate the generated YAML files (wingetcreate nests them under
           # manifests/<letter>/<Publisher>/<Package>/<version>/)
