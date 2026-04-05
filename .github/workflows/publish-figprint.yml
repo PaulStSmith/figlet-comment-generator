@@ -96,6 +96,16 @@ jobs:
           Compress-Archive -Path ./publish/win-x64/* -DestinationPath "./FIGPrint-$version-win-x64.zip"
           Compress-Archive -Path ./publish/win-arm64/* -DestinationPath "./FIGPrint-$version-win-arm64.zip"
 
+      - name: Delete previous releases
+        if: steps.check_tag.outputs.exists == 'false'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release list --limit 100 --json tagName --jq '.[].tagName' |
+            Where-Object { $_ -like 'figprint-v*' } |
+            ForEach-Object { gh release delete $_ --yes --cleanup-tag }
+
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         shell: pwsh

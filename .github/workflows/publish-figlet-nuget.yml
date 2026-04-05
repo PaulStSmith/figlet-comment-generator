@@ -75,6 +75,17 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
+      - name: Delete previous releases
+        if: steps.check_tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release list --limit 100 --json tagName --jq '.[].tagName' \
+            | grep '^figlet-v' \
+            | while read -r tag; do
+                gh release delete "$tag" --yes --cleanup-tag || true
+              done
+
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         env:
