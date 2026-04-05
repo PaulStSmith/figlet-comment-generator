@@ -191,8 +191,12 @@ jobs:
           # PowerShell here-strings require "@ at column 0, which conflicts with
           # YAML indentation. Use string arrays joined with newlines instead.
           $n = "`n"
+          $PackageId = "ByteForge.FIGPrint"
 
-          @("PackageIdentifier: ByteForge.FIGPrint",
+          #
+          # The Version manifest
+          #
+          @("PackageIdentifier: $PackageId",
             "PackageVersion: $version",
             "DefaultLocale: en-US",
             "ManifestType: version",
@@ -200,26 +204,10 @@ jobs:
             "") -join $n |
             Set-Content "$manifestDir/ByteForge.FIGPrint.yaml" -Encoding UTF8 -NoNewline
 
-          @("PackageIdentifier: ByteForge.FIGPrint",
-            "PackageVersion: $version",
-            "InstallerType: zip",
-            "NestedInstallerType: portable",
-            "NestedInstallerFiles:",
-            "- RelativeFilePath: FIGPrint.exe",
-            "  PortableCommandAlias: figprint",
-            "Installers:",
-            "- Architecture: x64",
-            "  InstallerUrl: $x64Url",
-            "  InstallerSha256: $x64Sha256",
-            "- Architecture: arm64",
-            "  InstallerUrl: $arm64Url",
-            "  InstallerSha256: $arm64Sha256",
-            "ManifestType: installer",
-            "ManifestVersion: 1.12.0",
-            "") -join $n |
-            Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -NoNewline
-
-          @("PackageIdentifier: ByteForge.FIGPrint",
+          #
+          # The Default Locale manifest
+          #
+          @("PackageIdentifier: $PackageId",
             "PackageVersion: $version",
             "PackageLocale: en-US",
             "Publisher: ByteForge",
@@ -234,6 +222,23 @@ jobs:
             "ManifestVersion: 1.12.0",
             "") -join $n |
             Set-Content "$manifestDir/ByteForge.FIGPrint.locale.en-US.yaml" -Encoding UTF8 -NoNewline
+
+          #
+          # The Installer manifest
+          #
+          @("PackageIdentifier: $PackageId",
+            "PackageVersion: $version",
+            "Installers:",
+            "- Architecture: x64",
+            "  InstallerUrl: $x64Url",
+            "  InstallerSha256: $x64Sha256",
+            "- Architecture: arm64",
+            "  InstallerUrl: $arm64Url",
+            "  InstallerSha256: $arm64Sha256",
+            "ManifestType: installer",
+            "ManifestVersion: 1.12.0",
+            "") -join $n |
+            Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -NoNewline
 
           # Locate the generated YAML files.
           $yamlFiles = Get-ChildItem -Path $manifestsOut -Recurse -Filter "*.yaml"
