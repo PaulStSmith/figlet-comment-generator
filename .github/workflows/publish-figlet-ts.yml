@@ -104,16 +104,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          {
+            echo '```'
+            cat assets/banners/figlet-ts.txt
+            echo '```'
+            echo ''
+            echo 'TypeScript FIGLet rendering library — browser and Node.js compatible.'
+            echo ''
+            echo "📦 Published to [npm](https://www.npmjs.com/package/@byte-forge/figlet/v/${{ steps.version.outputs.version }})"
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
+            echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"
+            echo "| **Commit** | \`${{ github.sha }}\` |"
+            echo ''
+            echo "📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/master/ChangeLog-2026.md)"
+          } > /tmp/release-notes.md
           gh release create "figlet-ts-v${{ steps.version.outputs.version }}" \
             --target "${{ github.sha }}" \
             --title "@byte-forge/figlet v${{ steps.version.outputs.version }}" \
-            --notes "## @byte-forge/figlet v${{ steps.version.outputs.version }}
-
-          Published to [npm](https://www.npmjs.com/package/@byte-forge/figlet/v/${{ steps.version.outputs.version }}).
-
-          | | |
-          |---|---|
-          | **Version** | \`${{ steps.version.outputs.version }}\` |
-          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
-          | **Commit** | \`${{ github.sha }}\` |" \
+            --notes-file /tmp/release-notes.md \
             "FIGLet.TS/${{ steps.pack.outputs.tarball }}"

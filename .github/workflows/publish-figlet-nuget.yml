@@ -80,16 +80,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          {
+            echo '```'
+            cat assets/banners/figlet-net.txt
+            echo '```'
+            echo ''
+            echo '.NET FIGLet rendering library — multi-targets from .NET Framework 4.7.2 to .NET 9.'
+            echo ''
+            echo "📦 Published to [NuGet](https://www.nuget.org/packages/ByteForge.FIGLet/${{ steps.version.outputs.version }})"
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
+            echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"
+            echo "| **Commit** | \`${{ github.sha }}\` |"
+            echo ''
+            echo "📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/master/ChangeLog-2026.md)"
+          } > /tmp/release-notes.md
           gh release create "figlet-v${{ steps.version.outputs.version }}" \
             --target "${{ github.sha }}" \
             --title "ByteForge.FIGLet v${{ steps.version.outputs.version }}" \
-            --notes "## ByteForge.FIGLet v${{ steps.version.outputs.version }}
-
-          Published to [NuGet](https://www.nuget.org/packages/ByteForge.FIGLet/${{ steps.version.outputs.version }}).
-
-          | | |
-          |---|---|
-          | **Version** | \`${{ steps.version.outputs.version }}\` |
-          | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
-          | **Commit** | \`${{ github.sha }}\` |" \
+            --notes-file /tmp/release-notes.md \
             ./nupkg/*.nupkg

@@ -89,8 +89,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          {
+            echo '```'
+            cat assets/banners/figlet-python.txt
+            echo '```'
+            echo ''
+            echo 'Python FIGLet rendering library — zero dependencies, spec-compliant.'
+            echo ''
+            echo "📦 Published to [PyPI](https://pypi.org/project/byteforge-figlet/${{ steps.version.outputs.version }})"
+            echo ''
+            echo '| | |'
+            echo '|---|---|'
+            echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
+            echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"
+            echo "| **Commit** | \`${{ github.sha }}\` |"
+            echo ''
+            echo "📋 [ChangeLog](${{ github.server_url }}/${{ github.repository }}/blob/master/ChangeLog-2026.md)"
+          } > /tmp/release-notes.md
           gh release create "figlet-py-v${{ steps.version.outputs.version }}" \
             --target "${{ github.sha }}" \
             --title "FIGLet Python v${{ steps.version.outputs.version }}" \
-            --notes-file "FIGLet.Python/README.md" \
+            --notes-file /tmp/release-notes.md \
             FIGLet.Python/dist/*
