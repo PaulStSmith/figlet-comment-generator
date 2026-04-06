@@ -20,7 +20,6 @@
   "activationEvents": [
     "onCommand:figlet.insertBanner",
     "onCommand:figlet.selectFontDirectory",
-    "onCommand:figlet.selectDefaultFont",
     "onCommand:figlet.inspectConfig",
     "onCommand:figlet.openSettings",
     "onCommand:figlet.showWelcome"
@@ -40,12 +39,7 @@
         "category": "FIGlet Comments",
         "icon": "$(folder)"
       },
-      {
-        "command": "figlet.selectDefaultFont",
-        "title": "Select Default Font",
-        "category": "FIGlet Comments"
-      },
-      {
+{
         "command": "figlet.inspectConfig",
         "title": "Inspect FIGlet Configuration"
       },
@@ -115,13 +109,7 @@
           "description": "Directory containing FIGlet font files (.flf)",
           "markdownDescription": "Directory containing FIGlet font files (.flf). [Browse...](command:figlet.selectFontDirectory)"
         },
-        "figlet.defaultFont": {
-          "type": "string",
-          "default": "small",
-          "description": "Default FIGlet font to use",
-          "markdownDescription": "Default FIGlet font to use. [Select Font...](command:figlet.selectDefaultFont)"
-        },
-        "figlet.layoutMode": {
+"figlet.layoutMode": {
           "type": "string",
           "enum": [
             "full",

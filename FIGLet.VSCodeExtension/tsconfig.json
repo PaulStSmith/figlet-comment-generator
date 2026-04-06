@@ -8,6 +8,9 @@
 			"ES2022",
 			"DOM"
 		],
+		"types": [
+			"node"
+		],
 		"sourceMap": true,
 		"rootDir": "src",
 		"strict": true,
