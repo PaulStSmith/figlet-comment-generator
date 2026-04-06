@@ -9,7 +9,11 @@
 			"DOM"
 		],
 		"types": [
-			"node"
+			"node",
+			"vscode",
+			"react",
+			"react-dom",
+			"mocha"
 		],
 		"sourceMap": true,
 		"rootDir": "src",

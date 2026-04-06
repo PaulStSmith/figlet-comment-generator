@@ -28,10 +28,10 @@
 
 ### feat(language): add dedicated Batch file comment style
 2026-04-06 : Paulo Santos
-● Introduce `BATCHFile` to `CommentStyle` enum for Batch (`::`) comments
-● Add `BATCHFile` case to `CommentStyleInfo` with `"::"` prefix
-● Provide `LanguageCommentStyles.BATCHFile` static property
-● Update `languageMap` to use `BATCHFile` for `bat`, `cmd`, `dos`, and `batch` language identifiers
+● Introduce `BatchFile` to `CommentStyle` enum for Batch (`::`) comments
+● Add `BatchFile` case to `CommentStyleInfo` with `"::"` prefix
+● Provide `LanguageCommentStyles.BatchFile` static property
+● Update `languageMap` to use `BatchFile` for `bat`, `cmd`, `dos`, and `batch` language identifiers
 ● Improve clarity by replacing the generic `Custom` style with a dedicated Batch style
 
 ### ci(publish-figprint): add ASCII art banner and clarify schema requirements
