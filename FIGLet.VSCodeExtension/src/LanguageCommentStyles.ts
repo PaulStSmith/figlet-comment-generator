@@ -328,7 +328,7 @@ export class LanguageCommentStyles {
     /**
      * Batch file comments (::).
      */
-    static readonly BATCHFile = new CommentStyleInfo(CommentStyle.BATCHFile);
+    static readonly BatchFile = new CommentStyleInfo(CommentStyle.BATCHFile);
 
     /**
      * Dictionary mapping language names to their respective comment styles.
@@ -395,10 +395,10 @@ export class LanguageCommentStyles {
         ['shellscript', LanguageCommentStyles.Bash],
 
         // Batch files
-        ['bat', LanguageCommentStyles.BATCHFile],
-        ['cmd', LanguageCommentStyles.BATCHFile],
-        ['dos', LanguageCommentStyles.BATCHFile],
-        ['batch', LanguageCommentStyles.BATCHFile]
+        ['bat', LanguageCommentStyles.BatchFile],
+        ['cmd', LanguageCommentStyles.BatchFile],
+        ['dos', LanguageCommentStyles.BatchFile],
+        ['batch', LanguageCommentStyles.BatchFile]
     ]);
 
     /**
