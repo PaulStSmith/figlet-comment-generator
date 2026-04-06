@@ -39,7 +39,7 @@
         "category": "FIGlet Comments",
         "icon": "$(folder)"
       },
-{
+      {
         "command": "figlet.inspectConfig",
         "title": "Inspect FIGlet Configuration"
       },
@@ -109,7 +109,7 @@
           "description": "Directory containing FIGlet font files (.flf)",
           "markdownDescription": "Directory containing FIGlet font files (.flf). [Browse...](command:figlet.selectFontDirectory)"
         },
-"figlet.layoutMode": {
+        "figlet.layoutMode": {
           "type": "string",
           "enum": [
             "full",
