@@ -6,7 +6,6 @@ on:
     branches: [master, main]
     paths:
       - 'FIGPrint/**'
-      - '.github/workflows/publish-figprint.yml'
   workflow_dispatch:
 
 jobs:

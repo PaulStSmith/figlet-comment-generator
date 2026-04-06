@@ -6,7 +6,6 @@ on:
     branches: [master, main]
     paths:
       - 'FIGLet.Python/**'
-      - '.github/workflows/publish-figlet-py.yml'
   workflow_dispatch:
 
 jobs:
