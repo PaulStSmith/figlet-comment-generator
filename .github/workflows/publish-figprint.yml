@@ -110,9 +110,7 @@ jobs:
 
           Cross-platform CLI tool for rendering text as FIGLet ASCII art.
 
-          📦 Install via winget: ``winget install ByteForge.FIGPrint``
-
-          | | |
+          | 📦 Install via winget: | ``winget install ByteForge.FIGPrint`` |
           |---|---|
           | **Version** | ``$version`` |
           | **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
