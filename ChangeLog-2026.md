@@ -6,6 +6,119 @@
 
 ## April 2026
 
+### docs(license): update license with ASCII art and new years
+2026-04-06 : Paulo Santos
+● Add ASCII art banner to the top of the MIT License file
+● Update copyright years to 2024–2026
+● Attribute copyright to Paulo Santos
+
+### feat(config): update commands and remove default font setting
+2026-04-06 : Paulo Santos
+● Remove `figlet.selectDefaultFont` command and `figlet.defaultFont` config option
+● Add `figlet.inspectConfig` command to the command palette
+● Add Node.js types to `tsconfig.json` for reliable type resolution of `fs`, `path`, and other built-ins
+
+### refactor(settings): remove defaultFont and simplify settings UI
+2026-04-06 : Paulo Santos
+● Remove `defaultFont` from extension configuration, settings UI, and all related backend logic
+● Store the last used font in VS Code global state and use it as the pre-selected font when opening the banner panel — matching the behaviour of the Visual Studio extension
+● Allow `github.com` as a valid external link host in the webview so the "Report an issue" link opens correctly
+● Simplify the settings webview to handle only font directory and layout mode
+● Apply minor code style and robustness improvements
+
+### feat(language): add dedicated Batch file comment style
+2026-04-06 : Paulo Santos
+● Introduce `BATCHFile` to `CommentStyle` enum for Batch (`::`) comments
+● Add `BATCHFile` case to `CommentStyleInfo` with `"::"` prefix
+● Provide `LanguageCommentStyles.BATCHFile` static property
+● Update `languageMap` to use `BATCHFile` for `bat`, `cmd`, `dos`, and `batch` language identifiers
+● Improve clarity by replacing the generic `Custom` style with a dedicated Batch style
+
+### ci(publish-figprint): add ASCII art banner and clarify schema requirements
+2026-04-05 : Paulo Santos
+● Add ASCII art "FIGPrint" banner to publish-figprint.yml release notes
+● Clarify winget-pkgs pipeline schema header requirements in comments
+● Note that `winget validate` reports valid with warnings but the pipeline requires the yaml-language-server schema header comment on each manifest file
+
+### docs(readme): add note on pending WinGet PR for FIGPrint CLI
+2026-04-05 : Paulo Santos
+● Add asterisk to FIGPrint CLI entry in tools table to indicate pending WinGet inclusion
+● Add explanatory footnote clarifying PR status for WinGet availability
+● Link to the relevant pull request (#355518) for user reference
+
+### ci(winget): add YAML schema reference comments to generated manifests
+2026-04-05 : Paulo Santos
+● Add yaml-language-server schema reference comments to top of all three generated WinGet manifest files (version, defaultLocale, installer)
+● Improves editor support and satisfies the winget-pkgs pipeline validator which requires the schema header even when ManifestVersion is present
+
+### ci(publish-figprint): improve upload error handling
+2026-04-05 : Paulo Santos
+● Add error checks after branch delete/create; exit on failure
+● Pipe JSON body via `--input -` to `gh api` to avoid argument-length issues when passing large base64 strings through `-f` flags
+● Check upload success for each YAML file; exit on failure with a clear error message
+● Add `✓ Uploaded successfully` confirmation per file
+
+### ci(manifest): specify InstallerType and NestedInstallerType per installer
+2026-04-05 : Paulo Santos
+● Explicitly set `InstallerType: zip` and `NestedInstallerType: portable` for both x64 and arm64 entries
+● Define `FIGPrint.exe` as the nested installer file with `figprint` as the portable command alias
+● Improves manifest metadata for schema 1.12.0 compatibility
+
+### refactor(ci): simplify WinGet manifest generation logic
+2026-04-05 : Paulo Santos
+● Refactor manifest generation into clear, commented sections
+● Use `$PackageId` variable consistently throughout all manifest entries
+● Write Default Locale manifest before Installer manifest
+● Add descriptive comments to clarify each manifest section's purpose
+
+### ci(manifest): improve LicenseUrl and error messages
+2026-04-05 : Paulo Santos
+● Update `LicenseUrl` to use `${{ github.event.repository.default_branch }}` dynamically instead of hardcoding `master`
+● Clarify error message when no YAML files are found to remove stale `wingetcreate` references
+
+### ci(winget): always generate manifests manually — remove wingetcreate dependency
+2026-04-05 : Paulo Santos
+● Remove `wingetcreate.exe` download and its `update` subcommand entirely
+● Always build YAML manifests manually to guarantee `ManifestVersion: 1.12.0`
+● `wingetcreate update` was silently generating 1.6.0 manifests which fail the winget-pkgs pipeline validation
+● Retain `$exists` package-detection check only for determining PR title format
+
+### ci(workflows): improve release cleanup logic — address PR #30 Copilot comments
+2026-04-04 : Paulo Santos
+● Increase fetched release limit from 100 to 1000 across all six publish workflows
+● Replace `grep '^prefix'` with `jq '.[] | .tagName | select(startswith("prefix"))'` to avoid exit-code-1 failures under `bash -e`/`pipefail` when no releases match
+● Skip deleting the newly created tag during cleanup by comparing against `$NEW_TAG`
+● Move the cleanup step to run *after* GitHub Release creation so a failed create never leaves zero releases
+
+### ci(release): delete previous GitHub releases on each publish
+2026-04-04 : Paulo Santos
+● Add "Delete previous releases" step to all six publish workflows
+● Use `gh release delete --yes --cleanup-tag` to remove both the release and its associated git tag
+● Filter by component-specific tag prefixes (`figlet-v`, `figlet-ts-v`, `figlet-py-v`, `vscode-v`, `vsext-v`, `figprint-v`)
+● Step runs only when the current tag does not already exist, ensuring only the latest release per component is kept
+
+### fix(releases): address PR #29 Copilot review comments
+2026-04-04 : Paulo Santos
+● Replace hard-coded `blob/master` ChangeLog links with `blob/${{ github.event.repository.default_branch }}` across all five remaining publish workflows
+● Fix VS extension release step: `/tmp/release-notes.md` → `$RUNNER_TEMP` on `windows-latest` where `/tmp/` is unreliable for the native `gh` binary
+
+### fix(nuget): correct branch name and .NET version label in publish workflow
+2026-04-04 : Paulo Santos
+● Fix hard-coded `master` branch reference to use `${{ github.event.repository.default_branch }}`
+● Correct `.NET 9` label to `.NET 10` in release description
+
+### style(banner): update and standardize ASCII art headers
+2026-04-04 : Paulo Santos
+● Replace old ASCII art banners in all six `assets/banners/*.txt` files
+● Use new, consistent stylized banners with `/* ... */` block comment markers
+● Standardize branding and header comments across all components
+
+### feat(releases): add FIGLet ASCII art banners to all GitHub release notes
+2026-04-04 : Paulo Santos
+● Add `assets/banners/` directory with six component banner files: `figlet-net.txt`, `figlet-ts.txt`, `figlet-python.txt`, `figlet-vs-extension.txt`, `figlet-vscode-extension.txt`, `figprint.txt`
+● Update all six publish workflows to read the relevant banner at release time and embed it in the GitHub Release body as a code block
+● Unifies the visual identity of all component releases
+
 ### fix(py): remove redundant force-include causing duplicate ZIP entries
 2026-04-04 : Paulo Santos
 ● hatchling's `packages = ["byteforge_figlet"]` already includes the entire package directory tree (fonts/ and all)

@@ -14,6 +14,8 @@ Master index for the FIGLet Comment Generator / ByteForge FIGLet Suite changelog
 - Shipped **VS Code Extension v1** to the marketplace (`PaulStSmith.figlet-comment-generator`)
 - Launched **byteforge-figlet** Python library on PyPI (141-test suite, zero dependencies)
 - First **FIGPrint** package published to **winget** (`ByteForge.FIGPrint`)
+- Removed `defaultFont` setting; last used font is now remembered per-user in global state (matching Visual Studio extension behaviour)
+- Added dedicated Batch file (`bat`/`cmd`) comment style (`::` prefix)
 - Automated publish pipelines for NuGet, npm, PyPI, VS Marketplace, VS Code Marketplace, winget, and GitHub Releases
 - Overhauled TypeScript renderer: ANSI color preservation, paragraph mode, RTL, configurable layout
 - Full test suite: 81 TypeScript (Vitest) + 141 Python (pytest) + comprehensive C# MSTest suite
