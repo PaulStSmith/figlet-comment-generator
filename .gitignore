@@ -317,6 +317,13 @@ paket-files/
 __pycache__/
 *.pyc
 
+# Our Python library cache directories
+FIGLet.Python/.pytest_cache/
+
+# Python virtual environments
+venv/
+.venv/
+
 # Cake - Uncomment if you are using it
 # tools/**
 # !tools/packages.config
