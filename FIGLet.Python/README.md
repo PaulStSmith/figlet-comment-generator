@@ -151,13 +151,13 @@ python -m byteforge_figlet "Hello World"
 
 **Constructor parameters:**
 
-| Parameter         | Type         | Default    | Description                    |
-| ----------------- | ------------ | ---------- | ------------------------------ |
-| `font`            | `FIGFont \   | None`      | built-in small                 |
-| `mode`            | `LayoutMode` | `Smushing` | Layout mode                    |
-| `line_separator`  | `str \       | None`      | `os.linesep`                   |
-| `use_ansi_colors` | `bool`       | `False`    | Preserve ANSI color codes      |
-| `paragraph_mode`  | `bool`       | `True`     | Treat `\n` as paragraph breaks |
+| Parameter         | Type                | Default      | Description                    |
+| ----------------- | ------------------- | ------------ | ------------------------------ |
+| `font`            | `FIGFont &#124; None` | `built-in small` | Font to use                    |
+| `mode`            | `LayoutMode`        | `Smushing`   | Layout mode                    |
+| `line_separator`  | `str &#124; None`   | `os.linesep` | Line separator                 |
+| `use_ansi_colors` | `bool`              | `False`      | Preserve ANSI color codes      |
+| `paragraph_mode`  | `bool`              | `True`       | Treat `\n` as paragraph breaks |
 
 ### `LayoutMode`
 
