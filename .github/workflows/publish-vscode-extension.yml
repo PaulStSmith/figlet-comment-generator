@@ -5,8 +5,8 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet.VSCodeExtension/**'
-      - '.github/workflows/publish-vscode-extension.yml'
+      - 'FIGLet.VSCodeExtension/**/*.ts'
+      - 'FIGLet.VSCodeExtension/**/*.tsx'
   workflow_dispatch:
 
 jobs:

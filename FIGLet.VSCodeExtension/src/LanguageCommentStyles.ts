@@ -67,7 +67,12 @@ export enum CommentStyle {
     /**
      * Bash-style comments (: ' ... ').
      */
-    Bash
+    Bash,
+
+    /**
+     * Batch file comments (::).
+     */
+    BATCHFile
 }
 
 /*
@@ -203,6 +208,10 @@ export class CommentStyleInfo {
                 this._blockCommentStart = blockStart ?? ": '#";
                 this._blockCommentEnd = blockEnd ?? "#'";
                 break;
+            
+            case CommentStyle.BATCHFile:
+                this._singleLinePrefix = singleLinePrefix ?? "::";
+                break;
 
             default:
                 throw new Error(`Invalid comment style: ${primary}`);
@@ -317,6 +326,11 @@ export class LanguageCommentStyles {
     static readonly Bash = new CommentStyleInfo(CommentStyle.Bash);
 
     /**
+     * Batch file comments (::).
+     */
+    static readonly BatchFile = new CommentStyleInfo(CommentStyle.BATCHFile);
+
+    /**
      * Dictionary mapping language names to their respective comment styles.
      */
     private static readonly languageMap = new Map<string, CommentStyleInfo>([
@@ -381,10 +395,10 @@ export class LanguageCommentStyles {
         ['shellscript', LanguageCommentStyles.Bash],
 
         // Batch files
-        ['bat', new CommentStyleInfo(CommentStyle.Custom, '::', null, null)],
-        ['cmd', new CommentStyleInfo(CommentStyle.Custom, '::', null, null)],
-        ['dos', new CommentStyleInfo(CommentStyle.Custom, '::', null, null)],
-        ['batch', new CommentStyleInfo(CommentStyle.Custom, '::', null, null)]
+        ['bat', LanguageCommentStyles.BatchFile],
+        ['cmd', LanguageCommentStyles.BatchFile],
+        ['dos', LanguageCommentStyles.BatchFile],
+        ['batch', LanguageCommentStyles.BatchFile]
     ]);
 
     /**

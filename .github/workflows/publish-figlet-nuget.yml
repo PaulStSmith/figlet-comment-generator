@@ -5,8 +5,7 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet/**'
-      - '.github/workflows/publish-figlet-nuget.yml'
+      - 'FIGLet/**/*.cs'
   workflow_dispatch:
 
 jobs:

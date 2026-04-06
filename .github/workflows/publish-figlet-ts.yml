@@ -5,8 +5,8 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet.TS/**'
-      - '.github/workflows/publish-figlet-ts.yml'
+      - 'FIGLet.TS/**/*.ts'
+      - 'FIGLet.TS/**/*.tsx'
   workflow_dispatch:
 
 jobs:

@@ -30,7 +30,9 @@ It includes libraries, IDE extensions, and command‑line tools that make it eas
 | **FIGLet TS Library** | TypeScript implementation for Node.js and web environments. Powers the VS Code extension. | TypeScript | [NPM](https://www.npmjs.com/package/@byte-forge/figlet) |
 | **Visual Studio Extension** | Adds FIGLet banner generation directly into Visual Studio. | C# | [VS Extension](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator) |
 | **VS Code Extension** | Generate FIGLet banners in VS Code with live preview and comment wrapping. | TypeScript | [VSCode Extension](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.figlet-comment-generator) |
-| **FigPrint CLI** | Command‑line tool for rendering FIGLet text in the terminal. | C# | `winget install ByteForge.FIGPrint` |
+| **FigPrint CLI** | Command‑line tool for rendering FIGLet text in the terminal. | C# | `winget install ByteForge.FIGPrint`(*) |
+
+(*): A PR for inclusion of _FIGPrint CLI_ into the WinGet library is currently pending review. (see [#355518](https://github.com/microsoft/winget-pkgs/pull/355518))
 
 ## 🧱 Architecture
 

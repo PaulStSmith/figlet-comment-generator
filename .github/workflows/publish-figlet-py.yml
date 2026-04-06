@@ -5,8 +5,7 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet.Python/**'
-      - '.github/workflows/publish-figlet-py.yml'
+      - 'FIGLet.Python/**/*.py'
   workflow_dispatch:
 
 jobs:

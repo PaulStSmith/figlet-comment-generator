@@ -5,8 +5,7 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGPrint/**'
-      - '.github/workflows/publish-figprint.yml'
+      - 'FIGPrint/**/*.cs'
   workflow_dispatch:
 
 jobs:
@@ -191,8 +190,25 @@ jobs:
           # PowerShell here-strings require "@ at column 0, which conflicts with
           # YAML indentation. Use string arrays joined with newlines instead.
           $n = "`n"
+          $PackageId = "ByteForge.FIGPrint"
 
-          @("PackageIdentifier: ByteForge.FIGPrint",
+          #
+          # ▀██▀                                   ██                      ██    ▄██▄ 
+          #  ██  ███▄██▄ ▀█▄▀▀█▄ ▄█▀▀▀█▄ ▀█▄█▀█▄ ▀▀██▀▀   ▀▀▀█▄  ▀█▄▀▀█▄ ▀▀██▀▀  ▀██▀ 
+          #  ██  ██ █ ██  ██▄▄█▀ ██   ██  ██       ██ ▄▄ ▄█▀▀██   ██  ██   ██ ▄▄  ▀▀  
+          # ▀▀▀▀ ▀▀ ▀ ▀▀ ▄██▄     ▀▀▀▀▀  ▀▀▀▀       ▀▀▀   ▀▀▀ ▀▀  ▀▀  ▀▀    ▀▀▀   ▀▀  
+          # 
+          # NOTE: 'winget validate' reports these manifests as valid (with warnings),
+          # but the winget-pkgs pipeline additionally requires the yaml-language-server
+          # schema header comment on each file. Without it the pipeline fails manifest
+          # validation even though the YAML content itself is correct.
+
+          #
+          # The Version manifest
+          #
+          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.version.1.12.0.schema.json",
+            "",
+            "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
             "DefaultLocale: en-US",
             "ManifestType: version",
@@ -200,26 +216,12 @@ jobs:
             "") -join $n |
             Set-Content "$manifestDir/ByteForge.FIGPrint.yaml" -Encoding UTF8 -NoNewline
 
-          @("PackageIdentifier: ByteForge.FIGPrint",
-            "PackageVersion: $version",
-            "InstallerType: zip",
-            "NestedInstallerType: portable",
-            "NestedInstallerFiles:",
-            "- RelativeFilePath: FIGPrint.exe",
-            "  PortableCommandAlias: figprint",
-            "Installers:",
-            "- Architecture: x64",
-            "  InstallerUrl: $x64Url",
-            "  InstallerSha256: $x64Sha256",
-            "- Architecture: arm64",
-            "  InstallerUrl: $arm64Url",
-            "  InstallerSha256: $arm64Sha256",
-            "ManifestType: installer",
-            "ManifestVersion: 1.12.0",
-            "") -join $n |
-            Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -NoNewline
-
-          @("PackageIdentifier: ByteForge.FIGPrint",
+          #
+          # The Default Locale manifest
+          #
+          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json",
+            "",
+            "PackageIdentifier: $PackageId",
             "PackageVersion: $version",
             "PackageLocale: en-US",
             "Publisher: ByteForge",
@@ -228,18 +230,45 @@ jobs:
             "PackageName: FIGPrint",
             "PackageUrl: https://github.com/${{ github.repository }}",
             "License: MIT",
-            "LicenseUrl: https://github.com/${{ github.repository }}/blob/master/LICENSE",
+            "LicenseUrl: https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/LICENSE",
             "ShortDescription: Command-line utility for rendering text using FIGlet fonts",
             "ManifestType: defaultLocale",
             "ManifestVersion: 1.12.0",
             "") -join $n |
             Set-Content "$manifestDir/ByteForge.FIGPrint.locale.en-US.yaml" -Encoding UTF8 -NoNewline
 
-          # Locate the generated YAML files (wingetcreate nests them under
-          # manifests/<letter>/<Publisher>/<Package>/<version>/)
+          #
+          # The Installer manifest
+          #
+          @("# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json",
+            "",
+            "PackageIdentifier: $PackageId",
+            "PackageVersion: $version",
+            "Installers:",
+            "- Architecture: x64",
+            "  InstallerUrl: $x64Url",
+            "  InstallerSha256: $x64Sha256",
+            "  InstallerType: zip",
+            "  NestedInstallerType: portable",
+            "  NestedInstallerFiles:",
+            "  - RelativeFilePath: FIGPrint.exe",
+
+            "- Architecture: arm64",
+            "  InstallerUrl: $arm64Url",
+            "  InstallerSha256: $arm64Sha256",
+            "  InstallerType: zip",
+            "  NestedInstallerType: portable",
+            "  NestedInstallerFiles:",
+            "  - RelativeFilePath: FIGPrint.exe",
+            "ManifestType: installer",
+            "ManifestVersion: 1.12.0",
+            "") -join $n |
+            Set-Content "$manifestDir/ByteForge.FIGPrint.installer.yaml" -Encoding UTF8 -NoNewline
+
+          # Locate the generated YAML files.
           $yamlFiles = Get-ChildItem -Path $manifestsOut -Recurse -Filter "*.yaml"
           if ($yamlFiles.Count -eq 0) {
-            Write-Error "wingetcreate did not produce any YAML files in $manifestsOut"
+            Write-Error "No YAML manifest files were found in $manifestsOut"
             exit 1
           }
           Write-Host "Generated $($yamlFiles.Count) manifest file(s):"
@@ -262,26 +291,43 @@ jobs:
           if ($LASTEXITCODE -eq 0) {
             Write-Host "Branch $branchName already exists — deleting and recreating"
             gh api "repos/$ownerLogin/winget-pkgs/git/refs/heads/$branchName" -X DELETE
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Failed to delete existing branch $branchName"
+              exit 1
+            }
           }
           gh api "repos/$ownerLogin/winget-pkgs/git/refs" `
             -X POST `
             -f ref="refs/heads/$branchName" `
-            -f sha="$baseSha" | Out-Null
+            -f sha="$baseSha"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to create branch $branchName on fork"
+            exit 1
+          }
           Write-Host "Created branch $branchName"
 
-          # Upload each YAML file to the correct path in the fork branch
+          # Upload each YAML file to the correct path in the fork branch.
+          # Build the JSON body and pipe via --input to avoid argument-length
+          # issues when passing large base64 strings through -f flags.
           $targetBase = "manifests/b/ByteForge/FIGPrint/$version"
           foreach ($file in $yamlFiles) {
-            $content     = [Convert]::ToBase64String(
-                             [System.Text.Encoding]::UTF8.GetBytes(
-                               (Get-Content $file.FullName -Raw)))
-            $targetPath  = "$targetBase/$($file.Name)"
+            $encoded    = [Convert]::ToBase64String(
+                            [System.Text.Encoding]::UTF8.GetBytes(
+                              (Get-Content $file.FullName -Raw)))
+            $targetPath = "$targetBase/$($file.Name)"
+            $body       = [PSCustomObject]@{
+                            message = "Add $packageId $version"
+                            content = $encoded
+                            branch  = $branchName
+                          } | ConvertTo-Json -Compress
             Write-Host "Uploading $($file.Name) → $targetPath"
-            gh api "repos/$ownerLogin/winget-pkgs/contents/$targetPath" `
-              -X PUT `
-              -f message="Add $packageId $version" `
-              -f content="$content" `
-              -f branch="$branchName" | Out-Null
+            $body | gh api "repos/$ownerLogin/winget-pkgs/contents/$targetPath" `
+              -X PUT --input -
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Failed to upload $($file.Name) to $targetPath"
+              exit 1
+            }
+            Write-Host "  ✓ Uploaded successfully"
           }
 
           # Open the PR with the required winget title format

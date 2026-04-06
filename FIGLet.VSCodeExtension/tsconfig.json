@@ -8,6 +8,13 @@
 			"ES2022",
 			"DOM"
 		],
+		"types": [
+			"node",
+			"vscode",
+			"react",
+			"react-dom",
+			"mocha"
+		],
 		"sourceMap": true,
 		"rootDir": "src",
 		"strict": true,

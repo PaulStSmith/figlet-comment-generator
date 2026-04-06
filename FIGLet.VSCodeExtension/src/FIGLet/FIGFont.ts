@@ -213,7 +213,7 @@ export class FIGFont {
      * line is empty.
      */
     private static detectEndmark(lines: string[], blockStart: number): string {
-        if (blockStart >= lines.length) return '@';
+        if (blockStart >= lines.length) { return '@'; }
         const firstRaw = lines[blockStart].replace(/[\r\n]+$/, '');
         return firstRaw.length > 0 ? firstRaw[firstRaw.length - 1] : '@';
     }
