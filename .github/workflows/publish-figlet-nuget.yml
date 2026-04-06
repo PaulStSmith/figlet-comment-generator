@@ -5,7 +5,7 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet/**'
+      - 'FIGLet/**/*.cs'
   workflow_dispatch:
 
 jobs:

@@ -5,8 +5,8 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet.VisualStudioExtension/**'
-      - 'FIGLet/**'  # VS Extension depends on FIGLet library
+      - 'FIGLet.VisualStudioExtension/**/*.cs'
+      - 'FIGLet/**/*.cs'  # VS Extension depends on FIGLet library
   workflow_dispatch:
 
 jobs:

@@ -5,7 +5,7 @@ on:
     types: [closed]
     branches: [master, main]
     paths:
-      - 'FIGLet.Python/**'
+      - 'FIGLet.Python/**/*.py'
   workflow_dispatch:
 
 jobs:
