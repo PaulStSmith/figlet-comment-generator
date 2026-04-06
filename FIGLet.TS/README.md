@@ -146,7 +146,7 @@ The library implements all official FIGLet smushing rules as defined in the FIGL
 | Underscore | `2` | Underscore is replaced by a character from the hierarchy |
 | Hierarchy | `4` | Characters from "higher" classes replace those from "lower" ones |
 | Opposite Pair | `8` | Matching bracket/parenthesis pairs smush into a vertical bar |
-| Big X | `16` | `\` and `/` smush into `X`; `>` and `<` smush into `=` |
+| Big X | `16` | `/+\` → `\|`, `\+/` → `Y`, `>+<` → `X` |
 | Hardblank | `32` | Two hardblanks smush into one hardblank |
 
 You can inspect a font's active rules at runtime:
