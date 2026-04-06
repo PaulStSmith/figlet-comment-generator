@@ -29,6 +29,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChangeLog", "ChangeLog", "{
 		ChangeLog.md = ChangeLog.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHubActions", "GitHubActions", "{D2C96421-FC23-4240-A03B-BEAF2FE5B4FF}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\publish-figlet-nuget.yml = .github\workflows\publish-figlet-nuget.yml
+		.github\workflows\publish-figlet-py.yml = .github\workflows\publish-figlet-py.yml
+		.github\workflows\publish-figlet-ts.yml = .github\workflows\publish-figlet-ts.yml
+		.github\workflows\publish-figprint.yml = .github\workflows\publish-figprint.yml
+		.github\workflows\publish-vs-extension.yml = .github\workflows\publish-vs-extension.yml
+		.github\workflows\publish-vscode-extension.yml = .github\workflows\publish-vscode-extension.yml
+		.github\workflows\sync-extension-versions.yml = .github\workflows\sync-extension-versions.yml
+		.github\workflows\sync-library-versions.yml = .github\workflows\sync-library-versions.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +118,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4311424D-7EB3-48E3-B250-C330A1A4F974} = {CB83148A-AB11-4E35-ABBF-5AF6D317CB99}
+		{D2C96421-FC23-4240-A03B-BEAF2FE5B4FF} = {CB83148A-AB11-4E35-ABBF-5AF6D317CB99}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {95010506-A759-47E0-B507-C7BBCE018F9A}

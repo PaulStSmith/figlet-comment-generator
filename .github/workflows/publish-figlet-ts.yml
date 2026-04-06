@@ -111,9 +111,7 @@ jobs:
             echo ''
             echo 'TypeScript FIGLet rendering library — browser and Node.js compatible.'
             echo ''
-            echo "📦 Published to [npm](https://www.npmjs.com/package/@byte-forge/figlet/v/${{ steps.version.outputs.version }})"
-            echo ''
-            echo '| | |'
+            echo "| 📦 Published to | [npm](https://www.npmjs.com/package/@byte-forge/figlet/v/${{ steps.version.outputs.version }}) |"
             echo '|---|---|'
             echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
             echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"

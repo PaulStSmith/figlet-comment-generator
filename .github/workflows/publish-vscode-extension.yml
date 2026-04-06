@@ -114,9 +114,7 @@ jobs:
             echo ''
             echo 'VS Code extension for inserting FIGLet ASCII art comments.'
             echo ''
-            echo '📦 Published to the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.figlet-comment-generator)'
-            echo ''
-            echo '| | |'
+            echo '| 📦 Published to | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.figlet-comment-generator) |'
             echo '|---|---|'
             echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
             echo "| **Actions run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"

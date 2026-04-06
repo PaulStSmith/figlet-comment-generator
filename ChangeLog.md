@@ -1,4 +1,4 @@
-# ChangeLog
+﻿# ChangeLog
 
 Master index for the FIGLet Comment Generator / ByteForge FIGLet Suite changelog.
 

@@ -142,9 +142,7 @@ jobs:
             echo ''
             echo 'Visual Studio 2022+ extension for inserting FIGLet ASCII art comments.'
             echo ''
-            echo '📦 Published to the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator)'
-            echo ''
-            echo '| | |'
+            echo '| 📦 Published to | [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator) |'
             echo '|---|---|'
             echo "| **Version** | \`${{ steps.version.outputs.version }}\` |"
             echo "| **Manifest base** | \`${{ steps.version.outputs.base }}\` |"
