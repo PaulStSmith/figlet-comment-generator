@@ -1,4 +1,4 @@
-# 🌐 **BYTEFORGE FIGLET SUITE — FIGPRINT CLI**
+﻿# 🌐 **BYTEFORGE FIGLET SUITE — FIGPRINT CLI**
 
 ```
 ██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗
@@ -60,20 +60,20 @@ FIGPrint [<text>...] [options]
 
 ### Arguments
 
-| Argument | Description |
-|----------|-------------|
+| Argument | Description                                                                                       |
+| -------- | ------------------------------------------------------------------------------------------------- |
 | `<text>` | One or more words to render. Multiple arguments are joined with a space. Omit to read from stdin. |
 
 ### Options
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--font <name>` | `small` | Name of the FIGlet font to use (without the `.flf` extension) |
-| `--layout <mode>` | `Smushing` | Layout mode: `FullSize`, `Kerning`, or `Smushing` |
-| `--ansi-colors` | off | Preserve ANSI color escape codes through the rendering |
-| `--showList` | off | Print a list of all available fonts and exit |
-| `--help` | | Show help and exit |
-| `--version` | | Show version and exit |
+| Option            | Default    | Description                                                   |
+| ----------------- | ---------- | ------------------------------------------------------------- |
+| `--font <name>`   | `small`    | Name of the FIGlet font to use (without the `.flf` extension) |
+| `--layout <mode>` | `Smushing` | Layout mode: `FullSize`, `Kerning`, or `Smushing`             |
+| `--ansi-colors`   | off        | Preserve ANSI color escape codes through the rendering        |
+| `--showList`      | off        | Print a list of all available fonts and exit                  |
+| `--help`          |            | Show help and exit                                            |
+| `--version`       |            | Show version and exit                                         |
 
 ---
 
@@ -145,20 +145,20 @@ The `small` font is embedded in the executable and is always available as the de
 
 Fonts bundled with the release:
 
-| Font name | Description |
-|-----------|-------------|
-| `small` | Compact font, the default |
-| `bmp` | Bitmap-style font |
-| `bmp-condensed` | Condensed bitmap variant |
-| `bmp-inverted` | Inverted bitmap font |
+| Font name                | Description                       |
+| ------------------------ | --------------------------------- |
+| `small`                  | Compact font, the default         |
+| `bmp`                    | Bitmap-style font                 |
+| `bmp-condensed`          | Condensed bitmap variant          |
+| `bmp-inverted`           | Inverted bitmap font              |
 | `bmp-inverted-condensed` | Inverted condensed bitmap variant |
 
 ## ↩ Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| `0` | Success |
-| `1` | No text provided, font not found, or rendering error |
+| Code | Meaning                                              |
+| ---- | ---------------------------------------------------- |
+| `0`  | Success                                              |
+| `1`  | No text provided, font not found, or rendering error |
 
 ---
 

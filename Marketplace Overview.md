@@ -1,4 +1,4 @@
-# Create beautiful ASCII art comments that make your code documentation stand out.
+﻿# Create beautiful ASCII art comments that make your code documentation stand out.
 
 FIGlet Comment Generator provides a powerful and intuitive way to create eye-catching ASCII art banners within Visual Studio. Whether you're documenting classes, methods, or important code sections, this extension helps you create visually distinctive comments that enhance code readability and organization.
 

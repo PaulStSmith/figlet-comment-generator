@@ -1,4 +1,4 @@
-# 🌐 **BYTEFORGE FIGLET SUITE — @byte‑forge/figlet (TypeScript Library)**
+﻿# 🌐 **BYTEFORGE FIGLET SUITE — @byte‑forge/figlet (TypeScript Library)**
 
 ```
 ██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗
@@ -120,11 +120,11 @@ console.log(asciiArt);
 
 The library supports three layout modes:
 
-| Mode | Value | Description |
-|------|-------|-------------|
-| `LayoutMode.FullSize` | `-1` | No character compression — each character is rendered at full width |
-| `LayoutMode.Kerning` | `0` | Characters are moved together until they touch but do not overlap |
-| `LayoutMode.Smushing` | `1` | Characters are merged according to the font's smushing rules (default) |
+| Mode                  | Value | Description                                                            |
+| --------------------- | ----- | ---------------------------------------------------------------------- |
+| `LayoutMode.FullSize` | `-1`  | No character compression — each character is rendered at full width    |
+| `LayoutMode.Kerning`  | `0`   | Characters are moved together until they touch but do not overlap      |
+| `LayoutMode.Smushing` | `1`   | Characters are merged according to the font's smushing rules (default) |
 
 ```typescript
 import { FIGFont, FIGLetRenderer, LayoutMode } from '@byte-forge/figlet';
@@ -140,14 +140,14 @@ const smushing = FIGLetRenderer.render('Text', font, LayoutMode.Smushing);
 
 The library implements all official FIGLet smushing rules as defined in the FIGLet specification. The font file determines which rules are active.
 
-| Rule | Flag | Description |
-|------|------|-------------|
-| Equal Character | `1` | Two identical characters smush into one |
-| Underscore | `2` | Underscore is replaced by a character from the hierarchy |
-| Hierarchy | `4` | Characters from "higher" classes replace those from "lower" ones |
-| Opposite Pair | `8` | Matching bracket/parenthesis pairs smush into a vertical bar |
-| Big X | `16` | `/+\` → `\|`, `\+/` → `Y`, `>+<` → `X` |
-| Hardblank | `32` | Two hardblanks smush into one hardblank |
+| Rule            | Flag | Description                                                      |
+| --------------- | ---- | ---------------------------------------------------------------- |
+| Equal Character | `1`  | Two identical characters smush into one                          |
+| Underscore      | `2`  | Underscore is replaced by a character from the hierarchy         |
+| Hierarchy       | `4`  | Characters from "higher" classes replace those from "lower" ones |
+| Opposite Pair   | `8`  | Matching bracket/parenthesis pairs smush into a vertical bar     |
+| Big X           | `16` | `/+\` → `\|`, `\+/` → `Y`, `>+<` → `X`                           |
+| Hardblank       | `32` | Two hardblanks smush into one hardblank                          |
 
 You can inspect a font's active rules at runtime:
 
@@ -197,21 +197,21 @@ console.log(renderer.render(paragraphs));
 ```
 Output:
 ```text
-  ___                                  _        _ 
+  ___                                  _        _
  | _ \__ _ _ _ __ _ __ _ _ _ __ _ _ __| |_     / |
  |  _/ _` | '_/ _` / _` | '_/ _` | '_ \ ' \    | |
  |_| \__,_|_| \__,_\__, |_| \__,_| .__/_||_|   |_|
-                   |___/         |_|              
+                   |___/         |_|
 
 
 
 
 
-  ___                                  _        ___ 
+  ___                                  _        ___
  | _ \__ _ _ _ __ _ __ _ _ _ __ _ _ __| |_     |_  )
- |  _/ _` | '_/ _` / _` | '_/ _` | '_ \ ' \     / / 
+ |  _/ _` | '_/ _` / _` | '_/ _` | '_ \ ' \     / /
  |_| \__,_|_| \__,_\__, |_| \__,_| .__/_||_|   /___|
-                   |___/         |_|                
+                   |___/         |_|
 
 ```
 
@@ -229,7 +229,7 @@ console.log(renderer.render('Hello 😊 World!'));
 ```
 Output:
 ```
-  _  _     _ _          __      __       _    _ _ 
+  _  _     _ _          __      __       _    _ _
  | || |___| | |___      \ \    / /__ _ _| |__| | |
  | __ / -_) | / _ \      \ \/\/ / _ \ '_| / _` |_|
  |_||_\___|_|_\___/       \_/\_/\___/_| |_\__,_(_)
@@ -241,32 +241,32 @@ Output:
 
 Handles font loading and storage.
 
-| Member | Description |
-|--------|-------------|
-| `FIGFont.getDefault()` | Returns the built-in default font (cached after first load) |
-| `FIGFont.fromFile(path)` | Loads a font from a `.flf` or `.zip` file |
-| `FIGFont.fromText(text)` | Parses a font from a string |
-| `FIGFont.fromLines(lines)` | Parses a font from an array of lines |
-| `.height` | Character height in rows |
-| `.hardBlank` | The hard-blank character |
-| `.characters` | `Map<string, string[]>` — character string → glyph rows |
-| `.smushingRules` | Active smushing rules flags |
-| `.printDirection` | `0` = left-to-right, `1` = right-to-left |
-| `.hasSmushingRule(rule)` | Tests whether a specific rule is active |
+| Member                     | Description                                                 |
+| -------------------------- | ----------------------------------------------------------- |
+| `FIGFont.getDefault()`     | Returns the built-in default font (cached after first load) |
+| `FIGFont.fromFile(path)`   | Loads a font from a `.flf` or `.zip` file                   |
+| `FIGFont.fromText(text)`   | Parses a font from a string                                 |
+| `FIGFont.fromLines(lines)` | Parses a font from an array of lines                        |
+| `.height`                  | Character height in rows                                    |
+| `.hardBlank`               | The hard-blank character                                    |
+| `.characters`              | `Map<string, string[]>` — character string → glyph rows     |
+| `.smushingRules`           | Active smushing rules flags                                 |
+| `.printDirection`          | `0` = left-to-right, `1` = right-to-left                    |
+| `.hasSmushingRule(rule)`   | Tests whether a specific rule is active                     |
 
 ### `FIGLetRenderer`
 
 Core rendering engine.
 
-| Member | Description |
-|--------|-------------|
-| `new FIGLetRenderer(font, mode?, separator?, ansi?, paragraph?)` | Create an instance |
-| `FIGLetRenderer.render(text, font, mode?, separator?, ansi?, paragraph?)` | Static one-shot render |
-| `.render(text)` | Render text using instance settings |
-| `.layoutMode` | Active `LayoutMode` |
-| `.lineSeparator` | Line separator string (default `'\n'`) |
-| `.useANSIColors` | Whether to preserve ANSI color codes through rendering |
-| `.paragraphMode` | Whether blank lines produce separate FIGLet renders |
+| Member                                                                    | Description                                            |
+| ------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `new FIGLetRenderer(font, mode?, separator?, ansi?, paragraph?)`          | Create an instance                                     |
+| `FIGLetRenderer.render(text, font, mode?, separator?, ansi?, paragraph?)` | Static one-shot render                                 |
+| `.render(text)`                                                           | Render text using instance settings                    |
+| `.layoutMode`                                                             | Active `LayoutMode`                                    |
+| `.lineSeparator`                                                          | Line separator string (default `'\n'`)                 |
+| `.useANSIColors`                                                          | Whether to preserve ANSI color codes through rendering |
+| `.paragraphMode`                                                          | Whether blank lines produce separate FIGLet renders    |
 
 ### `LayoutMode`
 
@@ -321,6 +321,7 @@ This library powers:
 ## 🔗 Related Packages
 
 - **[ByteForge.FIGLet](https://www.nuget.org/packages/ByteForge.FIGLet)** — The equivalent C# / .NET library (NuGet)
+- **[byteforge-figlet](https://pypi.org/project/byteforge-figlet)** — The equivalent Python library (PyPI)
 - **[FIGLet Comment Generator (VS Code)](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.figlet-comment-generator)** — VS Code extension
 - **[FIGLet Comment Generator (Visual Studio)](https://marketplace.visualstudio.com/items?itemName=PaulStSmith.FIGLetCommentGenerator)** — Visual Studio 2022+ extension
 

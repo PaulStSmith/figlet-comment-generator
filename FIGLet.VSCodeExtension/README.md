@@ -1,26 +1,26 @@
-# 🌐 **BYTEFORGE FIGLET SUITE — VS CODE EXTENSION**
+﻿# 🌐 **BYTEFORGE FIGLET SUITE — VS CODE EXTENSION**
 
 ```
-██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗ 
-██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝ 
-██████╔╝ ╚████╔╝    ██║   █████╗  █████╗  ██║   ██║██████╔╝██║  ███╗█████╗   
-██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝   
-██████╔╝   ██║      ██║   ███████╗██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗ 
-╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝ 
+██████╗ ██╗   ██╗████████╗███████╗███████╗ ██████╗ ██████╗  ██████╗ ███████╗
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
+██████╔╝ ╚████╔╝    ██║   █████╗  █████╗  ██║   ██║██████╔╝██║  ███╗█████╗
+██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝
+██████╔╝   ██║      ██║   ███████╗██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗
+╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
                  ███████╗██╗ ██████╗ ██╗     ███████╗████████╗    ███████╗██╗   ██╗██╗████████╗███████╗
                  ██╔════╝██║██╔════╝ ██║     ██╔════╝╚══██╔══╝    ██╔════╝██║   ██║██║╚══██╔══╝██╔════╝
-                 █████╗  ██║██║  ███╗██║     █████╗     ██║       ███████╗██║   ██║██║   ██║   █████╗  
-                 ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║       ╚════██║██║   ██║██║   ██║   ██╔══╝  
+                 █████╗  ██║██║  ███╗██║     █████╗     ██║       ███████╗██║   ██║██║   ██║   █████╗
+                 ██╔══╝  ██║██║   ██║██║     ██╔══╝     ██║       ╚════██║██║   ██║██║   ██║   ██╔══╝
                  ██║     ██║╚██████╔╝███████╗███████╗   ██║       ███████║╚██████╔╝██║   ██║   ███████╗
                  ╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚══════╝   ╚═╝       ╚══════╝ ╚═════╝ ╚═╝   ╚═╝   ╚══════╝
 ```
 
-> **FIGLet Comment Generator for VS Code**  
+> **FIGLet Comment Generator for VS Code**
 > *Generate ASCII art banners directly inside your editor.*
 
 ## 📘 Overview
 
-The **FIGLet Comment Generator** extension brings the power of FIGLet ASCII art directly into **Visual Studio Code**.  
+The **FIGLet Comment Generator** extension brings the power of FIGLet ASCII art directly into **Visual Studio Code**.
 Create eye‑catching section headers, file banners, and comment blocks with just a few keystrokes — all rendered using the ByteForge FIGLet Suite engine.
 
 ![Extension Screenshot](./media/screenshot.png)
@@ -29,18 +29,18 @@ This extension is powered by our own **FIGLet TypeScript Library** and integrate
 
 ## ✨ Features
 
-- 🎨 Generate ASCII art banners using FIGLet fonts  
-- 🔤 Choose from multiple FIGLet fonts  
-- 🧠 Automatically wraps banners in the correct comment syntax  
-- ⚙️ Supports multiple layout modes (Full Size, Kerning, Smushing)  
-- 🧩 Context‑aware insertion based on cursor position  
-- ⌨️ Customizable keyboard shortcuts  
-- 🖥️ Retro‑terminal aesthetic with clean, modern UI  
+- 🎨 Generate ASCII art banners using FIGLet fonts
+- 🔤 Choose from multiple FIGLet fonts
+- 🧠 Automatically wraps banners in the correct comment syntax
+- ⚙️ Supports multiple layout modes (Full Size, Kerning, Smushing)
+- 🧩 Context‑aware insertion based on cursor position
+- ⌨️ Customizable keyboard shortcuts
+- 🖥️ Retro‑terminal aesthetic with clean, modern UI
 
 ## 🛠 Installation
 
-1. Open **VS Code**  
-2. Press `Shift+Ctrl+X` (Windows/Linux) or `Shift+Cmd+X` (macOS)  
+1. Open **VS Code**
+2. Press `Shift+Ctrl+X` (Windows/Linux) or `Shift+Cmd+X` (macOS)
 3. Search for `FIGLet Comment Generator`
 4. Click Install
 
@@ -48,11 +48,11 @@ This extension is powered by our own **FIGLet TypeScript Library** and integrate
 
 ### **Generate a FIGLet banner**
 
-1. Place your cursor at the line where you want the banner  
-2. Press `Ctrl+Alt+B` (Windows/Linux/macOS)  
-3. Type your text  
-4. Select a font (optional)  
-5. Press **Enter**  
+1. Place your cursor at the line where you want the banner
+2. Press `Ctrl+Alt+B` (Windows/Linux/macOS)
+3. Type your text
+4. Select a font (optional)
+5. Press **Enter**
 
 ### Example
 
@@ -81,38 +81,38 @@ Open **Settings**, you have three methods:
 
 You can configure:
 
-- Default font  
-- Default layout mode  
+- Default font
+- Default layout mode
 - Font folder location
 
 ## 🧩 Supported Languages
 
 The extension automatically detects the file type and uses the correct comment syntax:
 
-- C‑style languages: `//` or `/* */`  
-- Python: `#`  
-- HTML/XML: `<!-- -->`  
-- SQL: `--`  
-- PowerShell: `#`  
-- Many more  
+- C‑style languages: `//` or `/* */`
+- Python: `#`
+- HTML/XML: `<!-- -->`
+- SQL: `--`
+- PowerShell: `#`
+- Many more
 
 ## 🔧 Powered By
 
 This extension uses our own **FIGLet TypeScript Library** — part of the ByteForge FIGLet Suite — for rendering FIGLet text with full support for:
 
-- FLF font parsing  
-- Layout modes (FullSize, Kerning, Smushing)  
-- Smushing rules (Equal, Underscore, Hierarchy, Opposite Pair, Big X, Hardblank)  
+- FLF font parsing
+- Layout modes (FullSize, Kerning, Smushing)
+- Smushing rules (Equal, Underscore, Hierarchy, Opposite Pair, Big X, Hardblank)
 
 ## 🤝 Contributing
 
-Contributions are welcome!  
+Contributions are welcome!
 If you’d like to improve the extension:
 
-1. Fork the repository  
-2. Create a feature branch  
-3. Commit your changes  
-4. Open a Pull Request  
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a Pull Request
 
 ## 📜 License
 
@@ -120,8 +120,8 @@ This extension is licensed under the **MIT License**.
 
 ## 💡 Credits
 
-- Original FIGLet concept by **Frank, Ian & Glenn**  
-- Implementations by **Paulo Santos (ByteForge)**  
+- Original FIGLet concept by **Frank, Ian & Glenn**
+- Implementations by **Paulo Santos (ByteForge)**
 - FIGLet specifications: [figlet.org](http://www.figlet.org/)
 
 ## Support

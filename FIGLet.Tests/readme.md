@@ -1,4 +1,4 @@
-# FIGLet.Tests
+﻿# FIGLet.Tests
 
 Unit and integration test suite for the FIGLet library (`ByteForge.FIGLet`).
 
@@ -33,7 +33,7 @@ dotnet test --filter "TestCategory=Performance"
 ## Test Structure
 
 | File                     | Description                                                        |
-|--------------------------|--------------------------------------------------------------------|
+| ------------------------ | ------------------------------------------------------------------ |
 | `FIGFontTests.cs`        | Tests for `FIGFont` class - font loading, parsing, and validation  |
 | `FIGLetRendererTests.cs` | Tests for `FIGLetRenderer` class - text rendering and layout modes |
 | `SmushingRulesTests.cs`  | Tests for all 6 smushing rules and their interactions              |

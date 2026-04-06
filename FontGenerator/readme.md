@@ -1,4 +1,4 @@
-# FontGenerator
+﻿# FontGenerator
 
 A utility for converting bitmap images into FIGlet font files (.flf).
 
@@ -59,7 +59,7 @@ The generator currently uses hardcoded filenames:
 Converts each column of 2 vertical pixels into a Unicode block character:
 
 | Top | Bottom | Character      |
-|-----|--------|----------------|
+| --- | ------ | -------------- |
 | ■   | ■      | █ (full block) |
 | ■   | □      | ▀ (upper half) |
 | □   | ■      | ▄ (lower half) |
@@ -72,7 +72,7 @@ Result: 8 characters wide × 4 lines tall per glyph
 Converts each 2x2 pixel grid into a Unicode quadrant block character:
 
 | Pattern | Character | Description             |
-|---------|-----------|-------------------------|
+| ------- | --------- | ----------------------- |
 | □□/□□   | (space)   | Empty                   |
 | □□/□■   | ▗         | Bottom-right            |
 | □□/■□   | ▖         | Bottom-left             |
@@ -105,7 +105,7 @@ Characters are arranged in a 16x16 grid in the bitmap
 ## Included Assets
 
 | File                   | Description                             |
-|------------------------|-----------------------------------------|
+| ---------------------- | --------------------------------------- |
 | `charmap.png`          | Standard character map (white on black) |
 | `charmap-inverted.png` | Inverted character map (black on white) |
 | `charmap.xcf`          | GIMP source file for editing            |

@@ -1,4 +1,4 @@
-# FIGLet Library Test Battle Plan
+﻿# FIGLet Library Test Battle Plan
 
 ## Project Overview
 This document outlines a comprehensive testing strategy for the **FIGLet** library (`ByteForge.FIGLet` namespace), which provides ASCII art text rendering capabilities using FIGFont files. The library consists of four main components that require thorough testing.

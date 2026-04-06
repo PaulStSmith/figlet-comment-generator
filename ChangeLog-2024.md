@@ -1,4 +1,4 @@
-# ChangeLog 2024
+﻿# ChangeLog 2024
 
 [← Back to master index](ChangeLog.md) | [2026](ChangeLog-2026.md) | [2025](ChangeLog-2025.md)
 
