@@ -11,7 +11,6 @@ import * as path from 'path';
  */
 export interface FigletConfig {
     fontDirectory: string;
-    defaultFont: string;
     layoutMode: 'full' | 'kerning' | 'smush';
     defaultWidth?: number;
 }
@@ -31,7 +30,6 @@ export class ConfigurationManager {
         
         return {
             layoutMode: config.get<'full' | 'kerning' | 'smush'>('layoutMode') || 'smush',
-            defaultFont: config.get<string>('defaultFont') || 'small',
             defaultWidth: config.get<number>('defaultWidth') || 80,
             fontDirectory: config.get<string>('fontDirectory') || path.join(this.getExtensionPath(), 'resources', 'fonts'),
         };

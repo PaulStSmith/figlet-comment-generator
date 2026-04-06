@@ -128,7 +128,7 @@ export class FigletPanel {
         const context = this._context;
         const config = vscode.workspace.getConfiguration('figlet');
         const fontDir = config.get<string>('fontDirectory') || null;
-        const defaultFont = config.get<string>('defaultFont') || 'small';
+        const lastFontUsed = context.globalState.get<string>('lastFontUsed') || 'small';
         const VALID_LAYOUT_KEYS = new Set<string>(['full', 'kerning', 'smush']);
         const rawLayout = config.get<string>('layoutMode') ?? 'smush';
         const defaultLayout = (VALID_LAYOUT_KEYS.has(rawLayout) ? rawLayout : 'smush') as LayoutKey;
@@ -155,7 +155,7 @@ export class FigletPanel {
             }
         }
 
-        await this._panel.webview.postMessage({ type: 'init', fonts, defaultFont, defaultLayout, language });
+        await this._panel.webview.postMessage({ type: 'init', fonts, defaultFont: lastFontUsed, defaultLayout, language });
     }
 
     /**
@@ -185,6 +185,7 @@ export class FigletPanel {
                 const ALLOWED_EXTERNAL_HOSTS = new Set([
                     'marketplace.visualstudio.com',
                     'code.visualstudio.com',
+                    'github.com',
                 ]);
                 const uri = vscode.Uri.parse(msg.url);
                 if (uri.scheme === 'https' && ALLOWED_EXTERNAL_HOSTS.has(uri.authority)) {
@@ -222,6 +223,8 @@ export class FigletPanel {
             msg.layoutMode === 'full' ? LayoutMode.FullSize :
                 msg.layoutMode === 'kerning' ? LayoutMode.Kerning :
                     LayoutMode.Smushing;
+
+        this._context.globalState.update('lastFontUsed', msg.font);
 
         const figletText = new FIGLetRenderer(font, layoutMode).render(msg.text);
         await BannerUtils.insertBanner(editor, figletText, msg.language);

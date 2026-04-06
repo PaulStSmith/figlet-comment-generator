@@ -17,7 +17,6 @@ interface FontRow {
 
 interface Settings {
     fontDirectory: string;
-    defaultFont: string;
     layoutMode: LayoutKey;
 }
 
@@ -167,7 +166,6 @@ const S = {
 
 export function SettingsApp() {
     const [fontDirectory, setFontDirectory]   = useState('');
-    const [defaultFont,   setDefaultFont]     = useState('small');
     const [layoutMode,    setLayoutMode]       = useState<LayoutKey>('smush');
     const [fonts,         setFonts]            = useState<FontRow[]>([]);
     const [selectedFont,  setSelectedFont]     = useState('small');
@@ -211,9 +209,7 @@ export function SettingsApp() {
             if (msg.type === 'init') {
                 const s: Settings = msg.settings;
                 setFontDirectory(s.fontDirectory || '');
-                setDefaultFont(s.defaultFont || 'small');
                 setLayoutMode((s.layoutMode as LayoutKey) || 'smush');
-                setSelectedFont(s.defaultFont || 'small');
                 const rows: FontRow[] = (msg.fonts as Array<{ name: string; content: string }>).map(f => {
                     try {
                         const fig = FIGFont.fromText(f.content);
@@ -257,7 +253,7 @@ export function SettingsApp() {
     const handleSave = () => {
         getVsCodeApi().postMessage({
             type: 'saveSettings',
-            settings: { fontDirectory, defaultFont, layoutMode },
+            settings: { fontDirectory, layoutMode },
         });
     };
 
@@ -267,7 +263,6 @@ export function SettingsApp() {
 
     const handleFontRowClick = (name: string) => {
         setSelectedFont(name);
-        setDefaultFont(name);
     };
 
     const handleSort = (col: keyof FontRow) => {

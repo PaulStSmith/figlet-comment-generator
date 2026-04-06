@@ -57,8 +57,9 @@ export class BannerUtils {
      * @param figletText The FIGlet banner text
      */
     static async insertBanner(editor: vscode.TextEditor, figletText: string, languageId?: string): Promise<void> {
-        const position = editor.selection.active;
+        var position = editor.selection.active;
         const indentation = this.getIndentation(editor, position);
+        position = position.with(position.line, 0); // Move to the start of the line
 
         // Wrap the banner with appropriate comments
         const commentedBanner = this.wrapWithComments(figletText, languageId ?? editor.document.languageId);
@@ -71,11 +72,7 @@ export class BannerUtils {
 
         // Insert the banner
         await editor.edit(editBuilder => {
-            if (editor.selection.isEmpty) {
-                editBuilder.insert(position, indentedBanner + '\n');
-            } else {
-                editBuilder.replace(editor.selection, indentedBanner + '\n');
-            }
+            editBuilder.insert(position, indentedBanner + '\n');
         });
     }
 }

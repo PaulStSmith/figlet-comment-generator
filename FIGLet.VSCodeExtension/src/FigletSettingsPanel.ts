@@ -11,7 +11,7 @@ interface ReadyMessage { type: 'ready'; }
 /** Message sent by the webview to request that the extension open a folder-picker dialog for the font directory. */
 interface BrowseFontDirMsg { type: 'browseFontDir'; }
 /** Message sent by the webview when the user clicks Save, carrying the new settings values. */
-interface SaveSettingsMessage { type: 'saveSettings'; settings: { fontDirectory: string; defaultFont: string; layoutMode: LayoutKey }; }
+interface SaveSettingsMessage { type: 'saveSettings'; settings: { fontDirectory: string; layoutMode: LayoutKey }; }
 /** Message sent by the webview when the user dismisses the settings panel without saving. */
 interface CloseMessage { type: 'close'; }
 /** Union of all message types that can be sent from the settings webview to the extension host. */
@@ -100,7 +100,6 @@ export class FigletSettingsPanel {
     private async _sendInitData(): Promise<void> {
         const config = vscode.workspace.getConfiguration('figlet');
         const fontDirectory = config.get<string>('fontDirectory') || '';
-        const defaultFont = config.get<string>('defaultFont') || 'small';
         const VALID_LAYOUT_KEYS = new Set<string>(['full', 'kerning', 'smush']);
         const rawLayout = config.get<string>('layoutMode') ?? 'smush';
         const layoutMode = (VALID_LAYOUT_KEYS.has(rawLayout) ? rawLayout : 'smush') as LayoutKey;
@@ -111,7 +110,7 @@ export class FigletSettingsPanel {
 
         await this._panel.webview.postMessage({
             type: 'init',
-            settings: { fontDirectory, defaultFont, layoutMode },
+            settings: { fontDirectory, layoutMode },
             fonts,
         });
     }
@@ -185,13 +184,12 @@ export class FigletSettingsPanel {
             }
 
             case 'saveSettings': {
-                const { fontDirectory, defaultFont } = msg.settings;
+                const { fontDirectory } = msg.settings;
                 const VALID_LAYOUT_KEYS = new Set<string>(['full', 'kerning', 'smush']);
                 const layoutMode = (VALID_LAYOUT_KEYS.has(msg.settings.layoutMode)
                     ? msg.settings.layoutMode : 'smush') as LayoutKey;
                 const config = vscode.workspace.getConfiguration('figlet');
                 await config.update('fontDirectory', fontDirectory, vscode.ConfigurationTarget.Global);
-                await config.update('defaultFont', defaultFont, vscode.ConfigurationTarget.Global);
                 await config.update('layoutMode', layoutMode, vscode.ConfigurationTarget.Global);
                 this.dispose();
                 vscode.window.showInformationMessage('FIGLet settings saved.');
