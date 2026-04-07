@@ -8,6 +8,10 @@ on:
       - 'FIGLet/**/*.cs'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
@@ -15,6 +19,7 @@ jobs:
 
     permissions:
       contents: write   # push version tag
+      actions: write    # read/write repo variables for version tracking
 
     steps:
       - name: Checkout
@@ -32,12 +37,40 @@ jobs:
 
       - name: Compute version
         id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Read major.minor from csproj; use the Actions run number as patch.
-          # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
+          # Read major.minor from csproj.
           BASE=$(grep -oPm1 "(?<=<Version>)[^<]+" FIGLet/FIGLet.csproj | sed 's/\.[0-9]*$//')
-          PATCH=$(( ${{ github.run_number }} > 65534 ? 65534 : ${{ github.run_number }} ))
-          NEW_VERSION="$BASE.$PATCH"
+
+          # Helper: PATCH an existing variable, fall back to POST on first run.
+          upsert_var() {
+            local name="$1" value="$2"
+            gh api "repos/${{ github.repository }}/actions/variables/$name" \
+              -X PATCH -f value="$value" >/dev/null 2>&1 || \
+            gh api "repos/${{ github.repository }}/actions/variables" \
+              -X POST -f name="$name" -f value="$value" >/dev/null
+          }
+
+          # Read stored maj/min and patch variables; default gracefully on first run.
+          STORED_MAJ_MIN=$(gh api "repos/${{ github.repository }}/actions/variables/NUGET_MAJ_MIN" --jq '.value' 2>/dev/null || echo "")
+          STORED_PATCH=$(gh api "repos/${{ github.repository }}/actions/variables/NUGET_PATCH" --jq '.value' 2>/dev/null || echo "0")
+
+          if [ "$BASE" != "$STORED_MAJ_MIN" ]; then
+            # Major/minor changed — write PATCH first so a failure between the two
+            # writes leaves MAJ_MIN stale and the mismatch is safely re-detected next run.
+            NEW_PATCH=0
+            upsert_var "NUGET_PATCH"   "0"
+            upsert_var "NUGET_MAJ_MIN" "$BASE"
+          else
+            # Same major/minor — increment patch.
+            # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
+            NEW_PATCH=$(( STORED_PATCH + 1 ))
+            NEW_PATCH=$(( NEW_PATCH > 65534 ? 65534 : NEW_PATCH ))
+            upsert_var "NUGET_PATCH" "$NEW_PATCH"
+          fi
+
+          NEW_VERSION="$BASE.$NEW_PATCH"
           sed -i "s|<Version>[^<]*</Version>|<Version>$NEW_VERSION</Version>|" FIGLet/FIGLet.csproj
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Version: $NEW_VERSION"

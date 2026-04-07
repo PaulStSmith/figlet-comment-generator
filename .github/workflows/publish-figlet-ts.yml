@@ -9,6 +9,10 @@ on:
       - 'FIGLet.TS/**/*.tsx'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
@@ -17,6 +21,7 @@ jobs:
     permissions:
       contents: write   # push version tag
       id-token: write   # OIDC token for npm trusted publishing
+      actions: write    # read/write repo variables for version tracking
 
     defaults:
       run:
@@ -42,10 +47,38 @@ jobs:
 
       - name: Compute version
         id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Read major.minor from package.json; use the Actions run number as patch.
+          # Read major.minor from package.json.
           BASE=$(node -p "require('./package.json').version.replace(/\.\d+$/, '')")
-          NEW_VERSION="$BASE.${{ github.run_number }}"
+
+          # Helper: PATCH an existing variable, fall back to POST on first run.
+          upsert_var() {
+            local name="$1" value="$2"
+            gh api "repos/${{ github.repository }}/actions/variables/$name" \
+              -X PATCH -f value="$value" >/dev/null 2>&1 || \
+            gh api "repos/${{ github.repository }}/actions/variables" \
+              -X POST -f name="$name" -f value="$value" >/dev/null
+          }
+
+          # Read stored maj/min and patch variables; default gracefully on first run.
+          STORED_MAJ_MIN=$(gh api "repos/${{ github.repository }}/actions/variables/TS_MAJ_MIN" --jq '.value' 2>/dev/null || echo "")
+          STORED_PATCH=$(gh api "repos/${{ github.repository }}/actions/variables/TS_PATCH" --jq '.value' 2>/dev/null || echo "0")
+
+          if [ "$BASE" != "$STORED_MAJ_MIN" ]; then
+            # Major/minor changed — write PATCH first so a failure between the two
+            # writes leaves MAJ_MIN stale and the mismatch is safely re-detected next run.
+            NEW_PATCH=0
+            upsert_var "TS_PATCH"   "0"
+            upsert_var "TS_MAJ_MIN" "$BASE"
+          else
+            # Same major/minor — increment patch.
+            NEW_PATCH=$(( STORED_PATCH + 1 ))
+            upsert_var "TS_PATCH" "$NEW_PATCH"
+          fi
+
+          NEW_VERSION="$BASE.$NEW_PATCH"
           # Update package.json and package-lock.json in sync before npm ci.
           node -e "
             const fs = require('fs');
