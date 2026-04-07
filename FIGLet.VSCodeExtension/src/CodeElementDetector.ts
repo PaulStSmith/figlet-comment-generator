@@ -40,6 +40,36 @@ export const METHOD_LIKE_KINDS = new Set<vscode.SymbolKind>([
     vscode.SymbolKind.Constructor,
 ]);
 
+/** Union of the two shapes `executeDocumentSymbolProvider` may return. */
+type AnySymbol = vscode.DocumentSymbol | vscode.SymbolInformation;
+
+/**
+ * Type guard — `DocumentSymbol` carries `range` directly while
+ * `SymbolInformation` carries it inside `location`.
+ */
+function _isDocumentSymbol(sym: AnySymbol): sym is vscode.DocumentSymbol {
+    return 'range' in sym;
+}
+
+/**
+ * Normalizes a mixed `AnySymbol[]` result into a flat `DocumentSymbol[]`.
+ * `SymbolInformation` entries are synthesized into childless `DocumentSymbol`
+ * objects so the rest of the code can use a single, uniform tree-walk.
+ */
+function _normalizeSymbols(symbols: AnySymbol[]): vscode.DocumentSymbol[] {
+    return symbols.map(sym => {
+        if (_isDocumentSymbol(sym)) { return sym; }
+        // SymbolInformation has no children and stores its range in `location`.
+        return new vscode.DocumentSymbol(
+            sym.name,
+            sym.containerName ?? '',
+            sym.kind,
+            sym.location.range,
+            sym.location.range
+        );
+    });
+}
+
 /**
  * Returns the deepest symbol of one of the specified kinds whose range contains
  * the given position, or `undefined` if none is found.
@@ -47,6 +77,9 @@ export const METHOD_LIKE_KINDS = new Set<vscode.SymbolKind>([
  * Uses `vscode.executeDocumentSymbolProvider` which relies on the language
  * server for the active file; returns `undefined` gracefully if no provider
  * is available.
+ *
+ * Handles both `DocumentSymbol[]` and `SymbolInformation[]` return shapes,
+ * normalizing them before the tree-walk so callers never see the difference.
  */
 export async function findSymbolAtCursor(
     document: vscode.TextDocument,
@@ -55,10 +88,11 @@ export async function findSymbolAtCursor(
 ): Promise<CodeElementInfo | undefined> {
     let symbols: vscode.DocumentSymbol[];
     try {
-        symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+        const raw = await vscode.commands.executeCommand<AnySymbol[]>(
             'vscode.executeDocumentSymbolProvider',
             document.uri
         ) ?? [];
+        symbols = _normalizeSymbols(raw);
     } catch {
         return undefined;
     }

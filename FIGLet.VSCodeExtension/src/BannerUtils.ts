@@ -65,12 +65,17 @@ export class BannerUtils {
         languageId?: string,
         insertionLine?: number
     ): Promise<void> {
-        const targetLine = insertionLine ?? editor.selection.active.line;
-        const position = new vscode.Position(targetLine, 0);
-        const indentation = this.getIndentation(editor, position);
+        const document = editor.document;
+        const requestedLine = insertionLine ?? editor.selection.active.line;
+        // Clamp to [0, lineCount] — lineCount itself is valid as an EOF sentinel.
+        const maxLineIndex = Math.max(document.lineCount - 1, 0);
+        const safeInsertionLine = Math.min(Math.max(requestedLine, 0), document.lineCount);
+        // For indentation lookup we must stay within [0, lineCount - 1].
+        const indentationLine = Math.min(safeInsertionLine, maxLineIndex);
+        const indentation = this.getIndentation(editor, new vscode.Position(indentationLine, 0));
 
         // Wrap the banner with appropriate comments
-        const commentedBanner = this.wrapWithComments(figletText, languageId ?? editor.document.languageId);
+        const commentedBanner = this.wrapWithComments(figletText, languageId ?? document.languageId);
 
         // Apply indentation to each line
         const indentedBanner = commentedBanner
@@ -78,9 +83,16 @@ export class BannerUtils {
             .map(line => indentation + line)
             .join('\n');
 
-        // Insert the banner
+        // When inserting at EOF, append after the last line's end; otherwise
+        // insert at column 0 of the target line so the banner lands above it.
+        const atEof = safeInsertionLine === document.lineCount;
+        const position = atEof
+            ? document.lineAt(maxLineIndex).range.end
+            : new vscode.Position(safeInsertionLine, 0);
+        const text = atEof ? '\n' + indentedBanner : indentedBanner + '\n';
+
         await editor.edit(editBuilder => {
-            editBuilder.insert(position, indentedBanner + '\n');
+            editBuilder.insert(position, text);
         });
     }
 
