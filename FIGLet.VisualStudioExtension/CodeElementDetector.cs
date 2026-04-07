@@ -71,7 +71,7 @@ internal partial class CodeElementDetector(AsyncPackage package)
     // Not to mention that to access the FileCodeModel, we need to pass through ActiveDocument,
     // that would throw if accessed from a background thread, so we are protected by that as well.
     //
-#pragma warning disable VSTHRD010 
+#pragma warning disable VSTHRD010
     /// <summary>
     /// Gets the FileCodeModel of the active document.
     /// </summary>
