@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Template source files - these are not included in compilation -->
+    <None Include="CheckExtensionVersion.ps1" />
     <None Include="PackageGUIDs.h" />
     <None Include="GenerateGUIDs.ps1" />
     <!-- Template definitions for the generator -->
@@ -200,7 +201,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LICENSE" Condition="Exists('LICENSE')">
+    <Content Label="LICENSE" Include="..\LICENSE" Condition="Exists('..\LICENSE')">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -236,7 +237,6 @@
   <!-- Override FindExistingDeploymentPath to skip version check when same version is installed -->
   <!-- This completely replaces the VSSDK target that throws the version error -->
   <Target Name="FindExistingDeploymentPath" Condition="'$(DeployExtension)' == 'true' AND '$(CreateVsixContainer)' == 'true'">
-    <Copy SourceFiles="..\LICENSE" DestinationFiles="LICENSE" Condition="Exists('..\LICENSE')" />
     <PropertyGroup>
       <ExtensionId>FIGLet-Comment-Generator.c0e582bf-ce1d-4dcd-8778-5fa44d758f0e</ExtensionId>
       <SkipDeploymentFlagFile>$(IntermediateOutputPath)skip_deploy.txt</SkipDeploymentFlagFile>

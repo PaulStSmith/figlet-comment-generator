@@ -90,6 +90,7 @@ export class CommentStyleInfo {
     private readonly _blockCommentStart: string | null = null;
     private readonly _blockCommentEnd: string | null = null;
     private readonly _singleLinePrefix: string | null = null;
+    private readonly _blockCommentStyles: [string, string][] = [];
 
     /**
      * Gets the primary comment style.
@@ -102,7 +103,15 @@ export class CommentStyleInfo {
      * Gets a value indicating whether block comments are supported.
      */
     get supportsBlockComments(): boolean {
-        return this._blockCommentStart !== null && this._blockCommentEnd !== null;
+        return this._blockCommentStyles.length > 0;
+    }
+
+    /**
+     * Gets all block comment delimiter pairs supported by this style.
+     * For most languages this contains a single entry; Pascal has two ({ } and (* *)).
+     */
+    get blockCommentStyles(): ReadonlyArray<[string, string]> {
+        return this._blockCommentStyles;
     }
 
     /**
@@ -216,6 +225,13 @@ export class CommentStyleInfo {
             default:
                 throw new Error(`Invalid comment style: ${primary}`);
         }
+
+        // Populate the block comment styles collection from the primary pair.
+        // Pascal adds a secondary pair for the (* *) style used by PasDoc.
+        if (this._blockCommentStart !== null && this._blockCommentEnd !== null)
+            this._blockCommentStyles.push([this._blockCommentStart, this._blockCommentEnd]);
+        if (primary === CommentStyle.Pascal)
+            this._blockCommentStyles.push(['(*', '*)']);
     }
 
     /**

@@ -55,6 +55,7 @@
     "vitest": "^3.2.4"
   },
   "optionalDependencies": {
-    "@rollup/rollup-win32-x64-msvc": "^4.60.1"
+    "@rollup/rollup-linux-x64-gnu": "4.60.1",
+    "@rollup/rollup-win32-x64-msvc": "4.60.1"
   }
 }

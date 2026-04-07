@@ -314,17 +314,20 @@ internal sealed class FIGLetCommentCommand
         }
 
         /*
-         * Avoids a block comment.
+         * Avoids a block comment. Iterates over all block comment styles for the language
+         * (e.g. both { } and (* *) for Pascal) so the correct pair is always matched.
          */
         var commentInfo = LanguageCommentStyles.GetCommentStyle(language);
-        if (commentInfo.SupportsBlockComments && line.Contains(commentInfo.BlockCommentEnd))
+        foreach (var (blockStart, blockEnd) in commentInfo.BlockCommentStyles)
         {
-            // Move up until we find the start of the block comment
-            while (!line.Contains(commentInfo.BlockCommentStart) && insertPoint.Line > 1)
+            if (!line.Contains(blockEnd)) continue;
+
+            while (!line.Contains(blockStart) && insertPoint.Line > 1)
             {
                 insertPoint.LineUp();
                 line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
             }
+            break; // Only one block comment sits above the insertion point
         }
 
         return insertPoint;
@@ -349,41 +352,67 @@ internal sealed class FIGLetCommentCommand
         // Group languages by their documentation style
         return language switch
         {
-            // Triple-slash documentation style
-            "csharp" or "fsharp" or "rust" => line.StartsWith("///") ||           // Doc comments
-                                   line.StartsWith("["),// Attributes/Decorators
-                                                        // Single-slash documentation
-            "c/c++" or "cpp" or "d" or "objective-c" => line.StartsWith("///") ||           // Doc comments
-                                   line.StartsWith("//!") ||           // Alternative doc comments
-                                   line.StartsWith("@"),// Attributes (Objective-C)
-                                                        // Triple-quote documentation
-            "basic" or "vb" => line.StartsWith("'''") ||           // Doc comments
-                                   line.StartsWith("<"),// Attributes
-                                                        // Hash-based documentation
-            "python" or "ruby" or "perl" or "yaml" or "shell" or "ps1" or "powershell" or "sh" or "zsh" or "bash" or "fish" or "shellscript" => line.StartsWith("#") ||             // Doc comments
-                                   line.StartsWith("@"),// Decorators (Python)
-                                                        // R-specific documentation
-            "r" => line.StartsWith("#'"),// Roxygen2 doc comments
-                                         // Fortran documentation
-            "fortran" => line.StartsWith("!>") ||            // Doc comments
-                                   line.StartsWith("!<"),// Alternative doc comments
-                                                         // Lisp-family documentation
-            "lisp" or "scheme" => line.StartsWith(";;;") ||           // Doc comments
-                                   line.StartsWith(";;"),// Secondary doc comments
-                                                         // SQL-family documentation
-            "sql" or "tsql" or "mysql" or "pgsql" or "plsql" or "sqlite" => line.StartsWith("--") ||            // Doc comments
-                                   line.StartsWith("--/"),// Alternative doc style (some dialects)
-                                                          // Pascal documentation
-            "pascal" => line.StartsWith("///") ||           // Doc comments
-                                   line.StartsWith("//"),// Alternative doc comments
-                                                         // Batch/DOS documentation
-            "bat" or "cmd" or "dos" or "batch" => line.StartsWith("::") ||            // Doc comments
-                                   line.StartsWith("rem", StringComparison.OrdinalIgnoreCase),// REM comments
-                                                                                              // XML-style documentation
-            "html" or "xml" or "xaml" or "svg" or "aspx" => line.StartsWith("<!--"),// XML comments
-                                                                                    // Languages that don't typically use line-based documentation
-            "java" or "javascript" or "typescript" or "css" or "go" or "swift" or "php" or "kotlin" or "scala" => line.StartsWith("@"),// Only check for annotations/decorators
-                                                                                                                                       // (Their doc comments are typically block-based)
+            // Triple-slash documentation style (C#, F#, Rust)
+            "csharp" or "fsharp" or "rust" =>
+                line.StartsWith("///") || // Doc comments
+                line.StartsWith("["),     // Attributes/Decorators
+
+            // Single-slash and alternative documentation (C/C++, D, Objective-C)
+            "c/c++" or "cpp" or "d" or "objective-c" =>
+                line.StartsWith("///") || // Doc comments
+                line.StartsWith("//!") || // Alternative doc comments
+                line.StartsWith("@"),     // Attributes (Objective-C)
+
+            // Triple-quote documentation (VB, Basic)
+            "basic" or "vb" =>
+                line.StartsWith("'''") || // Doc comments
+                line.StartsWith("<"),     // Attributes
+
+            // Hash-based documentation (Python, Ruby, Perl, YAML, Shell, PowerShell, etc.)
+            "python" or "ruby" or "perl" or "yaml" or 
+            "shell" or "ps1" or "powershell" or "sh" or 
+            "zsh" or "bash" or "fish" or "shellscript" =>
+                line.StartsWith("#") ||   // Doc comments
+                line.StartsWith("@"),     // Decorators (Python)
+
+            // R-specific documentation
+            "r" =>
+                line.StartsWith("#'"),     // Roxygen2 doc comments
+
+            // Fortran documentation
+            "fortran" =>
+                line.StartsWith("!>") ||  // Doc comments
+                line.StartsWith("!<"),    // Alternative doc comments
+
+            // Lisp-family documentation
+            "lisp" or "scheme" =>
+                line.StartsWith(";;;") || // Doc comments
+                line.StartsWith(";;"),    // Secondary doc comments
+
+            // SQL-family documentation
+            "sql" or "tsql" or "mysql" or 
+            "pgsql" or "plsql" or "sqlite" =>
+                line.StartsWith("--") ||  // Doc comments
+                line.StartsWith("--/"),   // Alternative doc style (some dialects)
+
+            // Pascal — PasDoc treats any // comment before a declaration as documentation
+            "pascal" =>
+                line.StartsWith("//"),
+
+            // Batch/DOS documentation
+            "bat" or "cmd" or "dos" or "batch" =>
+                line.StartsWith("::") ||  // Doc comments
+                line.StartsWith("rem", StringComparison.OrdinalIgnoreCase), // REM comments
+
+            // XML-style documentation
+            "html" or "xml" or "xaml" or "svg" or "aspx" =>
+                line.StartsWith("<!--"),  // XML comments
+
+            // Languages that don't typically use line-based documentation (Java, JS, TS, CSS, Go, Swift, PHP, Kotlin, Scala)
+            "java" or "javascript" or "typescript" or "css" or 
+            "go" or "swift" or "php" or "kotlin" or "scala" =>
+                line.StartsWith("@"),     // Only check for annotations/decorators (doc comments are typically block-based)
+
             _ => false,
         };
     }

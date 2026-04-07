@@ -63,11 +63,21 @@ internal partial class CodeElementDetector(AsyncPackage package)
         }
     }
 
+    //
+    // Accessing DTE properties on a background thread is generally not safe,
+    // but this property is only accessed after switching to the Main Thread
+    // in GetCodeElementAtCursorAsync, so it's safe in this context.
+    //
+    // Not to mention that to access the FileCodeModel, we need to pass through ActiveDocument,
+    // that would throw if accessed from a background thread, so we are protected by that as well.
+    //
+#pragma warning disable VSTHRD010
     /// <summary>
     /// Gets the FileCodeModel of the active document.
     /// </summary>
     /// <returns>The <see cref="FileCodeModel"/> of the active document or null if not found.</returns>
     private FileCodeModel FileCodeModel => ActiveDocument?.ProjectItem?.FileCodeModel;
+#pragma warning restore VSTHRD010
 
     /// <summary>
     /// Gets the active document.

@@ -22,6 +22,8 @@ public class InfoBarService : IInfoBarService
         ThreadHelper.ThrowIfNotOnUIThread();
         _serviceProvider = serviceProvider;
         _infoBarUIFactory = serviceProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
+        if (_infoBarUIFactory == null)
+            throw new InvalidOperationException("Unable to get IVsInfoBarUIFactory service.");
     }
 
     /// <summary>

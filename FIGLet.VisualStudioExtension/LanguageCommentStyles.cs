@@ -102,6 +102,8 @@ public enum CommentStyle
 
 public class CommentStyleInfo
 {
+    private readonly List<(string Start, string End)> _blockCommentStyles = [];
+
     /// <summary>
     /// Gets or sets the primary comment style.
     /// </summary>
@@ -110,7 +112,13 @@ public class CommentStyleInfo
     /// <summary>
     /// Gets a value indicating whether block comments are supported.
     /// </summary>
-    public bool SupportsBlockComments => BlockCommentStart != null && BlockCommentEnd != null;
+    public bool SupportsBlockComments => _blockCommentStyles.Count > 0;
+
+    /// <summary>
+    /// Gets all block comment delimiter pairs supported by this style.
+    /// For most languages this contains a single entry; Pascal has two ({ } and (* *)).
+    /// </summary>
+    public IReadOnlyList<(string Start, string End)> BlockCommentStyles => _blockCommentStyles;
 
     /// <summary>
     /// Gets the block comment start marker.
@@ -246,6 +254,13 @@ public class CommentStyleInfo
             default:
                 throw new ArgumentOutOfRangeException(nameof(primary), primary, null);
         }
+
+        // Populate the block comment styles collection from the primary pair.
+        // Pascal adds a secondary pair for the (* *) style used by PasDoc.
+        if (BlockCommentStart != null && BlockCommentEnd != null)
+            _blockCommentStyles.Add((BlockCommentStart, BlockCommentEnd));
+        if (primary == CommentStyle.Pascal)
+            _blockCommentStyles.Add(("(*", "*)"));
     }
 
     /// <summary>
