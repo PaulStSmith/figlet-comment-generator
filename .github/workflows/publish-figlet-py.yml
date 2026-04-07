@@ -15,6 +15,7 @@ jobs:
 
     permissions:
       contents: write   # required to create GitHub releases and push tags
+      actions: write    # read/write repo variables for version tracking
 
     steps:
       - name: Checkout
@@ -32,11 +33,32 @@ jobs:
 
       - name: Compute version
         id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: FIGLet.Python
         run: |
-          # Read major.minor from pyproject.toml; use the Actions run number as patch.
+          # Read major.minor from pyproject.toml.
           BASE=$(python3 -c "import re; t=open('pyproject.toml').read(); m=re.search(r'version\s*=\s*\"([^\"]+)\"', t); print(m.group(1).rsplit('.', 1)[0])")
-          NEW_VERSION="$BASE.${{ github.run_number }}"
+
+          # Read stored maj/min and patch variables; default gracefully on first run.
+          STORED_MAJ_MIN=$(gh api "repos/${{ github.repository }}/actions/variables/PY_MAJ_MIN" --jq '.value' 2>/dev/null || echo "")
+          STORED_PATCH=$(gh api "repos/${{ github.repository }}/actions/variables/PY_PATCH" --jq '.value' 2>/dev/null || echo "0")
+
+          if [ "$BASE" != "$STORED_MAJ_MIN" ]; then
+            # Major/minor changed — reset patch to 0 and update the stored value.
+            NEW_PATCH=0
+            gh api "repos/${{ github.repository }}/actions/variables/PY_MAJ_MIN" -X PATCH -f value="$BASE" 2>/dev/null || \
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="PY_MAJ_MIN" -f value="$BASE"
+            gh api "repos/${{ github.repository }}/actions/variables/PY_PATCH" -X PATCH -f value="0" 2>/dev/null || \
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="PY_PATCH" -f value="0"
+          else
+            # Same major/minor — increment patch.
+            NEW_PATCH=$(( STORED_PATCH + 1 ))
+            gh api "repos/${{ github.repository }}/actions/variables/PY_PATCH" -X PATCH -f value="$NEW_PATCH" 2>/dev/null || \
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="PY_PATCH" -f value="$NEW_PATCH"
+          fi
+
+          NEW_VERSION="$BASE.$NEW_PATCH"
           sed -i "s/^version = \"[^\"]*\"/version = \"$NEW_VERSION\"/" pyproject.toml
           sed -i "s/__version__ = \"[^\"]*\"/__version__ = \"$NEW_VERSION\"/" byteforge_figlet/__init__.py
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT

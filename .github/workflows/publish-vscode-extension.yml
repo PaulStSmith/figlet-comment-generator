@@ -16,6 +16,7 @@ jobs:
 
     permissions:
       contents: write   # required to create GitHub releases
+      actions: write    # read/write repo variables for version tracking
 
     defaults:
       run:
@@ -40,10 +41,31 @@ jobs:
 
       - name: Compute version
         id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Read major.minor from package.json; use the Actions run number as patch.
+          # Read major.minor from package.json.
           BASE=$(node -p "require('./package.json').version.replace(/\.\d+$/, '')")
-          NEW_VERSION="$BASE.${{ github.run_number }}"
+
+          # Read stored maj/min and patch variables; default gracefully on first run.
+          STORED_MAJ_MIN=$(gh api "repos/${{ github.repository }}/actions/variables/VSCODE_MAJ_MIN" --jq '.value' 2>/dev/null || echo "")
+          STORED_PATCH=$(gh api "repos/${{ github.repository }}/actions/variables/VSCODE_PATCH" --jq '.value' 2>/dev/null || echo "0")
+
+          if [ "$BASE" != "$STORED_MAJ_MIN" ]; then
+            # Major/minor changed — reset patch to 0 and update the stored value.
+            NEW_PATCH=0
+            gh api "repos/${{ github.repository }}/actions/variables/VSCODE_MAJ_MIN" -X PATCH -f value="$BASE" 2>/dev/null || \
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="VSCODE_MAJ_MIN" -f value="$BASE"
+            gh api "repos/${{ github.repository }}/actions/variables/VSCODE_PATCH" -X PATCH -f value="0" 2>/dev/null || \
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="VSCODE_PATCH" -f value="0"
+          else
+            # Same major/minor — increment patch.
+            NEW_PATCH=$(( STORED_PATCH + 1 ))
+            gh api "repos/${{ github.repository }}/actions/variables/VSCODE_PATCH" -X PATCH -f value="$NEW_PATCH" 2>/dev/null || \
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="VSCODE_PATCH" -f value="$NEW_PATCH"
+          fi
+
+          NEW_VERSION="$BASE.$NEW_PATCH"
           # Update package.json and package-lock.json in sync so npm ci
           # (lockfileVersion 3) does not see a root-version mismatch.
           node -e "

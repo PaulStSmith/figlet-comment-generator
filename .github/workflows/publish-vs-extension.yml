@@ -16,6 +16,7 @@ jobs:
 
     permissions:
       contents: write   # push version tag
+      actions: write    # read/write repo variables for version tracking
 
     steps:
       - name: Checkout
@@ -36,14 +37,42 @@ jobs:
       - name: Compute version
         id: version
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Read major.minor from the manifest; use the Actions run number as patch.
-          # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
+          # Read major.minor from the vsixmanifest.
           $manifestPath = Resolve-Path "FIGLet.VisualStudioExtension/source.extension.vsixmanifest"
           [xml]$manifest = Get-Content $manifestPath
           $base = $manifest.PackageManifest.Metadata.Identity.Version -replace '\.\d+$', ''
-          $patch = [Math]::Min(${{ github.run_number }}, 65534)
-          $newVersion = "$base.$patch"
+
+          # Read stored maj/min and patch variables; default gracefully on first run.
+          $storedMajMin = (gh api "repos/${{ github.repository }}/actions/variables/VSEXT_MAJ_MIN" --jq '.value' 2>$null)
+          if ($LASTEXITCODE -ne 0) { $storedMajMin = "" }
+          $storedPatch = (gh api "repos/${{ github.repository }}/actions/variables/VSEXT_PATCH" --jq '.value' 2>$null)
+          if ($LASTEXITCODE -ne 0) { $storedPatch = "0" }
+
+          if ($base -ne $storedMajMin) {
+            # Major/minor changed — reset patch to 0 and update the stored value.
+            $newPatch = 0
+            gh api "repos/${{ github.repository }}/actions/variables/VSEXT_MAJ_MIN" -X PATCH -f value="$base" 2>$null
+            if ($LASTEXITCODE -ne 0) {
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="VSEXT_MAJ_MIN" -f value="$base"
+            }
+            gh api "repos/${{ github.repository }}/actions/variables/VSEXT_PATCH" -X PATCH -f value="0" 2>$null
+            if ($LASTEXITCODE -ne 0) {
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="VSEXT_PATCH" -f value="0"
+            }
+          } else {
+            # Same major/minor — increment patch.
+            # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
+            $newPatch = [Math]::Min([int]$storedPatch + 1, 65534)
+            gh api "repos/${{ github.repository }}/actions/variables/VSEXT_PATCH" -X PATCH -f value="$newPatch" 2>$null
+            if ($LASTEXITCODE -ne 0) {
+              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="VSEXT_PATCH" -f value="$newPatch"
+            }
+          }
+
+          $newVersion = "$base.$newPatch"
           $manifest.PackageManifest.Metadata.Identity.Version = $newVersion
           $manifest.Save($manifestPath)
           echo "version=$newVersion" >> $env:GITHUB_OUTPUT
