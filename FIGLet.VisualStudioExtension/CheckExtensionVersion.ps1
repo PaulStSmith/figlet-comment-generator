@@ -19,19 +19,16 @@ try {
     exit 0
 }
 
-# Search locations: VS install directories and user extension directories
+# Search only known Visual Studio extension locations to avoid scanning full install roots
 $searchPaths = @(
-    "C:\Program Files\Microsoft Visual Studio",
-    "C:\Program Files (x86)\Microsoft Visual Studio",
-    [Environment]::GetFolderPath('LocalApplicationData') + "\Microsoft\VisualStudio"
+    "C:\Program Files\Microsoft Visual Studio\*\*\Common7\IDE\Extensions",
+    "C:\Program Files (x86)\Microsoft Visual Studio\*\*\Common7\IDE\Extensions",
+    ([Environment]::GetFolderPath('LocalApplicationData') + "\Microsoft\VisualStudio\*\Extensions")
 )
 
-foreach ($basePath in $searchPaths) {
-    if (-not (Test-Path $basePath)) { continue }
-
-    # Search for extension.vsixmanifest files
-    $manifests = Get-ChildItem -Path $basePath -Recurse -Filter 'extension.vsixmanifest' -ErrorAction SilentlyContinue
-
+foreach ($searchPath in $searchPaths) {
+    # Search for extension.vsixmanifest files only within extension directories
+    $manifests = Get-ChildItem -Path $searchPath -Recurse -Filter 'extension.vsixmanifest' -ErrorAction SilentlyContinue
     foreach ($manifest in $manifests) {
         try {
             [xml]$xml = Get-Content $manifest.FullName -ErrorAction Stop
