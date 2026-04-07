@@ -200,6 +200,9 @@ export function App() {
     const [language,     setLanguage]     = useState('csharp');
     const [inputText,    setInputText]    = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
+    // Incremented each time an 'init' message is processed.  The useEffect below
+    // watches this and sends 'initDone' only after React has committed the state.
+    const [initSeq, setInitSeq] = useState(0);
 
     const preview = useMemo(
         () => buildPreview(inputText, fontCache.get(selectedFont), layout, language),
@@ -226,6 +229,19 @@ export function App() {
                 setSelectedFont(def);
                 if (msg.defaultLayout) { setLayout(msg.defaultLayout as LayoutKey); }
                 if (msg.language)      { setLanguage(resolveLanguage(msg.language as string)); }
+                // Bump the counter; the useEffect below sends 'initDone' only
+                // after React has committed this render to the DOM.
+                setInitSeq(n => n + 1);
+            } else if (msg.type === 'setText') {
+                // Sent as a follow-up after 'init' so it lands in its own render
+                // cycle.  Select-all lets the user type immediately to replace the
+                // pre-filled name, or just press Enter to accept it.
+                const text = (msg.text as string) ?? '';
+                setInputText(text);
+                if (text) {
+                    // Defer the select so it runs after React has committed the new value.
+                    setTimeout(() => inputRef.current?.select(), 0);
+                }
             } else if (msg.type === 'fontLoaded') {
                 try {
                     const font = FIGFont.fromText(msg.content as string);
@@ -237,6 +253,14 @@ export function App() {
         getVsCodeApi().postMessage({ type: 'ready' });
         return () => window.removeEventListener('message', onMessage);
     }, []); // register once
+
+    // Fires after React has committed the state from an 'init' message.
+    // Only then do we tell the extension it's safe to send 'setText'.
+    useEffect(() => {
+        if (initSeq > 0) {
+            getVsCodeApi().postMessage({ type: 'initDone' });
+        }
+    }, [initSeq]);
 
     // Request missing font when selection changes
     useEffect(() => {

@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { FigletPanel } from './FigletPanel.js';
 import { FigletSettingsPanel } from './FigletSettingsPanel.js';
 import { WelcomePanel } from './WelcomePanel.js';
+import { findSymbolAtCursor, CLASS_LIKE_KINDS, METHOD_LIKE_KINDS } from './CodeElementDetector.js';
+import { BannerUtils } from './BannerUtils.js';
 
 /*
  *     _      _   _          _        _____     _               _          ___         _           _ __  
@@ -129,9 +131,67 @@ export async function activate(context: vscode.ExtensionContext) {
         );
     });
 
+    /*
+     *   ___                 _    ___ _               ___
+     *  |_ _|_ _  ___ ___ __| |_ / __| |__ _ ______  | _ ) __ _ _ _  _ _  ___ _ _
+     *   | || ' \(_-</ -_) _|  _| (__| / _` (_-<_-<  | _ \/ _` | ' \| ' \/ -_) '_|
+     *  |___|_||_/__/\___\__|\__|\___\__,_|__/__/__/  |___/\__,_|_||_|_||_\___|_|
+     *
+     */
+    let insertClassBannerCommand = vscode.commands.registerCommand('figlet.insertClassBanner', async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage('No active text editor found');
+            return;
+        }
+        try {
+            const symbol = await findSymbolAtCursor(editor.document, editor.selection.active, CLASS_LIKE_KINDS);
+            if (!symbol) {
+                vscode.window.showInformationMessage('No class, interface, or struct found at cursor — inserting banner at cursor position.');
+            }
+            const insertionLine = symbol
+                ? BannerUtils.findInsertionPoint(editor.document, symbol.startLine, editor.document.languageId)
+                : undefined;
+            await FigletPanel.createOrShow(context, editor, { initialText: symbol?.name, insertionLine });
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            vscode.window.showErrorMessage(`Error opening FIGLet panel: ${errorMessage}`);
+        }
+    });
+
+    /*
+     *   ___                 _    __  __     _   _            _   ___
+     *  |_ _|_ _  ___ ___ __| |_ |  \/  |___| |_| |_  ___  __| | | _ ) __ _ _ _  _ _  ___ _ _
+     *   | || ' \(_-</ -_) _|  _|| |\/| / -_)  _| ' \/ _ \/ _` | | _ \/ _` | ' \| ' \/ -_) '_|
+     *  |___|_||_/__/\___\__|\__||_|  |_\___|\__|_||_\___/\__,_| |___/\__,_|_||_|_||_\___|_|
+     *
+     */
+    let insertMethodBannerCommand = vscode.commands.registerCommand('figlet.insertMethodBanner', async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage('No active text editor found');
+            return;
+        }
+        try {
+            const symbol = await findSymbolAtCursor(editor.document, editor.selection.active, METHOD_LIKE_KINDS);
+            if (!symbol) {
+                vscode.window.showInformationMessage('No function or method found at cursor — inserting banner at cursor position.');
+            }
+            const insertionLine = symbol
+                ? BannerUtils.findInsertionPoint(editor.document, symbol.startLine, editor.document.languageId)
+                : undefined;
+            await FigletPanel.createOrShow(context, editor, { initialText: symbol?.name, insertionLine });
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            vscode.window.showErrorMessage(`Error opening FIGLet panel: ${errorMessage}`);
+        }
+    });
+
     // Register all commands
     context.subscriptions.push(
         insertBannerCommand,
+        insertClassBannerCommand,
+        insertMethodBannerCommand,
         selectFontDirCommand,
         inspectConfigCommand,
         openSettingsCommand,

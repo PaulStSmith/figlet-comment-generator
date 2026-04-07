@@ -21,9 +21,8 @@ package-lock.json
 .gitignore
 .gitattributes
 
-# Documentation & misc (README.md is intentionally kept — Marketplace requires it)
+# Documentation & misc (README.md and CHANGELOG.md are intentionally kept — Marketplace requires them)
 CONTRIBUTING.md
-CHANGELOG.md
 vsc-extension-quickstart.md
 
 # Media — screenshot and icon PNGs are intentionally kept; Marketplace renders them from README.md

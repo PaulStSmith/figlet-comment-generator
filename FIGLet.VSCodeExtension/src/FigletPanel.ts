@@ -20,8 +20,10 @@ interface CancelMessage { type: 'cancel'; }
 interface RequestFontMessage { type: 'requestFont'; name: string; }
 /** Message sent by the webview to open a URL in the system browser; only allow-listed hosts are acted upon. */
 interface OpenExternalMessage { type: 'openExternal'; url: string; }
+/** Message sent by the webview after it has fully processed an `init` message and committed its state. */
+interface InitDoneMessage { type: 'initDone'; }
 /** Union of all message types that can be sent from the webview to the extension host. */
-type FromWebview = ReadyMessage | OkMessage | CancelMessage | RequestFontMessage | OpenExternalMessage;
+type FromWebview = ReadyMessage | OkMessage | CancelMessage | RequestFontMessage | OpenExternalMessage | InitDoneMessage;
 
 /*
  *   ___ _      _     _   ___               _ 
@@ -51,6 +53,10 @@ export class FigletPanel {
     private _editor: vscode.TextEditor;
     /** Extension context stored after `_init` runs; provides access to extension paths and workspace state. */
     private _context!: vscode.ExtensionContext;
+    /** When set, the banner is inserted at this 0-based line instead of the cursor position. Cleared after each insertion. */
+    private _insertionLine?: number;
+    /** When set, the webview text input is pre-filled with this value on the next init. Cleared after each insertion. */
+    private _initialText?: string;
 
     /**
      * Opens the panel beside the active editor, or reveals it if it is already open.
@@ -61,10 +67,18 @@ export class FigletPanel {
      * @param context - The extension context used to resolve resource URIs and configuration.
      * @param editor  - The text editor into which the banner will eventually be inserted.
      */
-    public static async createOrShow(context: vscode.ExtensionContext, editor: vscode.TextEditor): Promise<void> {
+    public static async createOrShow(
+        context: vscode.ExtensionContext,
+        editor: vscode.TextEditor,
+        options?: { initialText?: string; insertionLine?: number }
+    ): Promise<void> {
         if (FigletPanel._instance) {
             FigletPanel._instance._editor = editor;
+            FigletPanel._instance._insertionLine = options?.insertionLine;
+            FigletPanel._instance._initialText   = options?.initialText;
             FigletPanel._instance._panel.reveal(vscode.ViewColumn.Beside);
+            // Re-send init data so the webview reflects the new context (pre-filled text, language, etc.)
+            await FigletPanel._instance._sendInitData();
             return;
         }
         const panel = vscode.window.createWebviewPanel(
@@ -73,10 +87,15 @@ export class FigletPanel {
             vscode.ViewColumn.Beside,
             {
                 enableScripts: true,
-                localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
+                localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
+                // Keep the React app alive when the panel is hidden behind another tab so
+                // subsequent invocations don't pay the cold-start cost again.
+                retainContextWhenHidden: true,
             }
         );
         FigletPanel._instance = new FigletPanel(panel, context.extensionUri, editor);
+        FigletPanel._instance._insertionLine = options?.insertionLine;
+        FigletPanel._instance._initialText   = options?.initialText;
         await FigletPanel._instance._init(context);
     }
 
@@ -174,6 +193,11 @@ export class FigletPanel {
             case 'ready':
                 await this._sendInitData();
                 break;
+            case 'initDone':
+                // The webview has finished processing 'init' and committed its state.
+                // Now it is safe to send the pre-fill text in its own render cycle.
+                await this._panel.webview.postMessage({ type: 'setText', text: this._initialText ?? '' });
+                break;
             case 'ok':
                 await this._insertBanner(msg);
                 this.dispose();
@@ -227,7 +251,14 @@ export class FigletPanel {
         await this._context.globalState.update('lastFontUsed', msg.font);
 
         const figletText = new FIGLetRenderer(font, layoutMode).render(msg.text);
-        await BannerUtils.insertBanner(editor, figletText, msg.language);
+
+        // Use the pre-computed insertion line for class/method banners; fall back
+        // to the cursor position for the plain "Insert Banner" command.
+        const insertionLine = this._insertionLine;
+        this._insertionLine = undefined;
+        this._initialText   = undefined;
+
+        await BannerUtils.insertBanner(editor, figletText, msg.language, insertionLine);
     }
 
     /**
