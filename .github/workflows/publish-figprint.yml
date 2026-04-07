@@ -8,6 +8,10 @@ on:
       - 'FIGPrint/**/*.cs'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
@@ -41,6 +45,19 @@ jobs:
           [xml]$csproj = Get-Content FIGPrint/FIGPrint.csproj
           $base = ($csproj.Project.PropertyGroup.Version | Where-Object { $_ }) -replace '\.\d+$', ''
 
+          # Helper: PATCH an existing variable, fall back to POST on first run.
+          # Throws on failure so the step fails fast rather than silently continuing
+          # with stale variables.
+          function Upsert-ActionsVar([string]$Name, [string]$Value) {
+            gh api "repos/${{ github.repository }}/actions/variables/$Name" `
+              -X PATCH -f value="$Value" 2>$null
+            if ($LASTEXITCODE -ne 0) {
+              gh api "repos/${{ github.repository }}/actions/variables" `
+                -X POST -f name="$Name" -f value="$Value"
+              if ($LASTEXITCODE -ne 0) { throw "Failed to upsert variable '$Name'" }
+            }
+          }
+
           # Read stored maj/min and patch variables; default gracefully on first run.
           $storedMajMin = (gh api "repos/${{ github.repository }}/actions/variables/FIGPRINT_MAJ_MIN" --jq '.value' 2>$null)
           if ($LASTEXITCODE -ne 0) { $storedMajMin = "" }
@@ -48,24 +65,16 @@ jobs:
           if ($LASTEXITCODE -ne 0) { $storedPatch = "0" }
 
           if ($base -ne $storedMajMin) {
-            # Major/minor changed — reset patch to 0 and update the stored value.
+            # Major/minor changed — write PATCH first so a failure between the two
+            # writes leaves MAJ_MIN stale and the mismatch is safely re-detected next run.
             $newPatch = 0
-            gh api "repos/${{ github.repository }}/actions/variables/FIGPRINT_MAJ_MIN" -X PATCH -f value="$base" 2>$null
-            if ($LASTEXITCODE -ne 0) {
-              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="FIGPRINT_MAJ_MIN" -f value="$base"
-            }
-            gh api "repos/${{ github.repository }}/actions/variables/FIGPRINT_PATCH" -X PATCH -f value="0" 2>$null
-            if ($LASTEXITCODE -ne 0) {
-              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="FIGPRINT_PATCH" -f value="0"
-            }
+            Upsert-ActionsVar "FIGPRINT_PATCH"   "0"
+            Upsert-ActionsVar "FIGPRINT_MAJ_MIN" "$base"
           } else {
             # Same major/minor — increment patch.
             # Capped at 65534 to stay within the 0-65535 limit of System.Version components.
             $newPatch = [Math]::Min([int]$storedPatch + 1, 65534)
-            gh api "repos/${{ github.repository }}/actions/variables/FIGPRINT_PATCH" -X PATCH -f value="$newPatch" 2>$null
-            if ($LASTEXITCODE -ne 0) {
-              gh api "repos/${{ github.repository }}/actions/variables" -X POST -f name="FIGPRINT_PATCH" -f value="$newPatch"
-            }
+            Upsert-ActionsVar "FIGPRINT_PATCH" "$newPatch"
           }
 
           $newVersion = "$base.$newPatch"
