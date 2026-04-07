@@ -314,17 +314,20 @@ internal sealed class FIGLetCommentCommand
         }
 
         /*
-         * Avoids a block comment.
+         * Avoids a block comment. Iterates over all block comment styles for the language
+         * (e.g. both { } and (* *) for Pascal) so the correct pair is always matched.
          */
         var commentInfo = LanguageCommentStyles.GetCommentStyle(language);
-        if (commentInfo.SupportsBlockComments && line.Contains(commentInfo.BlockCommentEnd))
+        foreach (var (blockStart, blockEnd) in commentInfo.BlockCommentStyles)
         {
-            // Move up until we find the start of the block comment
-            while (!line.Contains(commentInfo.BlockCommentStart) && insertPoint.Line > 1)
+            if (!line.Contains(blockEnd)) continue;
+
+            while (!line.Contains(blockStart) && insertPoint.Line > 1)
             {
                 insertPoint.LineUp();
                 line = insertPoint.GetLines(insertPoint.Line - 1, insertPoint.Line).TrimStart();
             }
+            break; // Only one block comment sits above the insertion point
         }
 
         return insertPoint;
@@ -392,10 +395,9 @@ internal sealed class FIGLetCommentCommand
                 line.StartsWith("--") ||  // Doc comments
                 line.StartsWith("--/"),   // Alternative doc style (some dialects)
 
-            // Pascal documentation
+            // Pascal — PasDoc treats any // comment before a declaration as documentation
             "pascal" =>
-                line.StartsWith("///") || // Doc comments
-                line.StartsWith("//"),    // Alternative doc comments
+                line.StartsWith("//"),
 
             // Batch/DOS documentation
             "bat" or "cmd" or "dos" or "batch" =>
